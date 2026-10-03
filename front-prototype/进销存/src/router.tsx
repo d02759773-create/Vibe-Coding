@@ -11,9 +11,16 @@ import { ProductList } from '@/pages/products/ProductList'
 import { SupplierDetail } from '@/pages/suppliers/SupplierDetail'
 import { SupplierEdit, SupplierNew } from '@/pages/suppliers/SupplierNew'
 import { SupplierList } from '@/pages/suppliers/SupplierList'
+import { WarehouseList } from '@/pages/warehouses/WarehouseList'
 import { WarehouseDetail } from '@/pages/warehouses/WarehouseDetail'
 import { WarehouseEdit, WarehouseNew } from '@/pages/warehouses/WarehouseNew'
-import { WarehouseList } from '@/pages/warehouses/WarehouseList'
+import { LogisticsDetail } from '@/pages/logistics/LogisticsDetail'
+import { LogisticsEdit, LogisticsNew } from '@/pages/logistics/LogisticsNew'
+import { LogisticsList } from '@/pages/logistics/LogisticsList'
+import { PurchaseOrderDetail } from '@/pages/purchaseOrders/PurchaseOrderDetail'
+import { PurchaseOrderEdit, PurchaseOrderNew } from '@/pages/purchaseOrders/PurchaseOrderNew'
+import { PurchaseOrderList } from '@/pages/purchaseOrders/PurchaseOrderList'
+import { DictionariesPage } from '@/pages/dictionaries/DictionariesPage'
 
 export const router = createHashRouter([
   {
@@ -28,7 +35,10 @@ export const router = createHashRouter([
       { path: 'sales/outbound', element: <PlaceholderPage /> },
       { path: 'sales/returns', element: <PlaceholderPage /> },
       { path: 'sales/return-inbound', element: <PlaceholderPage /> },
-      { path: 'purchase/orders', element: <PlaceholderPage /> },
+      { path: 'purchase/orders', element: <PurchaseOrderList /> },
+      { path: 'purchase/orders/new', element: <PurchaseOrderNew /> },
+      { path: 'purchase/orders/:id/edit', element: <PurchaseOrderEdit /> },
+      { path: 'purchase/orders/:id', element: <PurchaseOrderDetail /> },
       { path: 'purchase/inbound', element: <PlaceholderPage /> },
       { path: 'purchase/returns', element: <PlaceholderPage /> },
       { path: 'purchase/return-outbound', element: <PlaceholderPage /> },
@@ -52,8 +62,11 @@ export const router = createHashRouter([
       { path: 'master/warehouses/new', element: <WarehouseNew /> },
       { path: 'master/warehouses/:id/edit', element: <WarehouseEdit /> },
       { path: 'master/warehouses/:id', element: <WarehouseDetail /> },
-      { path: 'master/logistics', element: <PlaceholderPage /> },
-      { path: 'master/dictionaries', element: <PlaceholderPage /> },
+      { path: 'master/logistics', element: <LogisticsList /> },
+      { path: 'master/logistics/new', element: <LogisticsNew /> },
+      { path: 'master/logistics/:id/edit', element: <LogisticsEdit /> },
+      { path: 'master/logistics/:id', element: <LogisticsDetail /> },
+      { path: 'master/dictionaries', element: <DictionariesPage /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

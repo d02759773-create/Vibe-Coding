@@ -53,6 +53,9 @@ export const routeMetaList: RouteMeta[] = [
   { path: '/master/warehouses/:id', title: '仓库详情' },
   { path: '/master/warehouses/:id/edit', title: '编辑仓库' },
   { path: '/master/logistics', title: '物流管理' },
+  { path: '/master/logistics/new', title: '新增物流' },
+  { path: '/master/logistics/:id', title: '物流详情' },
+  { path: '/master/logistics/:id/edit', title: '编辑物流' },
   { path: '/master/dictionaries', title: '数据字典' },
 ]
 
@@ -103,6 +106,16 @@ export function getRouteMeta(pathname: string): RouteMeta {
   }
   if (/^\/master\/warehouses\/[^/]+$/.test(pathname) && pathname !== '/master/warehouses/new') {
     return { path: pathname, title: '仓库详情' }
+  }
+
+  if (pathname === '/master/logistics/new') {
+    return { path: pathname, title: '新增物流' }
+  }
+  if (/^\/master\/logistics\/[^/]+\/edit$/.test(pathname)) {
+    return { path: pathname, title: '编辑物流' }
+  }
+  if (/^\/master\/logistics\/[^/]+$/.test(pathname) && pathname !== '/master/logistics/new') {
+    return { path: pathname, title: '物流详情' }
   }
 
   return { path: pathname, title: '页面建设中' }

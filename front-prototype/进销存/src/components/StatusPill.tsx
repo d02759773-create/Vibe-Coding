@@ -18,10 +18,13 @@ const statusConfig: Record<
 type StatusPillProps = {
   status: ProductStatus
   className?: string
+  /** 禁用态展示文案，默认「停用」；物流模块使用「禁用」 */
+  disabledLabel?: string
 }
 
-export function StatusPill({ status, className }: StatusPillProps) {
+export function StatusPill({ status, className, disabledLabel }: StatusPillProps) {
   const config = statusConfig[status]
+  const label = status === 'DISABLED' && disabledLabel ? disabledLabel : config.label
   return (
     <span
       className={cn(
@@ -30,7 +33,7 @@ export function StatusPill({ status, className }: StatusPillProps) {
         className,
       )}
     >
-      {config.label}
+      {label}
     </span>
   )
 }
