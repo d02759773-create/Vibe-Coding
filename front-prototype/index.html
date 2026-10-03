@@ -816,7 +816,7 @@
         tags: ["进销存", "库存", "业务流"],
         status: "原型",
         icon: "chart",
-        url: "/inventory/dist/index.html"
+        url: "./进销存/dist/index.html"
       },
       {
         id: "wms",
@@ -906,7 +906,7 @@
 
     function handleProjectClick(project) {
       if (project.url) {
-        window.open(project.url, "_blank", "noopener");
+        window.location.assign(project.url);
         return;
       }
 
