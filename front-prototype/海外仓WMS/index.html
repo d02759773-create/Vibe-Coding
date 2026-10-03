@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>首页 - WMS</title>
+  <style>
+    :root {
+      --sidebar: #0b1c34;
+      --sidebar-active: #1c5bd8;
+      --topbar: #0b1c34;
+      --content-bg: #f0f3f8;
+      --card: #ffffff;
+      --text: #1f2a3d;
+      --muted: #8a96a8;
+      --muted-2: #6f7c8f;
+      --border: #e7edf5;
+      --blue: #2f6fed;
+      --green: #2fbf71;
+      --green-text: #22a55b;
+      --red: #e34848;
+      --shadow: 0 1px 2px rgba(23, 43, 77, 0.06), 0 2px 8px rgba(23, 43, 77, 0.03);
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--content-bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      min-width: 1680px;
+      overflow-x: auto;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      background: var(--content-bg);
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 180px;
+      background: var(--sidebar);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      height: 56px;
+      flex: 0 0 56px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .brand-logo {
+      width: 27px;
+      height: 27px;
+      border-radius: 7px;
+      background: #2f6fed;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .brand-name {
+      color: #fff;
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
+
+    .side-nav {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 10px 0 14px;
+    }
+
+    .side-nav::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .side-nav::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+    }
+
+    .nav-item {
+      position: relative;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      color: #c5d0e0;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: var(--sidebar-active);
+      color: #fff;
+    }
+
+    .nav-item.disabled {
+      color: #7e8ea7;
+    }
+
+    .nav-item.disabled:hover {
+      color: #9aabc4;
+    }
+
+    .nav-icon {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+    }
+
+    .nav-chevron {
+      width: 12px;
+      height: 12px;
+      margin-left: auto;
+      color: #7f91aa;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      padding: 0 5px;
+      border: 1px solid #3b4c66;
+      border-radius: 3px;
+      color: #8fa0b8;
+      font-size: 10px;
+      line-height: 16px;
+      white-space: nowrap;
+    }
+
+    .nav-divider {
+      height: 1px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    /* ===== Main shell ===== */
+    .main {
+      margin-left: 180px;
+      min-height: 100vh;
+      background: var(--content-bg);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 56px;
+      background: var(--topbar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 16px;
+    }
+
+    .top-tabs {
+      height: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .top-tab {
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      color: #9fb0c9;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .top-tab:hover {
+      color: #fff;
+    }
+
+    .top-tab.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #c7d2e0;
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      color: #fff;
+    }
+
+    .icon-btn svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .bell-badge {
+      position: absolute;
+      top: -7px;
+      right: -10px;
+      padding: 0 4px;
+      border-radius: 8px;
+      background: #e84b4b;
+      color: #fff;
+      font-size: 10px;
+      line-height: 15px;
+      transform: scale(0.9);
+      white-space: nowrap;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #d6dee9;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #f1a56f, #c96b4a);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .user-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .content {
+      padding: 12px 18px 24px;
+    }
+
+    .update-row {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: #7f8ea3;
+      font-size: 12px;
+    }
+
+    .update-row button {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #9aa7b8;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .update-row button:hover {
+      color: var(--blue);
+    }
+
+    .update-row svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===== KPI cards ===== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      min-height: 105px;
+      padding: 16px 18px;
+      border-radius: 8px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card.wide {
+      grid-column: span 2;
+    }
+
+    .kpi-title {
+      color: #1f2a3d;
+      font-size: 19px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .kpi-sub-label {
+      margin-top: 15px;
+      color: #8b97a8;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .kpi-value {
+      margin-top: 5px;
+      color: #1f2a3d;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .kpi-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    /* ===== Analysis panel ===== */
+    .analysis-panel {
+      margin-top: 14px;
+      padding: 18px 18px 20px;
+      border-radius: 8px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #1f2a3d;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .panel-title svg {
+      width: 15px;
+      height: 15px;
+      color: #b3bdca;
+    }
+
+    .date-range {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid #dbe3ee;
+      border-radius: 6px;
+      background: #fff;
+      color: #4f5d70;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .date-range:hover {
+      border-color: #b9c9df;
+    }
+
+    .date-range svg {
+      width: 14px;
+      height: 14px;
+      color: #8794a6;
+    }
+
+    .date-arrow {
+      color: #a6b1c0;
+      font-size: 13px;
+    }
+
+    .metric-tabs {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .metric-tab {
+      min-height: 103px;
+      padding: 13px 16px 15px;
+      border-top: 3px solid transparent;
+      border-radius: 6px;
+      background: #f4f6f9;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .metric-tab:hover {
+      background: #f7f9fc;
+    }
+
+    .metric-tab.active {
+      border-top-color: var(--blue);
+      background: #f8fafc;
+    }
+
+    .metric-name {
+      color: #7d899b;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .metric-value {
+      margin-top: 6px;
+      color: #1f2a3d;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .metric-compare {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 9px;
+      color: #7d899b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .compare-up {
+      color: var(--green-text);
+    }
+
+    .compare-down {
+      color: var(--red);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+      margin-top: 22px;
+    }
+
+    .chart {
+      display: block;
+      width: 100%;
+      height: 300px;
+      overflow: visible;
+    }
+
+    .chart text {
+      fill: #7f8b9e;
+      font-family: var(--font);
+      font-size: 12px;
+    }
+
+    .chart .grid {
+      stroke: #e7edf5;
+      stroke-width: 1;
+      stroke-dasharray: 3 4;
+    }
+
+    .chart .axis-line {
+      stroke: #dfe6ef;
+      stroke-width: 1;
+    }
+
+    .chart .series {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart .point-hit {
+      fill: transparent;
+      cursor: crosshair;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      z-index: 5;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: rgba(31, 42, 61, 0.94);
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -100%);
+      transition: opacity 0.15s ease;
+    }
+
+    /* ===== Bottom panels ===== */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 0.95fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .bottom-card {
+      min-height: 306px;
+      padding: 18px 18px 20px;
+      border: 1px solid #e8edf4;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .bottom-title {
+      color: #1f2a3d;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .empty-state {
+      height: 238px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: #a5b0bf;
+      font-size: 14px;
+    }
+
+    .empty-icon {
+      width: 54px;
+      height: 54px;
+      color: #cbd4df;
+    }
+
+    .inventory-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .summary-label {
+      color: #8b97a8;
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .summary-value {
+      margin-top: 6px;
+      color: #1f2a3d;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .bar-list {
+      margin-top: 18px;
+    }
+
+    .bar-item {
+      margin-top: 16px;
+    }
+
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      color: #6f7c8f;
+      font-size: 13px;
+    }
+
+    .bar-track {
+      height: 10px;
+      border-radius: 5px;
+      background: #edf1f6;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: var(--green);
+    }
+
+    .expense-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .expense-head .date-range {
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+
+    .expense-total {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      margin-top: 18px;
+    }
+
+    .expense-amount {
+      color: #1f2a3d;
+      font-size: 29px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .expense-currency {
+      color: #8b97a8;
+      font-size: 12px;
+    }
+
+    .expense-compare {
+      display: flex;
+      gap: 18px;
+      margin-top: 8px;
+      color: #8b97a8;
+      font-size: 12px;
+    }
+
+    .expense-list {
+      margin-top: 18px;
+    }
+
+    .expense-row {
+      display: grid;
+      grid-template-columns: 1fr auto 48px;
+      gap: 10px;
+      padding: 6px 0;
+      color: #5f6d80;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .expense-row .amount {
+      color: #1f2a3d;
+      text-align: right;
+    }
+
+    .expense-row .percent {
+      color: #6f7c8f;
+      text-align: right;
+    }
+
+    /* ===== Floating helpers ===== */
+    .floating-help {
+      position: fixed;
+      right: 8px;
+      top: 420px;
+      z-index: 40;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #f24c6a;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(242, 76, 106, 0.3);
+      cursor: pointer;
+    }
+
+    .floating-help svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 80;
+      padding: 10px 16px;
+      border-radius: 6px;
+      background: rgba(31, 42, 61, 0.94);
+      color: #fff;
+      font-size: 13px;
+      box-shadow: 0 12px 28px rgba(23, 43, 77, 0.22);
+      opacity: 0;
+      transform: translate(-50%, 12px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">A</div>
+        <div class="brand-name">领星WMS</div>
+      </div>
+
+      <nav class="side-nav">
+        <div class="nav-item active" data-home="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m3 10 9-7 9 7" />
+            <path d="M5 9.5V21h14V9.5" />
+            <path d="M9 21v-6h6v6" />
+          </svg>
+          <span>首页</span>
+        </div>
+
+        <div class="nav-item" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 8.35V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.35A2 2 0 0 1 4.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 21 8.35Z" />
+            <path d="M3.3 7 12 12l8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+          <span>入库</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+
+        <div class="nav-item" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 8.35V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.35A2 2 0 0 1 4.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 21 8.35Z" />
+            <path d="M12 22V12" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 7v5" />
+          </svg>
+          <span>出库</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+
+        <div class="nav-item" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 4v5h5" />
+            <path d="M12 8v5l3 2" />
+          </svg>
+          <span>退件</span>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <div class="nav-item disabled" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 11h18" />
+            <path d="m6 15-3 4h18l-3-4" />
+            <path d="M7 11V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6" />
+          </svg>
+          <span>直邮</span>
+          <span class="nav-badge">未复刻</span>
+        </div>
+
+        <div class="nav-item disabled" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 7h10" />
+            <path d="m14 4 3 3-3 3" />
+            <path d="M17 17H7" />
+            <path d="m10 14-3 3 3 3" />
+          </svg>
+          <span>转运</span>
+          <span class="nav-badge">未复刻</span>
+        </div>
+
+        <div class="nav-item disabled" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="3" width="16" height="18" rx="2" />
+            <path d="M8 7h8" />
+            <path d="M8 11h8" />
+            <path d="M8 15h5" />
+          </svg>
+          <span>工单</span>
+          <span class="nav-badge">未复刻</span>
+        </div>
+
+        <div class="nav-item disabled" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3v18h18" />
+            <path d="m7 15 3-4 3 2 5-7" />
+          </svg>
+          <span>报表</span>
+          <span class="nav-badge">未复刻</span>
+        </div>
+
+        <div class="nav-item disabled" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 4v5h5" />
+            <path d="M12 8v5l3 2" />
+          </svg>
+          <span>FBA退货</span>
+          <span class="nav-badge">未复刻</span>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <div class="nav-item" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 21V9l9-6 9 6v12" />
+            <path d="M9 21v-6h6v6" />
+          </svg>
+          <span>库内</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+
+        <div class="nav-item" data-unreplicated="true">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <ellipse cx="12" cy="5" rx="8" ry="3" />
+            <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
+            <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
+          </svg>
+          <span>基础数据</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ===== Main ===== -->
+    <div class="main">
+      <header class="topbar">
+        <div class="top-tabs">
+          <div class="top-tab active" data-home="true">首页</div>
+          <div class="top-tab" data-unreplicated="true">当前页面</div>
+          <div class="top-tab" data-unreplicated="true">退件</div>
+          <div class="top-tab" data-unreplicated="true">到仓扫描</div>
+        </div>
+
+        <div class="top-actions">
+          <button class="icon-btn" data-demo="true" title="窗口">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="14" rx="2" />
+              <path d="M8 21h8" />
+              <path d="M12 18v3" />
+            </svg>
+          </button>
+          <button class="icon-btn" data-demo="true" title="统计">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 3v18h18" />
+              <path d="M7 16V9" />
+              <path d="M12 16V5" />
+              <path d="M17 16v-4" />
+            </svg>
+          </button>
+          <button class="icon-btn" data-demo="true" title="通知">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+            <span class="bell-badge">99+</span>
+          </button>
+          <button class="icon-btn" data-demo="true" title="菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 6h13" />
+              <path d="M8 12h13" />
+              <path d="M8 18h13" />
+              <path d="M3 6h.01" />
+              <path d="M3 12h.01" />
+              <path d="M3 18h.01" />
+            </svg>
+          </button>
+          <div class="user" data-demo="true">
+            <span class="user-avatar">B</span>
+            <span>Bobbio</span>
+            <span class="user-divider"></span>
+            <span>美国仓</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+          <button class="icon-btn" data-demo="true" title="搜索">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="update-row">
+          <span>更新至时间 2026-7-18 07:00:24 UTC+2</span>
+          <button id="refreshBtn" title="刷新">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+              <path d="M20 4v7h-7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- KPI cards -->
+        <section class="kpi-grid" aria-label="关键指标">
+          <article class="kpi-card">
+            <div class="kpi-title">入库</div>
+            <div class="kpi-sub-label">待入库</div>
+            <div class="kpi-value">37</div>
+          </article>
+
+          <article class="kpi-card wide">
+            <div class="kpi-title">出库</div>
+            <div class="kpi-split">
+              <div>
+                <div class="kpi-sub-label">一件代发</div>
+                <div class="kpi-value">4</div>
+              </div>
+              <div>
+                <div class="kpi-sub-label">备货中转</div>
+                <div class="kpi-value">1</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-title">截单</div>
+            <div class="kpi-sub-label">待处理</div>
+            <div class="kpi-value">25</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-title">退件</div>
+            <div class="kpi-sub-label">待入库</div>
+            <div class="kpi-value">10</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-title">转运</div>
+            <div class="kpi-sub-label">待收货</div>
+            <div class="kpi-value">3</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-title">工单</div>
+            <div class="kpi-sub-label">待审核</div>
+            <div class="kpi-value">3</div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-title">FBA退货</div>
+            <div class="kpi-sub-label">待入库</div>
+            <div class="kpi-value">2</div>
+          </article>
+        </section>
+
+        <!-- Analysis panel -->
+        <section class="analysis-panel" aria-label="单量分析">
+          <div class="panel-head">
+            <div class="panel-title">
+              <span>单量分析</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5" />
+                <path d="M12 8h.01" />
+              </svg>
+            </div>
+            <div class="date-range" data-demo="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4" />
+                <path d="M8 3v4" />
+                <path d="M3 11h18" />
+              </svg>
+              <span>2026/06/18</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4" />
+                <path d="M8 3v4" />
+                <path d="M3 11h18" />
+              </svg>
+              <span class="date-arrow">→</span>
+              <span>2026/07/17</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4" />
+                <path d="M8 3v4" />
+                <path d="M3 11h18" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="metric-tabs" id="metricTabs">
+            <div class="metric-tab active" data-key="regular">
+              <div class="metric-name">常规入库</div>
+              <div class="metric-value">47</div>
+              <div class="metric-compare"><span>环比: <span class="compare-up">27.03% ↑</span></span><span>同比: <span class="compare-down">-78.14% ↓</span></span></div>
+            </div>
+            <div class="metric-tab" data-key="transferIn">
+              <div class="metric-name">备货中转入库</div>
+              <div class="metric-value">6</div>
+              <div class="metric-compare"><span>环比: <span class="compare-down">-60.00% ↓</span></span><span>同比: <span class="compare-down">-53.85% ↓</span></span></div>
+            </div>
+            <div class="metric-tab" data-key="dropship">
+              <div class="metric-name">一件代发</div>
+              <div class="metric-value">73</div>
+              <div class="metric-compare"><span>环比: <span class="compare-down">-75.42% ↓</span></span><span>同比: <span class="compare-down">-49.66% ↓</span></span></div>
+            </div>
+            <div class="metric-tab" data-key="transfer">
+              <div class="metric-name">备货中转</div>
+              <div class="metric-value">10</div>
+              <div class="metric-compare"><span>环比: <span class="compare-up">11.11% ↑</span></span><span>同比: <span class="compare-down">-66.67% ↓</span></span></div>
+            </div>
+            <div class="metric-tab" data-key="relabel">
+              <div class="metric-name">换标服务</div>
+              <div class="metric-value">3</div>
+              <div class="metric-compare"><span>环比: <span class="compare-up">0.00% ↑</span></span><span>同比: <span class="compare-down">-72.73% ↓</span></span></div>
+            </div>
+            <div class="metric-tab" data-key="defective">
+              <div class="metric-name">次品处理</div>
+              <div class="metric-value">0</div>
+              <div class="metric-compare"><span>环比: <span class="compare-down">-100.00% ↓</span></span><span>同比: <span class="compare-down">-100.00% ↓</span></span></div>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <svg class="chart" id="chart" viewBox="0 0 1600 260" preserveAspectRatio="none" role="img" aria-label="单量趋势图"></svg>
+            <div class="chart-tooltip" id="chartTooltip"></div>
+          </div>
+        </section>
+
+        <!-- Bottom panels -->
+        <section class="bottom-grid">
+          <article class="bottom-card">
+            <div class="bottom-title">最新公告</div>
+            <div class="empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="8" y="8" width="12" height="12" rx="2" />
+                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+              </svg>
+              <span>暂无数据</span>
+            </div>
+          </article>
+
+          <article class="bottom-card">
+            <div class="bottom-title">库存</div>
+            <div class="inventory-summary">
+              <div>
+                <div class="summary-label">在库总数</div>
+                <div class="summary-value">9930881.3</div>
+              </div>
+              <div>
+                <div class="summary-label">可用SKU</div>
+                <div class="summary-value">2168</div>
+              </div>
+            </div>
+            <div class="bar-list">
+              <div class="bar-item">
+                <div class="bar-head"><span>产品库存</span><span>99,177,557</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width: 100%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-head"><span>箱库存</span><span>5,554</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width: 6%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-head"><span>退货库存</span><span>125,702</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width: 14%"></div></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="bottom-card">
+            <div class="expense-head">
+              <div class="bottom-title">业务费用</div>
+              <div class="date-range" data-demo="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M16 3v4" />
+                  <path d="M8 3v4" />
+                  <path d="M3 11h18" />
+                </svg>
+                <span>2026/07/12</span>
+                <span class="date-arrow">→</span>
+                <span>2026/07/18</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M16 3v4" />
+                  <path d="M8 3v4" />
+                  <path d="M3 11h18" />
+                </svg>
+              </div>
+            </div>
+            <div class="expense-total">
+              <span class="expense-amount">$ 9,619.53</span>
+              <span class="expense-currency">USD</span>
+            </div>
+            <div class="expense-compare">
+              <span>同比↓100%</span>
+              <span class="compare-down">环比↓17%</span>
+            </div>
+            <div class="expense-list">
+              <div class="expense-row"><span>仓租</span><span class="amount">$9,560.43</span><span class="percent">99%</span></div>
+              <div class="expense-row"><span>出库</span><span class="amount">$56.60</span><span class="percent">1%</span></div>
+              <div class="expense-row"><span>工单</span><span class="amount">$1.50</span><span class="percent">&lt;1%</span></div>
+              <div class="expense-row"><span>其他</span><span class="amount">$1.00</span><span class="percent">&lt;1%</span></div>
+              <div class="expense-row"><span>入库</span><span class="amount">$0.00</span><span class="percent">0%</span></div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <button class="floating-help" data-demo="true" title="帮助">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9a2.5 2.5 0 1 1 4.1 1.9c-.9.7-1.6 1.1-1.6 2.1" />
+      <path d="M12 17h.01" />
+    </svg>
+  </button>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const chartSeries = {
+      regular: {
+        name: "常规入库",
+        data: [3.1, 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 3.5, 1.0, 1.0, 1.0, 3.5, 1.2, 1.2, 1.2, 1.2, 2.0, 4.8, 5.0, 5.0, 6.0, 6.0, 3.0, 3.0, 3.0, 3.0, 3.0, 1.0]
+      },
+      transferIn: {
+        name: "备货中转入库",
+        data: [1.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.2, 1.0, 1.0, 1.0, 2.4, 1.0, 1.0, 1.0, 1.0, 1.6, 2.2, 2.8, 3.0, 3.8, 4.2, 2.2, 2.0, 2.0, 2.0, 2.0, 1.2]
+      },
+      dropship: {
+        name: "一件代发",
+        data: [4.2, 3.0, 2.0, 1.6, 1.4, 1.2, 1.2, 1.4, 2.0, 2.8, 3.6, 4.2, 3.4, 2.6, 2.0, 1.6, 1.2, 1.4, 2.0, 3.0, 4.0, 4.6, 5.2, 5.8, 4.2, 3.6, 3.0, 2.6, 2.2, 1.6]
+      },
+      transfer: {
+        name: "备货中转",
+        data: [0.8, 0.6, 0.6, 0.8, 1.0, 1.2, 1.4, 1.8, 2.2, 2.8, 3.6, 4.0, 3.2, 2.8, 2.4, 2.0, 2.4, 3.2, 4.0, 4.4, 4.8, 5.2, 5.6, 5.0, 4.2, 3.6, 3.0, 2.8, 2.4, 2.0]
+      },
+      relabel: {
+        name: "换标服务",
+        data: [2.0, 2.0, 2.2, 2.2, 2.0, 2.0, 1.8, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.0, 2.0, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.0, 2.0, 1.8, 1.8, 1.8, 2.0, 2.0, 2.0, 2.0]
+      },
+      defective: {
+        name: "次品处理",
+        data: [0.8, 0.6, 0.6, 0.4, 0.4, 0.5, 0.7, 0.8, 1.0, 1.2, 1.0, 0.8, 0.7, 0.6, 0.8, 1.0, 1.2, 1.0, 0.8, 0.6, 0.5, 0.4, 0.4, 0.3, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2]
+      }
+    };
+
+    const chartState = {
+      key: "regular"
+    };
+
+    const chartConfig = {
+      width: 1600,
+      height: 260,
+      left: 44,
+      right: 24,
+      top: 12,
+      bottom: 32,
+      max: 6
+    };
+
+    const metricTabContainer = document.getElementById("metricTabs");
+    const chart = document.getElementById("chart");
+    const chartTooltip = document.getElementById("chartTooltip");
+    const toast = document.getElementById("toast");
+    let toastTimer = null;
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function dateForIndex(index) {
+      const date = new Date(Date.UTC(2026, 5, 17));
+      date.setUTCDate(date.getUTCDate() + index);
+      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+    }
+
+    function renderChart(key) {
+      const series = chartSeries[key] || chartSeries.regular;
+      const values = series.data;
+      const { width, height, left, right, top, bottom, max } = chartConfig;
+      const plotWidth = width - left - right;
+      const plotHeight = height - top - bottom;
+      const stepX = plotWidth / (values.length - 1);
+
+      const points = values.map((value, index) => {
+        const x = left + index * stepX;
+        const y = top + ((max - value) / max) * plotHeight;
+        return { x, y, value, index };
+      });
+
+      const grid = [];
+      for (let value = 0; value <= max; value += 1) {
+        const y = top + ((max - value) / max) * plotHeight;
+        grid.push(`<line class="grid" x1="${left}" y1="${y.toFixed(1)}" x2="${width - right}" y2="${y.toFixed(1)}"></line>`);
+        grid.push(`<text x="${left - 10}" y="${(y + 4).toFixed(1)}" text-anchor="end">${value}</text>`);
+      }
+
+      const xLabelIndexes = [0, 4, 12, 14, 18, 20, 22, 29];
+      const xLabels = xLabelIndexes.map((index) => {
+        const x = left + index * stepX;
+        return `<text x="${x.toFixed(1)}" y="${height - 8}" text-anchor="middle">${dateForIndex(index)}</text>`;
+      }).join("");
+
+      const polyline = points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+      const hitPoints = points.map((point) => (
+        `<circle class="point-hit" cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="10" data-index="${point.index}"></circle>`
+      )).join("");
+
+      chart.innerHTML = `
+        <g>${grid.join("")}</g>
+        ${xLabels}
+        <polyline class="series" points="${polyline}"></polyline>
+        <g>${hitPoints}</g>
+      `;
+
+      bindChartHover(points);
+    }
+
+    function bindChartHover(points) {
+      chart.querySelectorAll(".point-hit").forEach((circle) => {
+        circle.addEventListener("mouseenter", () => {
+          const index = Number(circle.dataset.index);
+          const point = points[index];
+          const series = chartSeries[chartState.key] || chartSeries.regular;
+          chartTooltip.textContent = `${dateForIndex(index)} · ${series.name}: ${point.value}`;
+
+          const chartRect = chart.getBoundingClientRect();
+          const scaleX = chartRect.width / chartConfig.width;
+          const scaleY = chartRect.height / chartConfig.height;
+          chartTooltip.style.left = `${point.x * scaleX}px`;
+          chartTooltip.style.top = `${point.y * scaleY - 6}px`;
+          chartTooltip.style.opacity = "1";
+        });
+
+        circle.addEventListener("mouseleave", () => {
+          chartTooltip.style.opacity = "0";
+        });
+      });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    metricTabContainer.addEventListener("click", (event) => {
+      const tab = event.target.closest(".metric-tab");
+      if (!tab) return;
+      metricTabContainer.querySelectorAll(".metric-tab").forEach((item) => item.classList.remove("active"));
+      tab.classList.add("active");
+      chartState.key = tab.dataset.key;
+      renderChart(chartState.key);
+    });
+
+    document.querySelectorAll("[data-unreplicated]").forEach((element) => {
+      element.addEventListener("click", () => {
+        showToast("该页面暂未复刻，本次仅完成菜单结构与首页");
+      });
+    });
+
+    document.querySelectorAll("[data-demo]").forEach((element) => {
+      element.addEventListener("click", () => {
+        showToast("该操作仅为原型演示，未接入真实数据");
+      });
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      const icon = document.querySelector("#refreshBtn svg");
+      icon.style.transition = "transform 0.6s ease";
+      icon.style.transform = "rotate(360deg)";
+      showToast("数据已刷新（演示）");
+      setTimeout(() => {
+        icon.style.transition = "none";
+        icon.style.transform = "rotate(0deg)";
+      }, 620);
+    });
+
+    renderChart(chartState.key);
+  </script>
+</body>
+</html>

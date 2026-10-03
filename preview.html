@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Daniel</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: '#e2e8f0',
+            muted: {
+              DEFAULT: '#f1f5f9',
+              foreground: '#64748b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 基础平滑滚动与字体 */
+    html {
+      scroll-behavior: smooth;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.125rem 0.625rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- 顶部导航栏 -->
+  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div class="max-w-5xl mx-auto flex h-14 items-center justify-between px-4 md:px-6">
+      <a href="#/" class="font-semibold text-lg tracking-tight hover:opacity-80 transition-opacity">
+        PM Daniel
+      </a>
+      <nav class="flex items-center space-x-6 text-sm">
+        <a id="nav-home" href="#/" class="font-medium text-slate-900 transition-colors hover:text-slate-900">首页</a>
+        <a id="nav-projects" href="#/projects" class="text-slate-500 transition-colors hover:text-slate-900">项目</a>
+        <a id="nav-posts" href="#/posts" class="text-slate-500 transition-colors hover:text-slate-900">文章</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 页面主容器 -->
+  <main id="app" class="flex-1 w-full max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
+    <!-- 内容通过 JS 路由动态注入 -->
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="border-t border-slate-200 py-6 text-center text-sm text-slate-500">
+    <div class="max-w-5xl mx-auto px-4">
+      <p>© <span id="current-year"></span> PM Daniel. 保留所有权利。</p>
+    </div>
+  </footer>
+
+  <script>
+    // 数据模型（严格根据字段清单与PRD种子数据）
+    const siteConfig = {
+      siteName: "PM Daniel",
+      author: {
+        displayName: "PM Daniel",
+        tagline: "供应链产品经理&AI产品经理",
+        avatar: "",
+        bio: ""
+      }
+    };
+
+    const projects = [
+      {
+        id: "proj-erp",
+        slug: "cross-border-erp",
+        title: "跨境 ERP",
+        summary: "",
+        body: "",
+        publishedAt: "2026-09-15",
+        status: "Published",
+        role: "产品负责人",
+        tags: ["ERP", "跨境电商", "供应链"],
+        techStack: ["React", "TypeScript", "Tailwind CSS"]
+      },
+      {
+        id: "proj-wms",
+        slug: "overseas-warehouse-wms",
+        title: "海外仓 WMS",
+        summary: "",
+        body: "",
+        publishedAt: "2026-08-20",
+        status: "Published",
+        role: "产品负责人",
+        tags: ["WMS", "海外仓", "仓储履约"],
+        techStack: ["React", "Node.js", "PostgreSQL"]
+      }
+    ];
+
+    const posts = []; // 首版 0 篇
+
+    document.getElementById("current-year").textContent = new Date().getFullYear();
+
+    // 路由渲染引擎
+    function render() {
+      const hash = window.location.hash || "#/";
+      const app = document.getElementById("app");
+      
+      // 更新导航高亮与行为
+      const isHome = hash === "#/" || hash === "";
+      document.getElementById("nav-home").className = isHome ? "font-medium text-slate-900" : "text-slate-500 hover:text-slate-900";
+      document.getElementById("nav-projects").className = hash.startsWith("#/projects") ? "font-medium text-slate-900" : "text-slate-500 hover:text-slate-900";
+      document.getElementById("nav-posts").className = hash.startsWith("#/posts") ? "font-medium text-slate-900" : "text-slate-500 hover:text-slate-900";
+
+      // 设置主页时导航滚锚点能力
+      if (isHome) {
+        document.getElementById("nav-projects").onclick = (e) => {
+          e.preventDefault();
+          document.getElementById("projects-section")?.scrollIntoView({ behavior: "smooth" });
+        };
+        document.getElementById("nav-posts").onclick = (e) => {
+          e.preventDefault();
+          document.getElementById("posts-section")?.scrollIntoView({ behavior: "smooth" });
+        };
+      } else {
+        document.getElementById("nav-projects").onclick = null;
+        document.getElementById("nav-posts").onclick = null;
+      }
+
+      // 1. 主页 #/
+      if (isHome) {
+        document.title = siteConfig.siteName;
+        app.innerHTML = `
+          <div class="space-y-16">
+            <!-- Hero 区 -->
+            <section class="flex flex-col items-start gap-4 pt-4 pb-6 border-b border-slate-100">
+              <div class="flex items-center gap-4">
+                <div class="h-16 w-16 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-800 font-bold text-xl">
+                  D
+                </div>
+                <div>
+                  <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    ${siteConfig.author.displayName}
+                  </h1>
+                  <p class="mt-1 text-lg text-slate-600 font-medium">
+                    ${siteConfig.author.tagline}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- 项目预览区 -->
+            <section id="projects-section" class="scroll-mt-20">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-2xl font-bold tracking-tight text-slate-900">项目</h2>
+                  <p class="text-sm text-slate-500 mt-0.5">精选供应链与跨境方向的产品实践</p>
+                </div>
+                <a href="#/projects" class="text-sm font-medium text-slate-700 hover:text-slate-900 hover:underline">
+                  查看更多 &rarr;
+                </a>
+              </div>
+              <div class="grid gap-4 md:grid-cols-2">
+                ${projects.map(p => renderProjectCard(p)).join("")}
+              </div>
+            </section>
+
+            <!-- 文章预览区 -->
+            <section id="posts-section" class="scroll-mt-20">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="text-2xl font-bold tracking-tight text-slate-900">文章</h2>
+                  <p class="text-sm text-slate-500 mt-0.5">产品思考、AI 实践与随笔</p>
+                </div>
+                <a href="#/posts" class="text-sm font-medium text-slate-700 hover:text-slate-900 hover:underline">
+                  查看更多 &rarr;
+                </a>
+              </div>
+              <!-- 规范空状态 -->
+              <div class="rounded-xl border border-dashed border-slate-200 py-12 text-center">
+                <p class="text-base font-medium text-slate-700">文章撰写中，敬请期待</p>
+                <p class="mt-1 text-sm text-slate-500">后续会更新产品思考与实践。</p>
+              </div>
+            </section>
+          </div>
+        `;
+        return;
+      }
+
+      // 2. 项目列表页 #/projects
+      if (hash === "#/projects") {
+        document.title = `项目 · ${siteConfig.siteName}`;
+        app.innerHTML = `
+          <div class="space-y-8">
+            <div>
+              <a href="#/" class="text-sm text-slate-500 hover:text-slate-900 inline-block mb-4">&larr; 返回首页</a>
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">项目</h1>
+              <p class="mt-2 text-slate-600">供应链与跨境相关的产品实践。</p>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2">
+              ${projects.map(p => renderProjectCard(p)).join("")}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 3. 项目详情页 #/projects/:slug
+      if (hash.startsWith("#/projects/")) {
+        const slug = hash.replace("#/projects/", "");
+        const project = projects.find(p => p.slug === slug);
+        if (!project) {
+          render404("未找到对应项目");
+          return;
+        }
+
+        document.title = `${project.title} · 项目 · ${siteConfig.siteName}`;
+        app.innerHTML = `
+          <article class="max-w-3xl mx-auto space-y-8">
+            <div>
+              <a href="#/projects" class="text-sm text-slate-500 hover:text-slate-900 inline-block mb-4">&larr; 返回项目列表</a>
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">${project.title}</h1>
+              <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                <time datetime="${project.publishedAt}">发布时间：${project.publishedAt}</time>
+                <span class="font-medium text-slate-700">角色：${project.role}</span>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                ${project.tags.map(tag => `<span class="badge bg-slate-100 text-slate-800">${tag}</span>`).join("")}
+                ${project.techStack.map(tech => `<span class="badge border border-slate-200 text-slate-700">${tech}</span>`).join("")}
+              </div>
+            </div>
+            <hr class="border-slate-200">
+            <section class="py-4">
+              <div class="rounded-xl border border-dashed border-slate-200 py-16 text-center text-slate-500">
+                内容整理中，敬请期待。
+              </div>
+            </section>
+          </article>
+        `;
+        return;
+      }
+
+      // 4. 文章列表页 #/posts
+      if (hash === "#/posts") {
+        document.title = `文章 · ${siteConfig.siteName}`;
+        app.innerHTML = `
+          <div class="space-y-8">
+            <div>
+              <a href="#/" class="text-sm text-slate-500 hover:text-slate-900 inline-block mb-4">&larr; 返回首页</a>
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">文章</h1>
+              <p class="mt-2 text-slate-600">产品思考、AI 实践与随笔。</p>
+            </div>
+            <div class="rounded-xl border border-dashed border-slate-200 py-16 text-center">
+              <p class="text-base font-medium text-slate-700">文章撰写中，敬请期待</p>
+              <p class="mt-1 text-sm text-slate-500">后续会更新产品思考与实践。</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 5. 兜底 404
+      render404();
+    }
+
+    // 渲染卡片辅助函数（无摘要时不渲染空白区）
+    function renderProjectCard(p) {
+      return `
+        <a href="#/projects/${p.slug}" class="group block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+            <time datetime="${p.publishedAt}">${p.publishedAt}</time>
+            <span class="font-medium text-slate-700">${p.role}</span>
+          </div>
+          <h3 class="text-xl font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+            ${p.title}
+          </h3>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            ${p.tags.map(t => `<span class="badge bg-slate-100 text-slate-800">${t}</span>`).join("")}
+          </div>
+        </a>
+      `;
+    }
+
+    function render404(msg = "页面未找到") {
+      document.title = `页面未找到 · ${siteConfig.siteName}`;
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-center space-y-4">
+          <span class="text-7xl font-extrabold text-slate-300">404</span>
+          <h1 class="text-2xl font-bold text-slate-900">${msg}</h1>
+          <p class="text-slate-500 max-w-sm">抱歉，您访问的页面不存在或已被移除。</p>
+          <a href="#/" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-slate-800">
+            返回首页
+          </a>
+        </div>
+      `;
+    }
+
+    window.addEventListener("hashchange", render);
+    window.addEventListener("DOMContentLoaded", render);
+    render();
+  </script>
+</body>
+</html>
