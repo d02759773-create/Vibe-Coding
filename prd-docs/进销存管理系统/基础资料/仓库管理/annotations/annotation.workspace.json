@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "title": "进销存原型-仓库档案标注",
+  "inputs": [
+    {
+      "scope": "warehouse-list",
+      "config": "./warehouse-list.annotation.config.json",
+      "order": 1
+    },
+    {
+      "scope": "warehouse-detail",
+      "config": "./warehouse-detail.annotation.config.json",
+      "order": 2
+    },
+    {
+      "scope": "warehouse-form",
+      "config": "./warehouse-form.annotation.config.json",
+      "order": 3
+    }
+  ],
+  "runtime": {
+    "zIndexBase": 2147480000,
+    "initialMode": "preview"
+  },
+  "output": "../../../../../front-prototype/进销存/public/annotation-kit/annotation.bundle.json",
+  "coverage": "./coverage.md",
+  "htmlOutput": "./annotations-export.html"
+}

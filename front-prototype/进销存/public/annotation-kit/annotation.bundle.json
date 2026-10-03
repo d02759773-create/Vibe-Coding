@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "title": "进销存原型-仓库档案标注",
+  "mermaid": {},
+  "runtime": {
+    "zIndexBase": 2147480000,
+    "initialMode": "preview"
+  },
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/warehouses",
+      "moduleName": "列表工具栏",
+      "target": {
+        "selector": "[data-anno='warehouse-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-LIST-TOOLBAR"
+      ],
+      "key": "warehouse-list:1",
+      "scope": "warehouse-list",
+      "markdown": "## 列表工具栏\n\n来源：《仓库档案_前端Demo版PRD》§2.5；《仓库档案主PRD》§10\n\n- **新增仓库**：进入新增页；课程一期仅管理员可维护（Demo 可暂不做按钮级隐藏，联调前对齐权限表）。\n- 主数据 **不提供删除**；停用替代清除（《仓库档案主PRD》R06）。"
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/warehouses",
+      "moduleName": "查询条件",
+      "target": {
+        "selector": "[data-anno='warehouse-list-filters']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-LIST-FILTER"
+      ],
+      "key": "warehouse-list:2",
+      "scope": "warehouse-list",
+      "markdown": "## 查询条件区\n\n来源：《仓库档案_前端Demo版PRD》§2.1；《仓库档案字段清单》§一、§二（可筛选列）\n\n| 字段 | 控件 | 规则 |\n| --- | --- | --- |\n| 综合搜索 | Input | 匹配仓库编码、仓库名称、负责人 |\n| 仓库类型 | Select | 全部 / `MAIN` 主仓 / `BRANCH` 分仓 / `STORE` 门店仓 |\n| 启停用状态 | Select | 全部 / 启用 `ENABLED` / 停用 `DISABLED` |\n\n- 点击 **查询** 应用条件并重置到第 1 页；**重置** 清空条件。\n- 加载中：筛选区禁用（Demo 未单独做 Skeleton 时以实际实现为准）。"
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/warehouses",
+      "moduleName": "列表与分页",
+      "target": {
+        "selector": "[data-anno='warehouse-list-table']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-LIST-TABLE"
+      ],
+      "key": "warehouse-list:3",
+      "scope": "warehouse-list",
+      "markdown": "## 列表表格与分页\n\n来源：《仓库档案_前端Demo版PRD》§2.2–§2.4；《仓库档案字段清单》§4.1\n\n**列**：仓库编码 → 仓库名称 → 仓库类型（中文）→ 负责人 → 启停用状态（StatusPill：启用绿 / 停用灰）→ 最后修改时间（`YYYY-MM-DD HH:mm:ss`）→ 操作（固定右侧）。\n\n**行操作**：查看 / 编辑；启用态显示 **停用**，停用态显示 **启用**（通过确认弹窗，不在表单改状态）。\n\n**列表态**：\n- 无数据：文案「暂无仓库数据」\n- 分页：默认每页 10 条，上一页 / 下一页（Demo 客户端分页）\n\n**待确认**：`STORE` 门店仓是否一期开放（《仓库档案主PRD》§13、《仓库档案字段清单》§五）。"
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/warehouses",
+      "moduleName": "启停用弹窗",
+      "target": {
+        "selector": "[data-anno='warehouse-status-modal']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-LIST-STATUS"
+      ],
+      "key": "warehouse-list:4",
+      "scope": "warehouse-list",
+      "markdown": "## 启用 / 停用确认弹窗\n\n来源：《仓库档案主PRD》§5.3、§7.3（A21–A22）；《仓库档案_前端Demo版PRD》§2.2 操作列说明、§七\n\n**停用**（列表行或详情入口逻辑一致）：\n1. 点击「停用」时 **先** 校验本仓实时库存数量合计；若 &gt; 0：Toast「当前仓库仍有库存，请先处理后再停用」，**不打开**弹窗。\n2. 库存 = 0 时打开弹窗；`停用原因` 必填，1–200 字符；未填红字「停用原因不能为空」。\n3. 成功：Toast「仓库已停用」，状态 `DISABLED`，写入停用人/停用时间。\n\n**启用**：纯确认弹窗，无需原因；成功 Toast「仓库已启用」，更新启用人/启用时间。\n\n**待确认**：停用库存口径与「即时库存查询」是否同一汇总接口（《仓库档案主PRD》§13 #2）。"
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/warehouses/",
+      "routeMatcher": "^#/master/warehouses/(?!new$)[^/]+$",
+      "moduleName": "详情操作区",
+      "target": {
+        "selector": "[data-anno='warehouse-detail-actions']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-DETAIL-ACTIONS"
+      ],
+      "key": "warehouse-detail:1",
+      "scope": "warehouse-detail",
+      "markdown": "## 详情页操作区\n\n来源：《仓库档案_前端Demo版PRD》§3.1；《仓库档案主PRD》§5.4 动作矩阵\n\n| 按钮 | 条件 | 说明 |\n| --- | --- | --- |\n| 返回列表 | 始终 | 回到仓库列表 |\n| 编辑 | 始终 | 进入编辑页 |\n| 停用 | 当前 `ENABLED` | 库存为 0 打开停用弹窗；库存 &gt; 0 Toast 阻断 |\n| 启用 | 当前 `DISABLED` | 打开启用确认弹窗 |\n\n启停用 **不得** 在编辑表单以下拉修改（《仓库档案主PRD》A24）。"
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/warehouses/",
+      "routeMatcher": "^#/master/warehouses/(?!new$)[^/]+$",
+      "moduleName": "详情信息区",
+      "target": {
+        "selector": "[data-anno='warehouse-detail-sections']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-DETAIL-FIELDS"
+      ],
+      "key": "warehouse-detail:2",
+      "scope": "warehouse-detail",
+      "markdown": "## 详情信息分组\n\n来源：《仓库档案_前端Demo版PRD》§3.2；《仓库档案字段清单》§一–§三\n\n| 分组 | 字段 |\n| --- | --- |\n| 基础资料 | 仓库编码、仓库名称、仓库类型、启停用状态 |\n| 联系信息 | 仓库地址、负责人、联系电话、仓库备注 |\n| 补充信息 | 停用原因 |\n| 系统信息 | 创建人/时间、最后修改人/时间、停用人/时间、启用人/时间 |\n\n**展示规则**：\n- 空值统一 `-`\n- `停用原因`：仅 `DISABLED` 展示实际内容，启用态 `-`\n- `停用人`/`停用时间`：仅 `DISABLED` 有值\n- `启用人`/`启用时间`：从未启用可 `-`；再次启用展示最近一次记录\n- 档案详情 **不展示** 库存汇总字段（《仓库档案字段清单》按需维度说明）"
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/warehouses/",
+      "routeMatcher": "^#/master/warehouses/(?!new$)[^/]+$",
+      "moduleName": "启停用弹窗",
+      "target": {
+        "selector": "[data-anno='warehouse-status-modal']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-DETAIL-STATUS"
+      ],
+      "key": "warehouse-detail:3",
+      "scope": "warehouse-detail",
+      "markdown": "## 启用 / 停用确认弹窗\n\n来源：《仓库档案主PRD》§7.3；《仓库档案_前端Demo版PRD》§七\n\n与列表页共用同一套启停用规则与反馈文案（停用库存校验 → 弹窗内停用原因必填 → Toast 成功/失败）。"
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/warehouses/",
+      "routeMatcher": "^#/master/warehouses/[^/]+/edit$",
+      "moduleName": "系统信息",
+      "target": {
+        "selector": "[data-anno='warehouse-form-system']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-FORM-SYSTEM"
+      ],
+      "key": "warehouse-form:4",
+      "scope": "warehouse-form",
+      "markdown": "## 系统信息（仅编辑）\n\n来源：《仓库档案_前端Demo版PRD》§4.2；《仓库档案字段清单》§三\n\n- 仅编辑模式展示：创建人、创建时间、最后修改人、最后修改时间（只读）。\n- 新增页不展示系统字段区块。"
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/warehouses/new",
+      "routeMatcher": "^#/master/warehouses/(new|[^/]+/edit)$",
+      "moduleName": "表单全局规则",
+      "target": {
+        "selector": "[data-anno='warehouse-form-page']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-FORM-GLOBAL"
+      ],
+      "key": "warehouse-form:1",
+      "scope": "warehouse-form",
+      "markdown": "## 新增 / 编辑页全局\n\n来源：《仓库档案_前端Demo版PRD》§4.2–§4.3、§六；《仓库档案主PRD》§7.1–§7.2\n\n**页面模式**\n- 新增：标题「新增仓库」；保存后默认 `ENABLED`，主表单不展示启停用状态。\n- 编辑：标题「编辑仓库」；`仓库类型` 只读；`仓库编码` 未引用可改、已引用只读。\n- 主表单 **不出现** `启停用状态` 与 `停用原因`（停用原因仅在停用弹窗）。\n\n**提交边界**\n- 保存时全量校验；失败定位首个报错字段并阻断。\n- 编辑且已引用：不触发编码唯一性重复校验（《仓库档案主PRD》A11）。\n\n**结果处理**\n- 成功：Toast「保存成功」，返回列表并可见最新数据。\n- 编码重复：字段红字「仓库编码已存在」。\n\n**离开处理**\n- 取消 / 顶部取消：返回列表，不保存（Demo 未做未保存离开二次确认）。"
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/warehouses/new",
+      "routeMatcher": "^#/master/warehouses/(new|[^/]+/edit)$",
+      "moduleName": "基础资料",
+      "target": {
+        "selector": "[data-anno='warehouse-form-basic']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-FORM-BASIC"
+      ],
+      "key": "warehouse-form:2",
+      "scope": "warehouse-form",
+      "markdown": "## 基础资料字段组\n\n来源：《仓库档案_前端Demo版PRD》§4.1、§五；《仓库档案字段清单》§一\n\n| 字段 | 必填/可编辑 | 核心约束 |\n| --- | --- | --- |\n| 仓库编码 | 必填；新增可编辑；编辑未引用可编辑、已引用只读 | 2–32 字符，全局唯一；建议 `WH-CN-DG` 格式 |\n| 仓库名称 | 必填；可编辑 | 最多 50 字符，去首尾空格 |\n| 仓库类型 | 必填；新增 Select；编辑只读 | `MAIN` / `BRANCH` / `STORE`；保存后不可改（R07） |"
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/warehouses/new",
+      "routeMatcher": "^#/master/warehouses/(new|[^/]+/edit)$",
+      "moduleName": "联系信息",
+      "target": {
+        "selector": "[data-anno='warehouse-form-contact']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-FORM-CONTACT"
+      ],
+      "key": "warehouse-form:3",
+      "scope": "warehouse-form",
+      "markdown": "## 联系信息字段组\n\n来源：《仓库档案_前端Demo版PRD》§4.1、§五；《仓库档案字段清单》§二\n\n| 字段 | 必填/可编辑 | 核心约束 |\n| --- | --- | --- |\n| 仓库地址 | 必填 | 最多 200 字符 |\n| 负责人 | 必填 | 最多 20 字符，去首尾空格 |\n| 联系电话 | 选填 | 最多 20 字符；填写时须手机或座机；失焦或保存失败文案「请输入有效的手机号或座机号」 |\n| 仓库备注 | 选填 | 最多 200 字符 |"
+    },
+    {
+      "id": "5",
+      "order": 5,
+      "page": "#/master/warehouses/new",
+      "routeMatcher": "^#/master/warehouses/(new|[^/]+/edit)$",
+      "moduleName": "底部操作",
+      "target": {
+        "selector": "[data-anno='warehouse-form-actions']",
+        "fallbackSelectors": []
+      },
+      "sourceRefs": [
+        "WH-FORM-ACTIONS"
+      ],
+      "key": "warehouse-form:5",
+      "scope": "warehouse-form",
+      "markdown": "## 底部操作\n\n来源：《仓库档案_前端Demo版PRD》§4.3\n\n- **取消**：返回列表，不保存。\n- **保存**：触发表单全量校验与提交。"
+    }
+  ],
+  "coverage": {
+    "total": 12,
+    "mapped": 12,
+    "unmapped": 0
+  }
+}

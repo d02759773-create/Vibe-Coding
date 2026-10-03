@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "title": "仓库档案-列表页",
+  "scope": "warehouse-list",
+  "sourceBase": ".",
+  "runtime": {
+    "zIndexBase": 2147480000,
+    "initialMode": "preview"
+  },
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    {
+      "id": "WH-LIST-TOOLBAR",
+      "source": "../仓库档案_前端Demo版PRD.md#25-权限demo-占位",
+      "page": "#/master/warehouses"
+    },
+    {
+      "id": "WH-LIST-FILTER",
+      "source": "../仓库档案_前端Demo版PRD.md#21-查询条件区",
+      "page": "#/master/warehouses"
+    },
+    {
+      "id": "WH-LIST-TABLE",
+      "source": "../仓库档案_前端Demo版PRD.md#22-表格列定义",
+      "page": "#/master/warehouses"
+    },
+    {
+      "id": "WH-LIST-STATUS",
+      "source": "../仓库档案主PRD.md#73-停用--启用",
+      "page": "#/master/warehouses"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/warehouses",
+      "moduleName": "列表工具栏",
+      "target": { "selector": "[data-anno='warehouse-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/warehouse-list.md",
+      "blockId": "1",
+      "sourceRefs": ["WH-LIST-TOOLBAR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/warehouses",
+      "moduleName": "查询条件",
+      "target": { "selector": "[data-anno='warehouse-list-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/warehouse-list.md",
+      "blockId": "2",
+      "sourceRefs": ["WH-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/warehouses",
+      "moduleName": "列表与分页",
+      "target": { "selector": "[data-anno='warehouse-list-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/warehouse-list.md",
+      "blockId": "3",
+      "sourceRefs": ["WH-LIST-TABLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/warehouses",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='warehouse-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/warehouse-list.md",
+      "blockId": "4",
+      "sourceRefs": ["WH-LIST-STATUS"]
+    }
+  ]
+}
