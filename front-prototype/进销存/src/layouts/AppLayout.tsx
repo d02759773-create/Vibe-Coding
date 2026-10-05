@@ -1,17 +1,38 @@
-import { Outlet } from 'react-router-dom'
-import { AppHeader } from '@/components/layout/AppHeader'
-import { AppSidebar } from '@/components/layout/AppSidebar'
+import { ProLayout } from '@ant-design/pro-components'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { proLayoutRoute } from '@/config/proLayoutMenu'
 
 export function AppLayout() {
+  const location = useLocation()
+
   return (
-    <div className="flex min-h-svh">
-      <AppSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+    <ProLayout
+      title="进销存管理系统"
+      layout="mix"
+      fixSiderbar
+      location={{ pathname: location.pathname }}
+      route={proLayoutRoute}
+      menuItemRender={(item, dom) => {
+        if (!item.path || item.path === '/') {
+          return (
+            <Link to="/" style={{ color: 'inherit' }}>
+              {dom}
+            </Link>
+          )
+        }
+        return (
+          <Link to={item.path} style={{ color: 'inherit' }}>
+            {dom}
+          </Link>
+        )
+      }}
+      avatarProps={{
+        title: '管理员（占位）',
+        size: 'small',
+      }}
+      contentStyle={{ padding: 24 }}
+    >
+      <Outlet />
+    </ProLayout>
   )
 }

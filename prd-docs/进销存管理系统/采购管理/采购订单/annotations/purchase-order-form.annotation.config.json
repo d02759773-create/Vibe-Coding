@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "title": "采购订单-新增编辑页",
+  "scope": "purchase-order-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    {
+      "id": "PO-FORM-GLOBAL",
+      "source": "../采购订单_Demo_新增编辑页.md#八模式差异汇总",
+      "page": "#/purchase/orders/new"
+    },
+    {
+      "id": "PO-FORM-BASIC",
+      "source": "../采购订单字段清单.md#一头部字段单据级",
+      "page": "#/purchase/orders/new"
+    },
+    {
+      "id": "PO-FORM-LINES",
+      "source": "../采购订单字段清单.md#二商品明细字段行级",
+      "page": "#/purchase/orders/new"
+    },
+    {
+      "id": "PO-FORM-ACTIONS",
+      "source": "../采购订单_Demo_新增编辑页.md#七操作行为说明",
+      "page": "#/purchase/orders/new"
+    },
+    {
+      "id": "PO-FORM-VALIDATION",
+      "source": "../../../全局约束/全局字段校验与反馈规范.md#25-采购订单草稿保存-vs-提交审核分层",
+      "page": "#/purchase/orders/new"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/orders/new",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(new|[^/]+/edit)$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-order-form.md",
+      "blockId": "page-global",
+      "sourceRefs": ["PO-FORM-GLOBAL", "PO-FORM-VALIDATION"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/orders/new",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(new|[^/]+/edit)$",
+      "moduleName": "基本信息",
+      "target": { "selector": "[data-anno='purchase-order-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-form.md",
+      "blockId": "1",
+      "sourceRefs": ["PO-FORM-BASIC", "PO-FORM-VALIDATION"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/orders/new",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(new|[^/]+/edit)$",
+      "moduleName": "商品明细",
+      "target": { "selector": "[data-anno='purchase-order-form-lines']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-form.md",
+      "blockId": "2",
+      "sourceRefs": ["PO-FORM-LINES", "PO-FORM-VALIDATION"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/orders/new",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(new|[^/]+/edit)$",
+      "moduleName": "底部操作",
+      "target": { "selector": "[data-anno='purchase-order-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-form.md",
+      "blockId": "3",
+      "sourceRefs": ["PO-FORM-ACTIONS", "PO-FORM-VALIDATION"]
+    }
+  ]
+}

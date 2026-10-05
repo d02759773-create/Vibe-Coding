@@ -1,5 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
+import type { ProColumns } from '@ant-design/pro-components'
+import { PageContainer, ProTable } from '@ant-design/pro-components'
+import { Card, Col, Input, InputNumber, Row, Select, Space, Typography, Button as AntButton } from 'antd'
 import { Button } from '@/components/ui/button'
+import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
 import { StatusPill } from '@/components/StatusPill'
 import { Modal } from '@/components/Modal'
 import { Toast } from '@/components/Toast'
@@ -49,11 +53,6 @@ const defaultItemFilters: DictionaryItemFilters = {
   itemName: '',
   status: '',
 }
-
-const inputClass =
-  'h-9 rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
-const textareaClass =
-  'min-h-20 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
 
 type StatusModalState =
   | { kind: 'type'; target: DictionaryType; action: 'enable' | 'disable' }
@@ -391,374 +390,388 @@ export function DictionariesPage() {
 
   const itemCodeReadonly = itemForm?.mode === 'edit' && itemForm.item.referenced
 
+  const typeColumns: ProColumns<DictionaryType>[] = useMemo(
+    () => [
+      {
+        title: '类型',
+        dataIndex: 'typeName',
+        render: (_, row) => (
+          <Space direction="vertical" size={0}>
+            <Typography.Text strong>{row.typeName}</Typography.Text>
+            <Typography.Text type="secondary" style={{ fontSize: 12, fontFamily: 'monospace' }}>
+              {row.typeCode}
+            </Typography.Text>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {structureTypeLabel(row.structureType)}
+            </Typography.Text>
+          </Space>
+        ),
+      },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        width: 88,
+        render: (_, row) => <StatusPill status={row.status} disabledLabel="禁用" />,
+      },
+      {
+        title: '操作',
+        valueType: 'option',
+        width: 160,
+        render: (_, row) => (
+          <TableRowActions
+            items={[
+              <AntButton
+                key="view"
+                type="link"
+                size="small"
+                style={tableActionLinkStyle}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setTypeDetail(row)
+                }}
+              >
+                查看
+              </AntButton>,
+              <AntButton
+                key="edit"
+                type="link"
+                size="small"
+                style={tableActionLinkStyle}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openTypeForm('edit', row)
+                }}
+              >
+                编辑
+              </AntButton>,
+              row.status === 'ENABLED' ? (
+                <AntButton
+                  key="disable"
+                  type="link"
+                  size="small"
+                  danger
+                  style={tableActionLinkStyle}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openStatusModal({ kind: 'type', target: row, action: 'disable' })
+                  }}
+                >
+                  禁用
+                </AntButton>
+              ) : (
+                <AntButton
+                  key="enable"
+                  type="link"
+                  size="small"
+                  style={tableActionLinkStyle}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openStatusModal({ kind: 'type', target: row, action: 'enable' })
+                  }}
+                >
+                  启用
+                </AntButton>
+              ),
+            ]}
+          />
+        ),
+      },
+    ],
+    [],
+  )
+
+  const itemColumns: ProColumns<DictionaryItem>[] = useMemo(() => {
+    const isTree = selectedType?.structureType === 'TREE'
+    const treeCols: ProColumns<DictionaryItem>[] = isTree
+      ? [
+          {
+            title: '项名称',
+            dataIndex: 'itemName',
+            render: (_, row) => (
+              <span style={{ paddingLeft: row.level === 2 ? 24 : 0 }}>{row.itemName}</span>
+            ),
+          },
+          { title: '项编码', dataIndex: 'itemCode', render: (v) => <Typography.Text code>{v}</Typography.Text> },
+          { title: '层级', dataIndex: 'level', width: 64 },
+          {
+            title: '是否叶子',
+            dataIndex: 'isLeaf',
+            width: 88,
+            render: (_, row) => (row.isLeaf ? '是' : '否'),
+          },
+        ]
+      : [
+          { title: '项编码', dataIndex: 'itemCode', render: (v) => <Typography.Text code>{v}</Typography.Text> },
+          { title: '项名称', dataIndex: 'itemName' },
+        ]
+
+    return [
+      ...treeCols,
+      { title: '排序号', dataIndex: 'sortOrder', width: 80 },
+      {
+        title: '使用状态',
+        dataIndex: 'status',
+        width: 96,
+        render: (_, row) => <StatusPill status={row.status} disabledLabel="禁用" />,
+      },
+      {
+        title: '最后修改时间',
+        dataIndex: 'updatedAt',
+        width: 168,
+        render: (_, row) => (
+          <Typography.Text type="secondary">{formatDateTime(row.updatedAt)}</Typography.Text>
+        ),
+      },
+      {
+        title: '操作',
+        valueType: 'option',
+        width: 200,
+        fixed: 'right',
+        render: (_, row) => (
+          <TableRowActions
+            items={[
+              <AntButton
+                key="view"
+                type="link"
+                size="small"
+                style={tableActionLinkStyle}
+                onClick={() => setItemDetail(row)}
+              >
+                查看
+              </AntButton>,
+              <AntButton
+                key="edit"
+                type="link"
+                size="small"
+                style={tableActionLinkStyle}
+                onClick={() => openItemForm({ mode: 'edit', item: row })}
+              >
+                编辑
+              </AntButton>,
+              row.status === 'ENABLED' ? (
+                <AntButton
+                  key="disable"
+                  type="link"
+                  size="small"
+                  danger
+                  style={tableActionLinkStyle}
+                  onClick={() => openStatusModal({ kind: 'item', target: row, action: 'disable' })}
+                >
+                  禁用
+                </AntButton>
+              ) : (
+                <AntButton
+                  key="enable"
+                  type="link"
+                  size="small"
+                  style={tableActionLinkStyle}
+                  onClick={() => openStatusModal({ kind: 'item', target: row, action: 'enable' })}
+                >
+                  启用
+                </AntButton>
+              ),
+            ]}
+          />
+        ),
+      },
+    ]
+  }, [selectedType?.structureType])
+
   return (
-    <div className="space-y-4" data-anno="dictionaries-page">
-      <div data-anno="dictionaries-toolbar">
-        <p className="text-sm text-muted-foreground">基础资料 / 数据字典</p>
-        <h2 className="text-xl font-semibold tracking-tight">数据字典</h2>
-        <p className="text-sm text-muted-foreground">维护字典类型与字典项，供档案与单据引用</p>
-      </div>
-
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <section
-          className="w-full shrink-0 space-y-3 rounded-xl border bg-card p-4 lg:w-[380px]"
-          data-anno="dictionaries-type-panel"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold">字典类型</h3>
-            <Button type="button" size="sm" onClick={() => openTypeForm('new')}>
-              新增类型
-            </Button>
-          </div>
-
-          <div className="grid gap-2 text-sm">
-            <label className="grid gap-1">
-              <span className="text-muted-foreground">类型名称</span>
-              <input
-                className={inputClass}
+    <PageContainer
+      title="数据字典"
+      subTitle="维护字典类型与字典项，供档案与单据引用"
+      data-anno="dictionaries-page"
+    >
+      <Row gutter={16} align="top" data-anno="dictionaries-toolbar">
+        <Col xs={24} lg={8} xl={7}>
+          <Card
+            title="字典类型"
+            size="small"
+            data-anno="dictionaries-type-panel"
+            extra={
+              <Button type="button" size="sm" onClick={() => openTypeForm('new')}>
+                新增类型
+              </Button>
+            }
+          >
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+              <Input
                 value={typeFilters.typeName}
                 onChange={(e) => setTypeFilters((f) => ({ ...f, typeName: e.target.value }))}
-                placeholder="请输入"
+                placeholder="类型名称"
+                allowClear
               />
-            </label>
-            <label className="grid gap-1">
-              <span className="text-muted-foreground">类型编码</span>
-              <input
-                className={inputClass}
+              <Input
                 value={typeFilters.typeCode}
                 onChange={(e) => setTypeFilters((f) => ({ ...f, typeCode: e.target.value }))}
-                placeholder="请输入"
+                placeholder="类型编码"
+                allowClear
               />
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="grid gap-1">
-                <span className="text-muted-foreground">结构类型</span>
-                <select
-                  className={inputClass}
-                  value={typeFilters.structureType}
-                  onChange={(e) =>
-                    setTypeFilters((f) => ({
-                      ...f,
-                      structureType: e.target.value as DictionaryTypeFilters['structureType'],
-                    }))
-                  }
-                >
-                  {STRUCTURE_FILTER_OPTIONS.map((o) => (
-                    <option key={o.label} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-1">
-                <span className="text-muted-foreground">使用状态</span>
-                <select
-                  className={inputClass}
-                  value={typeFilters.status}
-                  onChange={(e) =>
-                    setTypeFilters((f) => ({
-                      ...f,
-                      status: e.target.value as DictionaryTypeFilters['status'],
-                    }))
-                  }
-                >
-                  {STATUS_FILTER_OPTIONS.map((o) => (
-                    <option key={o.label} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={handleTypeReset}>
-                重置
-              </Button>
-              <Button type="button" size="sm" onClick={handleTypeSearch}>
-                搜索
-              </Button>
-            </div>
-          </div>
-
-          <div className="max-h-[420px] overflow-auto rounded-lg border">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
-                  <th className="px-2 py-2 font-medium">类型</th>
-                  <th className="px-2 py-2 font-medium">状态</th>
-                  <th className="px-2 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {types.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-2 py-8 text-center text-muted-foreground">
-                      暂无字典类型
-                    </td>
-                  </tr>
-                ) : (
-                  types.map((row) => {
-                    const active = selectedTypeCode === row.typeCode
-                    return (
-                      <tr
-                        key={row.id}
-                        className={`border-b last:border-b-0 ${active ? 'bg-primary/5' : 'hover:bg-muted/20'}`}
-                      >
-                        <td className="px-2 py-2">
-                          <button
-                            type="button"
-                            className="w-full text-left"
-                            onClick={() => setSelectedTypeCode(row.typeCode)}
-                          >
-                            <div className="font-medium">{row.typeName}</div>
-                            <div className="font-mono text-xs text-muted-foreground">{row.typeCode}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {structureTypeLabel(row.structureType)}
-                            </div>
-                          </button>
-                        </td>
-                        <td className="px-2 py-2 align-top">
-                          <StatusPill status={row.status} disabledLabel="禁用" />
-                        </td>
-                        <td className="px-2 py-2 align-top">
-                          <div className="flex flex-col gap-1 text-xs">
-                            <button
-                              type="button"
-                              className="text-left text-primary hover:underline"
-                              onClick={() => setTypeDetail(row)}
-                            >
-                              查看
-                            </button>
-                            <button
-                              type="button"
-                              className="text-left text-primary hover:underline"
-                              onClick={() => openTypeForm('edit', row)}
-                            >
-                              编辑
-                            </button>
-                            {row.status === 'ENABLED' ? (
-                              <button
-                                type="button"
-                                className="text-left text-destructive hover:underline"
-                                onClick={() =>
-                                  openStatusModal({ kind: 'type', target: row, action: 'disable' })
-                                }
-                              >
-                                禁用
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="text-left text-primary hover:underline"
-                                onClick={() =>
-                                  openStatusModal({ kind: 'type', target: row, action: 'enable' })
-                                }
-                              >
-                                启用
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section
-          className="min-w-0 flex-1 space-y-3 rounded-xl border bg-card p-4"
-          data-anno="dictionaries-item-panel"
-        >
-          {!selectedType ? (
-            <p className="py-16 text-center text-muted-foreground">请先在左侧选择字典类型</p>
-          ) : (
-            <>
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <h3 className="text-base font-semibold">
-                    {selectedType.typeName}
-                    <span className="ml-2 font-mono text-sm font-normal text-muted-foreground">
-                      ({selectedType.typeCode})
-                    </span>
-                  </h3>
-                  <span className="mt-1 inline-flex rounded-md bg-muted px-2 py-0.5 text-xs">
-                    {structureTypeLabel(selectedType.structureType)}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {selectedType.structureType === 'TREE' ? (
-                    <>
-                      <Button type="button" size="sm" variant="outline" onClick={() => openItemForm({ mode: 'new', level: 1 })}>
-                        新增一级项
-                      </Button>
-                      <Button type="button" size="sm" onClick={() => openItemForm({ mode: 'new', level: 2 })}>
-                        新增二级项
-                      </Button>
-                    </>
-                  ) : (
-                    <Button type="button" size="sm" onClick={() => openItemForm({ mode: 'new', level: 1 })}>
-                      新增字典项
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid gap-2 md:grid-cols-3 text-sm">
-                <label className="grid gap-1">
-                  <span className="text-muted-foreground">项编码</span>
-                  <input
-                    className={inputClass}
-                    value={itemFilters.itemCode}
-                    onChange={(e) => setItemFilters((f) => ({ ...f, itemCode: e.target.value }))}
-                  />
-                </label>
-                <label className="grid gap-1">
-                  <span className="text-muted-foreground">项名称</span>
-                  <input
-                    className={inputClass}
-                    value={itemFilters.itemName}
-                    onChange={(e) => setItemFilters((f) => ({ ...f, itemName: e.target.value }))}
-                  />
-                </label>
-                <label className="grid gap-1">
-                  <span className="text-muted-foreground">使用状态</span>
-                  <select
-                    className={inputClass}
-                    value={itemFilters.status}
-                    onChange={(e) =>
-                      setItemFilters((f) => ({
+              <Row gutter={8}>
+                <Col span={12}>
+                  <Select
+                    style={{ width: '100%' }}
+                    value={typeFilters.structureType || undefined}
+                    onChange={(v) =>
+                      setTypeFilters((f) => ({
                         ...f,
-                        status: e.target.value as DictionaryItemFilters['status'],
+                        structureType: (v ?? '') as DictionaryTypeFilters['structureType'],
                       }))
                     }
-                  >
-                    {STATUS_FILTER_OPTIONS.map((o) => (
-                      <option key={o.label} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="flex items-end gap-2 md:col-span-3">
+                    options={STRUCTURE_FILTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                    allowClear
+                    placeholder="结构类型"
+                  />
+                </Col>
+                <Col span={12}>
+                  <Select
+                    style={{ width: '100%' }}
+                    value={typeFilters.status || undefined}
+                    onChange={(v) =>
+                      setTypeFilters((f) => ({
+                        ...f,
+                        status: (v ?? '') as DictionaryTypeFilters['status'],
+                      }))
+                    }
+                    options={STATUS_FILTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                    allowClear
+                    placeholder="使用状态"
+                  />
+                </Col>
+              </Row>
+              <Space>
+                <Button type="button" variant="outline" size="sm" onClick={handleTypeReset}>
+                  重置
+                </Button>
+                <Button type="button" size="sm" onClick={handleTypeSearch}>
+                  搜索
+                </Button>
+              </Space>
+              <ProTable<DictionaryType>
+                rowKey="id"
+                dataSource={types}
+                columns={typeColumns}
+                search={false}
+                options={false}
+                pagination={false}
+                scroll={{ y: 420 }}
+                size="small"
+                data-anno="dictionaries-type-table"
+                onRow={(record) => ({
+                  onClick: () => setSelectedTypeCode(record.typeCode),
+                  style: { cursor: 'pointer' },
+                })}
+                rowClassName={(record) =>
+                  record.typeCode === selectedTypeCode ? 'ant-table-row-selected' : ''
+                }
+              />
+            </Space>
+          </Card>
+        </Col>
+        <Col xs={24} lg={16} xl={17}>
+          <Card size="small" data-anno="dictionaries-item-panel">
+            {!selectedType ? (
+              <Typography.Text type="secondary" style={{ display: 'block', textAlign: 'center', padding: 48 }}>
+                请先在左侧选择字典类型
+              </Typography.Text>
+            ) : (
+              <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                <Row justify="space-between" align="middle" gutter={[8, 8]}>
+                  <Col>
+                    <Space direction="vertical" size={4}>
+                      <Typography.Text strong style={{ fontSize: 16 }}>
+                        {selectedType.typeName}{' '}
+                        <Typography.Text type="secondary" code style={{ fontWeight: 400 }}>
+                          {selectedType.typeCode}
+                        </Typography.Text>
+                      </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {structureTypeLabel(selectedType.structureType)}
+                      </Typography.Text>
+                    </Space>
+                  </Col>
+                  <Col>
+                    <Space wrap>
+                      {selectedType.structureType === 'TREE' ? (
+                        <>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openItemForm({ mode: 'new', level: 1 })}
+                          >
+                            新增一级项
+                          </Button>
+                          <Button type="button" size="sm" onClick={() => openItemForm({ mode: 'new', level: 2 })}>
+                            新增二级项
+                          </Button>
+                        </>
+                      ) : (
+                        <Button type="button" size="sm" onClick={() => openItemForm({ mode: 'new', level: 1 })}>
+                          新增字典项
+                        </Button>
+                      )}
+                    </Space>
+                  </Col>
+                </Row>
+                <Row gutter={8}>
+                  <Col xs={24} md={8}>
+                    <Input
+                      value={itemFilters.itemCode}
+                      onChange={(e) => setItemFilters((f) => ({ ...f, itemCode: e.target.value }))}
+                      placeholder="项编码"
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Input
+                      value={itemFilters.itemName}
+                      onChange={(e) => setItemFilters((f) => ({ ...f, itemName: e.target.value }))}
+                      placeholder="项名称"
+                      allowClear
+                    />
+                  </Col>
+                  <Col xs={24} md={8}>
+                    <Select
+                      style={{ width: '100%' }}
+                      value={itemFilters.status || undefined}
+                      onChange={(v) =>
+                        setItemFilters((f) => ({
+                          ...f,
+                          status: (v ?? '') as DictionaryItemFilters['status'],
+                        }))
+                      }
+                      options={STATUS_FILTER_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                      allowClear
+                      placeholder="使用状态"
+                    />
+                  </Col>
+                </Row>
+                <Space>
                   <Button type="button" variant="outline" size="sm" onClick={handleItemReset}>
                     重置
                   </Button>
                   <Button type="button" size="sm" onClick={handleItemSearch}>
                     搜索
                   </Button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full min-w-[720px] border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-                      {selectedType.structureType === 'TREE' ? (
-                        <>
-                          <th className="px-3 py-2.5 font-medium">项名称</th>
-                          <th className="px-3 py-2.5 font-medium">项编码</th>
-                          <th className="px-3 py-2.5 font-medium">层级</th>
-                          <th className="px-3 py-2.5 font-medium">是否叶子</th>
-                        </>
-                      ) : (
-                        <>
-                          <th className="px-3 py-2.5 font-medium">项编码</th>
-                          <th className="px-3 py-2.5 font-medium">项名称</th>
-                        </>
-                      )}
-                      <th className="px-3 py-2.5 font-medium">排序号</th>
-                      <th className="px-3 py-2.5 font-medium">使用状态</th>
-                      <th className="px-3 py-2.5 font-medium">最后修改时间</th>
-                      <th className="px-3 py-2.5 font-medium">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={selectedType.structureType === 'TREE' ? 8 : 6}
-                          className="px-3 py-10 text-center text-muted-foreground"
-                        >
-                          暂无字典项
-                        </td>
-                      </tr>
-                    ) : (
-                      items.map((row) => (
-                        <tr key={row.id} className="border-b last:border-b-0 hover:bg-muted/20">
-                          {selectedType.structureType === 'TREE' ? (
-                            <>
-                              <td className="px-3 py-2.5">
-                                <span style={{ paddingLeft: row.level === 2 ? 24 : 0 }}>{row.itemName}</span>
-                              </td>
-                              <td className="px-3 py-2.5 font-mono text-xs">{row.itemCode}</td>
-                              <td className="px-3 py-2.5">{row.level}</td>
-                              <td className="px-3 py-2.5">{row.isLeaf ? '是' : '否'}</td>
-                            </>
-                          ) : (
-                            <>
-                              <td className="px-3 py-2.5 font-mono text-xs">{row.itemCode}</td>
-                              <td className="px-3 py-2.5">{row.itemName}</td>
-                            </>
-                          )}
-                          <td className="px-3 py-2.5">{row.sortOrder}</td>
-                          <td className="px-3 py-2.5">
-                            <StatusPill status={row.status} disabledLabel="禁用" />
-                          </td>
-                          <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
-                            {formatDateTime(row.updatedAt)}
-                          </td>
-                          <td className="px-3 py-2.5">
-                            <div className="flex flex-wrap gap-2 text-sm">
-                              <button
-                                type="button"
-                                className="text-primary hover:underline"
-                                onClick={() => setItemDetail(row)}
-                              >
-                                查看
-                              </button>
-                              <button
-                                type="button"
-                                className="text-primary hover:underline"
-                                onClick={() => openItemForm({ mode: 'edit', item: row })}
-                              >
-                                编辑
-                              </button>
-                              {row.status === 'ENABLED' ? (
-                                <button
-                                  type="button"
-                                  className="text-destructive hover:underline"
-                                  onClick={() =>
-                                    openStatusModal({ kind: 'item', target: row, action: 'disable' })
-                                  }
-                                >
-                                  禁用
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="text-primary hover:underline"
-                                  onClick={() =>
-                                    openStatusModal({ kind: 'item', target: row, action: 'enable' })
-                                  }
-                                >
-                                  启用
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </section>
-      </div>
+                </Space>
+                <ProTable<DictionaryItem>
+                  rowKey="id"
+                  dataSource={items}
+                  columns={itemColumns}
+                  search={false}
+                  options={false}
+                  pagination={{ pageSize: 20, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
+                  scroll={{ x: 720 }}
+                  size="small"
+                  data-anno="dictionaries-item-table"
+                />
+              </Space>
+            )}
+          </Card>
+        </Col>
+      </Row>
 
       {/* 类型表单 */}
       <Modal
@@ -769,67 +782,40 @@ export function DictionariesPage() {
         onConfirm={saveTypeForm}
         dataAnno="dictionaries-type-form"
       >
-        <div className="grid gap-3 text-sm">
-          <label className="grid gap-1">
-            <span>
-              类型编码 <span className="text-destructive">*</span>
-            </span>
-            <input
-              className={inputClass}
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <FormField label="类型编码" required error={typeFormErrors.typeCode}>
+            <Input
               value={typeFormCode}
               readOnly={typeForm?.mode === 'edit'}
               disabled={typeForm?.mode === 'edit'}
               onChange={(e) => setTypeFormCode(e.target.value.toUpperCase())}
               placeholder="RETURN_REASON"
             />
-            {typeFormErrors.typeCode ? (
-              <span className="text-xs text-destructive">{typeFormErrors.typeCode}</span>
-            ) : null}
-          </label>
-          <label className="grid gap-1">
-            <span>
-              类型名称 <span className="text-destructive">*</span>
-            </span>
-            <input
-              className={inputClass}
-              value={typeFormName}
-              onChange={(e) => setTypeFormName(e.target.value)}
-            />
-            {typeFormErrors.typeName ? (
-              <span className="text-xs text-destructive">{typeFormErrors.typeName}</span>
-            ) : null}
-          </label>
-          <label className="grid gap-1">
-            <span>
-              结构类型 <span className="text-destructive">*</span>
-            </span>
-            <select
-              className={inputClass}
+          </FormField>
+          <FormField label="类型名称" required error={typeFormErrors.typeName}>
+            <Input value={typeFormName} onChange={(e) => setTypeFormName(e.target.value)} />
+          </FormField>
+          <FormField label="结构类型" required>
+            <Select
+              style={{ width: '100%' }}
               value={typeFormStructure}
               disabled={typeForm?.mode === 'edit'}
-              onChange={(e) => setTypeFormStructure(e.target.value as StructureType)}
-            >
-              <option value="FLAT">平铺</option>
-              <option value="TREE">树形（最多2级）</option>
-            </select>
-          </label>
-          <label className="grid gap-1">
-            <span>类型说明</span>
-            <textarea
-              className={textareaClass}
-              value={typeFormDesc}
-              onChange={(e) => setTypeFormDesc(e.target.value)}
+              onChange={(v) => setTypeFormStructure(v as StructureType)}
+              options={[
+                { value: 'FLAT', label: '平铺' },
+                { value: 'TREE', label: '树形（最多2级）' },
+              ]}
             />
-            {typeFormErrors.typeDescription ? (
-              <span className="text-xs text-destructive">{typeFormErrors.typeDescription}</span>
-            ) : null}
-          </label>
+          </FormField>
+          <FormField label="类型说明" error={typeFormErrors.typeDescription}>
+            <Input.TextArea value={typeFormDesc} onChange={(e) => setTypeFormDesc(e.target.value)} rows={3} />
+          </FormField>
           {typeForm?.mode === 'edit' ? (
-            <p className="text-muted-foreground">
+            <Typography.Text type="secondary">
               是否预置：{typeForm.type.isPreset ? '是' : '否'}
-            </p>
+            </Typography.Text>
           ) : null}
-        </div>
+        </Space>
       </Modal>
 
       {/* 类型详情 */}
@@ -842,23 +828,23 @@ export function DictionariesPage() {
         dataAnno="dictionaries-type-detail"
       >
         {typeDetail ? (
-          <div className="space-y-3 text-sm">
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <DetailRow label="类型编码" value={typeDetail.typeCode} />
             <DetailRow label="类型名称" value={typeDetail.typeName} />
             <DetailRow label="结构类型" value={structureTypeLabel(typeDetail.structureType)} />
             <DetailRow label="类型说明" value={displayDash(typeDetail.description)} />
             <DetailRow label="是否预置" value={typeDetail.isPreset ? '是' : '否'} />
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">使用状态</span>
+            <Space align="center">
+              <Typography.Text type="secondary">使用状态</Typography.Text>
               <StatusPill status={typeDetail.status} disabledLabel="禁用" />
-            </div>
+            </Space>
             <DetailRow
               label="停用原因"
               value={
                 typeDetail.status === 'DISABLED' ? displayDash(typeDetail.disableReason) : '-'
               }
             />
-            <div className="flex flex-wrap gap-2 pt-2">
+            <Space wrap>
               <Button type="button" size="sm" variant="outline" onClick={() => openTypeForm('edit', typeDetail)}>
                 编辑
               </Button>
@@ -886,8 +872,8 @@ export function DictionariesPage() {
                   启用
                 </Button>
               )}
-            </div>
-          </div>
+            </Space>
+          </Space>
         ) : null}
       </Modal>
 
@@ -907,62 +893,37 @@ export function DictionariesPage() {
         dataAnno="dictionaries-item-form"
       >
         {itemForm && selectedType ? (
-          <div className="grid gap-3 text-sm">
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <DetailRow label="所属类型编码" value={selectedType.typeCode} />
-            <label className="grid gap-1">
-              <span>
-                项编码 <span className="text-destructive">*</span>
-              </span>
-              <input
-                className={inputClass}
+            <FormField label="项编码" required error={itemFormErrors.itemCode}>
+              <Input
                 value={itemFormCode}
                 readOnly={Boolean(itemCodeReadonly)}
                 disabled={Boolean(itemCodeReadonly)}
                 onChange={(e) => setItemFormCode(e.target.value)}
               />
-              {itemFormErrors.itemCode ? (
-                <span className="text-xs text-destructive">{itemFormErrors.itemCode}</span>
-              ) : null}
-            </label>
-            <label className="grid gap-1">
-              <span>
-                项名称 <span className="text-destructive">*</span>
-              </span>
-              <input
-                className={inputClass}
-                value={itemFormName}
-                onChange={(e) => setItemFormName(e.target.value)}
-              />
-              {itemFormErrors.itemName ? (
-                <span className="text-xs text-destructive">{itemFormErrors.itemName}</span>
-              ) : null}
-            </label>
+            </FormField>
+            <FormField label="项名称" required error={itemFormErrors.itemName}>
+              <Input value={itemFormName} onChange={(e) => setItemFormName(e.target.value)} />
+            </FormField>
             {selectedType.structureType === 'TREE' &&
             (itemForm.mode === 'new' ? itemForm.level === 2 : itemForm.item.level === 2) ? (
-              <label className="grid gap-1">
-                <span>
-                  父项编码 <span className="text-destructive">*</span>
-                </span>
-                <select
-                  className={inputClass}
-                  value={itemFormParent}
+              <FormField label="父项编码" required error={itemFormErrors.parentItemCode}>
+                <Select
+                  style={{ width: '100%' }}
+                  value={itemFormParent || undefined}
                   disabled={
                     itemForm.mode === 'edit' &&
                     hasChildItems(selectedType.typeCode, itemForm.item.itemCode)
                   }
-                  onChange={(e) => setItemFormParent(e.target.value)}
-                >
-                  <option value="">请选择</option>
-                  {levelOneOptions.map((p) => (
-                    <option key={p.id} value={p.itemCode}>
-                      {p.itemCode} {p.itemName}
-                    </option>
-                  ))}
-                </select>
-                {itemFormErrors.parentItemCode ? (
-                  <span className="text-xs text-destructive">{itemFormErrors.parentItemCode}</span>
-                ) : null}
-              </label>
+                  onChange={(v) => setItemFormParent(v ?? '')}
+                  placeholder="请选择"
+                  options={levelOneOptions.map((p) => ({
+                    value: p.itemCode,
+                    label: `${p.itemCode} ${p.itemName}`,
+                  }))}
+                />
+              </FormField>
             ) : null}
             {itemForm.mode === 'edit' ? (
               <>
@@ -970,29 +931,19 @@ export function DictionariesPage() {
                 <DetailRow label="是否叶子" value={itemForm.item.isLeaf ? '是' : '否'} />
               </>
             ) : null}
-            <label className="grid gap-1">
-              <span>排序号</span>
-              <input
-                type="number"
-                className={inputClass}
+            <FormField label="排序号" error={itemFormErrors.sortOrder}>
+              <InputNumber
+                style={{ width: '100%' }}
                 min={0}
                 max={9999}
                 value={itemFormSort}
-                onChange={(e) => setItemFormSort(Number(e.target.value))}
+                onChange={(v) => setItemFormSort(Number(v ?? 0))}
               />
-              {itemFormErrors.sortOrder ? (
-                <span className="text-xs text-destructive">{itemFormErrors.sortOrder}</span>
-              ) : null}
-            </label>
-            <label className="grid gap-1">
-              <span>项备注</span>
-              <textarea
-                className={textareaClass}
-                value={itemFormRemark}
-                onChange={(e) => setItemFormRemark(e.target.value)}
-              />
-            </label>
-          </div>
+            </FormField>
+            <FormField label="项备注">
+              <Input.TextArea value={itemFormRemark} onChange={(e) => setItemFormRemark(e.target.value)} rows={3} />
+            </FormField>
+          </Space>
         ) : null}
       </Modal>
 
@@ -1006,7 +957,7 @@ export function DictionariesPage() {
         dataAnno="dictionaries-item-detail"
       >
         {itemDetail ? (
-          <div className="space-y-2 text-sm">
+          <Space direction="vertical" size="small" style={{ width: '100%' }}>
             <DetailRow label="所属类型编码" value={itemDetail.typeCode} />
             <DetailRow label="项编码" value={itemDetail.itemCode} />
             <DetailRow label="项名称" value={itemDetail.itemName} />
@@ -1015,15 +966,15 @@ export function DictionariesPage() {
             <DetailRow label="是否叶子" value={itemDetail.isLeaf ? '是' : '否'} />
             <DetailRow label="排序号" value={String(itemDetail.sortOrder)} />
             <DetailRow label="项备注" value={displayDash(itemDetail.remark)} />
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">使用状态</span>
+            <Space align="center">
+              <Typography.Text type="secondary">使用状态</Typography.Text>
               <StatusPill status={itemDetail.status} disabledLabel="禁用" />
-            </div>
+            </Space>
             <DetailRow
               label="停用原因"
               value={itemDetail.status === 'DISABLED' ? displayDash(itemDetail.disableReason) : '-'}
             />
-            <div className="flex flex-wrap gap-2 pt-2">
+            <Space wrap>
               <Button
                 type="button"
                 size="sm"
@@ -1060,8 +1011,8 @@ export function DictionariesPage() {
                   启用
                 </Button>
               )}
-            </div>
-          </div>
+            </Space>
+          </Space>
         ) : null}
       </Modal>
 
@@ -1082,38 +1033,63 @@ export function DictionariesPage() {
         dataAnno="dictionaries-status-modal"
       >
         {statusModal?.action === 'disable' ? (
-          <label className="grid gap-1 text-sm">
-            <span>
-              停用原因 <span className="text-destructive">*</span>
-            </span>
-            <textarea
-              className={textareaClass}
+          <FormField label="停用原因" required error={disableReasonError}>
+            <Input.TextArea
               maxLength={200}
+              rows={3}
               value={disableReason}
               onChange={(e) => {
                 setDisableReason(e.target.value)
                 if (disableReasonError) setDisableReasonError('')
               }}
             />
-            {disableReasonError ? (
-              <span className="text-xs text-destructive">{disableReasonError}</span>
-            ) : null}
-          </label>
+          </FormField>
         ) : (
-          <p className="text-sm text-muted-foreground">确认启用？</p>
+          <Typography.Text type="secondary">确认启用？</Typography.Text>
         )}
       </Modal>
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
+  )
+}
+
+function FormField({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: ReactNode
+}) {
+  return (
+    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+      <Typography.Text>
+        {label}
+        {required ? <Typography.Text type="danger"> *</Typography.Text> : null}
+      </Typography.Text>
+      {children}
+      {error ? (
+        <Typography.Text type="danger" style={{ fontSize: 12 }}>
+          {error}
+        </Typography.Text>
+      ) : null}
+    </Space>
   )
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-2">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="break-all">{value}</span>
-    </div>
+    <Row gutter={8} wrap={false}>
+      <Col flex="120px">
+        <Typography.Text type="secondary">{label}</Typography.Text>
+      </Col>
+      <Col flex="auto">
+        <Typography.Text style={{ wordBreak: 'break-all' }}>{value}</Typography.Text>
+      </Col>
+    </Row>
   )
 }

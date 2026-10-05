@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "title": "进销存原型-业务标注",
+  "inputs": [
+    {
+      "scope": "warehouse-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/仓库管理/annotations/warehouse-list.annotation.config.json",
+      "order": 1
+    },
+    {
+      "scope": "warehouse-detail",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/仓库管理/annotations/warehouse-detail.annotation.config.json",
+      "order": 2
+    },
+    {
+      "scope": "warehouse-form",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/仓库管理/annotations/warehouse-form.annotation.config.json",
+      "order": 3
+    },
+    {
+      "scope": "purchase-order-global",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购订单/annotations/purchase-order-global.annotation.config.json",
+      "order": 9
+    },
+    {
+      "scope": "purchase-order-list",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购订单/annotations/purchase-order-list.annotation.config.json",
+      "order": 10
+    },
+    {
+      "scope": "purchase-order-form",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购订单/annotations/purchase-order-form.annotation.config.json",
+      "order": 11
+    },
+    {
+      "scope": "purchase-order-detail",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购订单/annotations/purchase-order-detail.annotation.config.json",
+      "order": 12
+    }
+  ],
+  "runtime": {
+    "zIndexBase": 2147480000,
+    "initialMode": "preview"
+  },
+  "output": "../public/annotation-kit/annotation.bundle.json",
+  "coverage": "./coverage.md",
+  "htmlOutput": "./annotations-export.html"
+}

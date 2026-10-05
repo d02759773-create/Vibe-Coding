@@ -30,7 +30,7 @@ export type PurchaseInboundLink = {
   inboundDate: string
   totalQty: number
   operator: string
-  status: 'STOCKED_IN'
+  status: 'STOCKED_IN' | 'DRAFT'
 }
 
 export type PurchaseOrder = {

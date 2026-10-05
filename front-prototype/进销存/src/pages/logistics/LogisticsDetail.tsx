@@ -1,8 +1,11 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PageContainer } from '@ant-design/pro-components'
+import { Space, Typography } from 'antd'
 import { Button } from '@/components/ui/button'
+import { DetailFieldRow, DetailSection } from '@/components/detail/DetailSection'
 import { StatusPill } from '@/components/StatusPill'
-import { Modal } from '@/components/Modal'
+import { EnableDisableModal } from '@/components/master/EnableDisableModal'
 import { Toast } from '@/components/Toast'
 import { displayValue, formatDateTime } from '@/features/products/format'
 import {
@@ -23,24 +26,6 @@ function nowString(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function FieldRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1 border-b border-dashed py-3 last:border-b-0 sm:grid-cols-[140px_1fr]">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm">{value}</dd>
-    </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-xl border bg-card">
-      <h3 className="border-b px-4 py-3 text-sm font-semibold">{title}</h3>
-      <dl className="px-4">{children}</dl>
-    </section>
-  )
-}
-
 export function LogisticsDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -57,12 +42,14 @@ export function LogisticsDetail() {
 
   if (!item) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">未找到物流档案。</p>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
-          返回列表
-        </Button>
-      </div>
+      <PageContainer title="物流详情">
+        <Typography.Text type="secondary">未找到物流档案。</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
+            返回列表
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
@@ -125,17 +112,12 @@ export function LogisticsDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4" data-anno="logistics-detail-page">
-      <div
-        className="flex flex-wrap items-center justify-between gap-3"
-        data-anno="logistics-detail-actions"
-      >
-        <div>
-          <p className="text-sm text-muted-foreground">基础资料 / 物流管理 / 详情</p>
-          <h2 className="text-xl font-semibold tracking-tight">物流详情</h2>
-          <p className="text-sm text-muted-foreground">{item.logisticsCode}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <PageContainer
+      title="物流详情"
+      subTitle={item.logisticsCode}
+      tags={<StatusPill status={item.status} disabledLabel="禁用" />}
+      extra={
+        <Space wrap data-anno="logistics-detail-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
             返回列表
           </Button>
@@ -161,75 +143,61 @@ export function LogisticsDetail() {
               启用
             </Button>
           )}
-        </div>
-      </div>
-
-      <div className="space-y-4" data-anno="logistics-detail-sections">
-        <Section title="基础识别信息">
-        <FieldRow label="物流编码" value={item.logisticsCode} />
-        <FieldRow label="物流名称" value={item.logisticsName} />
-        <FieldRow label="物流类型" value={logisticsTypeLabel(item.logisticsType)} />
-        <FieldRow label="物流服务商" value={displayServiceProvider(item.serviceProvider)} />
-        <FieldRow label="物流备注" value={displayValue(item.remark)} />
-        <FieldRow
+        </Space>
+      }
+      data-anno="logistics-detail-page"
+    >
+      <Space direction="vertical" size="large" style={{ width: '100%' }} data-anno="logistics-detail-sections">
+        <DetailSection title="基础识别信息">
+        <DetailFieldRow label="物流编码" value={item.logisticsCode} />
+        <DetailFieldRow label="物流名称" value={item.logisticsName} />
+        <DetailFieldRow label="物流类型" value={logisticsTypeLabel(item.logisticsType)} />
+        <DetailFieldRow label="物流服务商" value={displayServiceProvider(item.serviceProvider)} />
+        <DetailFieldRow label="物流备注" value={displayValue(item.remark)} />
+        <DetailFieldRow
           label="使用状态"
           value={<StatusPill status={item.status} disabledLabel="禁用" />}
         />
-        <FieldRow
+        <DetailFieldRow
           label="停用原因"
           value={item.status === 'DISABLED' ? displayValue(item.disableReason) : '-'}
         />
-      </Section>
+      </DetailSection>
 
-      <Section title="系统信息">
-        <FieldRow label="创建人" value={item.createdBy} />
-        <FieldRow label="创建时间" value={formatDateTime(item.createdAt)} />
-        <FieldRow label="最后修改人" value={item.updatedBy} />
-        <FieldRow label="最后修改时间" value={formatDateTime(item.updatedAt)} />
-        <FieldRow label="禁用人" value={displayValue(item.disabledBy)} />
-        <FieldRow label="禁用时间" value={item.disabledAt ? formatDateTime(item.disabledAt) : '-'} />
-        <FieldRow label="启用人" value={displayValue(item.enabledBy)} />
-        <FieldRow label="启用时间" value={item.enabledAt ? formatDateTime(item.enabledAt) : '-'} />
-      </Section>
-      </div>
+      <DetailSection title="系统信息">
+        <DetailFieldRow label="创建人" value={item.createdBy} />
+        <DetailFieldRow label="创建时间" value={formatDateTime(item.createdAt)} />
+        <DetailFieldRow label="最后修改人" value={item.updatedBy} />
+        <DetailFieldRow label="最后修改时间" value={formatDateTime(item.updatedAt)} />
+        <DetailFieldRow label="禁用人" value={displayValue(item.disabledBy)} />
+        <DetailFieldRow label="禁用时间" value={item.disabledAt ? formatDateTime(item.disabledAt) : '-'} />
+        <DetailFieldRow label="启用人" value={displayValue(item.enabledBy)} />
+        <DetailFieldRow label="启用时间" value={item.enabledAt ? formatDateTime(item.enabledAt) : '-'} />
+      </DetailSection>
+      </Space>
 
-      <Modal
+      <EnableDisableModal
         dataAnno="logistics-status-modal"
         open={Boolean(statusAction)}
-        title={statusAction === 'disable' ? '确认禁用物流方式？' : '确认启用物流方式？'}
-        confirmLabel={statusAction === 'disable' ? '确认禁用' : '确认启用'}
-        confirmVariant={statusAction === 'disable' ? 'destructive' : 'default'}
+        mode={statusAction ?? 'disable'}
+        entityLabel="物流方式"
+        maxReasonLength={200}
+        disableReason={disableReason}
+        disableReasonError={disableReasonError}
+        enableHint="启用后该物流方式可再次被业务单据引用。"
+        onReasonChange={(v) => {
+          setDisableReason(v)
+          if (disableReasonError) setDisableReasonError('')
+        }}
         onClose={() => {
           setStatusAction(null)
           setDisableReason('')
           setDisableReasonError('')
         }}
         onConfirm={confirmStatusChange}
-      >
-        {statusAction === 'disable' ? (
-          <label className="grid gap-1 text-sm">
-            <span>
-              停用原因 <span className="text-destructive">*</span>
-            </span>
-            <textarea
-              className="min-h-24 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              maxLength={200}
-              value={disableReason}
-              onChange={(e) => {
-                setDisableReason(e.target.value)
-                if (disableReasonError) setDisableReasonError('')
-              }}
-            />
-            {disableReasonError ? (
-              <span className="text-xs text-destructive">{disableReasonError}</span>
-            ) : null}
-          </label>
-        ) : (
-          <p className="text-sm text-muted-foreground">启用后该物流方式可再次被业务单据引用。</p>
-        )}
-      </Modal>
+      />
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }

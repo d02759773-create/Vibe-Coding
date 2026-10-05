@@ -1,4 +1,4 @@
-import type { PurchaseOrderStatus, StatusTabKey, TaxRate } from './types'
+import type { PurchaseInboundLink, PurchaseOrder, PurchaseOrderStatus, StatusTabKey, TaxRate } from './types'
 
 export const STATUS_TABS: { key: StatusTabKey; label: string }[] = [
   { key: 'ALL', label: '全部' },
@@ -68,4 +68,22 @@ export function todayDateString(): string {
 export function tabCountLabel(count: number): string {
   if (count > 99) return '99+'
   return String(count)
+}
+
+export function countDraftInboundLinks(order: PurchaseOrder): number {
+  return order.inboundLinks.filter((l) => l.status === 'DRAFT').length
+}
+
+/** 主 PRD R44：存在草稿入库单时追加提示 */
+export function closeOrderConfirmBody(order: PurchaseOrder): string {
+  const n = countDraftInboundLinks(order)
+  const tail = '关闭后剩余未入库数量将不再接收，确认关闭订单？'
+  if (n > 0) {
+    return `该订单下存在${n}张草稿入库单，关闭后将无法继续操作，请确认。${tail}`
+  }
+  return tail
+}
+
+export function inboundLinkStatusLabel(status: PurchaseInboundLink['status']): string {
+  return status === 'DRAFT' ? '草稿' : '已入库'
 }

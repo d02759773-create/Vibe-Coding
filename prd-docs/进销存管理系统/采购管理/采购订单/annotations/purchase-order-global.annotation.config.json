@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "title": "采购订单-模块共用规则",
+  "scope": "purchase-order-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "PO-G-BG", "source": "../采购订单主PRD.md#1-业务背景", "page": "#/purchase/orders" },
+    { "id": "PO-G-SC", "source": "../采购订单主PRD.md#4-业务场景", "page": "#/purchase/orders" },
+    { "id": "PO-G-ST", "source": "../采购订单主PRD.md#5-状态机", "page": "#/purchase/orders" },
+    { "id": "PO-G-AC", "source": "../采购订单主PRD.md#6-动作能力矩阵", "page": "#/purchase/orders" },
+    { "id": "PO-G-RU", "source": "../采购订单主PRD.md#7-核心业务规则", "page": "#/purchase/orders" },
+    { "id": "PO-G-PR", "source": "../采购订单主PRD.md#8-权限设计", "page": "#/purchase/orders" }
+  ],
+  "annotations": [
+    {
+      "id": "g-background",
+      "type": "global",
+      "order": 1,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "模块背景与链路",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-background",
+      "sourceRefs": ["PO-G-BG"]
+    },
+    {
+      "id": "g-scenarios",
+      "type": "global",
+      "order": 2,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "业务场景",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-scenarios",
+      "sourceRefs": ["PO-G-SC"]
+    },
+    {
+      "id": "g-state",
+      "type": "global",
+      "order": 3,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "状态与流转",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-state",
+      "sourceRefs": ["PO-G-ST"]
+    },
+    {
+      "id": "g-actions",
+      "type": "global",
+      "order": 4,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "动作能力矩阵",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-actions",
+      "sourceRefs": ["PO-G-AC"]
+    },
+    {
+      "id": "g-rules",
+      "type": "global",
+      "order": 5,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "核心业务规则",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-rules",
+      "sourceRefs": ["PO-G-RU"]
+    },
+    {
+      "id": "g-permission",
+      "type": "global",
+      "order": 6,
+      "page": "#/purchase/orders",
+      "routeMatcher": "(^#|^/#)/purchase/orders",
+      "moduleName": "权限与数据范围",
+      "markdownFile": "pages/purchase-order-global.md",
+      "blockId": "g-permission",
+      "sourceRefs": ["PO-G-PR"]
+    }
+  ]
+}

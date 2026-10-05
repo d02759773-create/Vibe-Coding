@@ -1,6 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
+import type { ActionType, ProColumns } from '@ant-design/pro-components'
+import { PageContainer, ProTable } from '@ant-design/pro-components'
+import { Input, Space, Tabs, Typography } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
 import { Modal } from '@/components/Modal'
 import { Toast } from '@/components/Toast'
 import { PurchaseOrderStatusTag } from '@/components/PurchaseOrderStatusTag'
@@ -10,14 +14,20 @@ import {
   formatYuan,
   partnerLabel,
   tabCountLabel,
+  closeOrderConfirmBody,
 } from '@/features/purchaseOrders/constants'
 import {
   countByTab,
   deletePurchaseOrder,
   filterPurchaseOrders,
+  getPurchaseOrderById,
   nowString,
   updateOrderStatus,
 } from '@/features/purchaseOrders/storage'
+import {
+  submitFailureToast,
+  validateOrderForSubmit,
+} from '@/features/purchaseOrders/validate'
 import type {
   PurchaseOrder,
   PurchaseOrderListFilters,
@@ -49,19 +59,46 @@ type ConfirmAction =
   | 'close'
   | null
 
+function formatDateParam(v: unknown): string {
+  if (!v) return ''
+  if (typeof v === 'string') return v
+  if (
+    typeof v === 'object' &&
+    v !== null &&
+    'format' in v &&
+    typeof (v as { format: (f: string) => string }).format === 'function'
+  ) {
+    return (v as { format: (f: string) => string }).format('YYYY-MM-DD')
+  }
+  return String(v)
+}
+
+function paramsToFilters(params: Record<string, unknown>): PurchaseOrderListFilters {
+  return {
+    orderNos: String(params.orderNos ?? ''),
+    supplierId: String(params.supplierId ?? ''),
+    warehouseId: String(params.warehouseId ?? ''),
+    status: (params.status ?? '') as PurchaseOrderListFilters['status'],
+    orderDateFrom: formatDateParam(params.orderDateFrom),
+    orderDateTo: formatDateParam(params.orderDateTo),
+    expectedDateFrom: formatDateParam(params.expectedDateFrom),
+    expectedDateTo: formatDateParam(params.expectedDateTo),
+    updatedFrom: formatDateParam(params.updatedFrom),
+    updatedTo: formatDateParam(params.updatedTo),
+  }
+}
+
 export function PurchaseOrderList() {
   const navigate = useNavigate()
+  const actionRef = useRef<ActionType>(undefined)
   const [tab, setTab] = useState<StatusTabKey>('ALL')
-  const [filters, setFilters] = useState(defaultFilters)
-  const [applied, setApplied] = useState(defaultFilters)
-  const [expanded, setExpanded] = useState(false)
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [applied, setApplied] = useState<PurchaseOrderListFilters>(defaultFilters)
   const [refreshKey, setRefreshKey] = useState(0)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
   const [toast, setToast] = useState<string | null>(null)
   const [confirmTarget, setConfirmTarget] = useState<PurchaseOrder | null>(null)
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
 
   const suppliers = useMemo(() => listSuppliers().filter((s) => s.status === 'ENABLED'), [])
   const warehouses = useMemo(() => listWarehouses().filter((w) => w.status === 'ENABLED'), [])
@@ -71,29 +108,9 @@ export function PurchaseOrderList() {
     return countByTab(applied)
   }, [refreshKey, applied])
 
-  const filtered = useMemo(() => {
-    void refreshKey
-    return filterPurchaseOrders(applied, tab)
-  }, [refreshKey, applied, tab])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const pageSafe = Math.min(page, totalPages)
-  const pageRows = filtered.slice((pageSafe - 1) * pageSize, pageSafe * pageSize)
-
   function bump() {
     setRefreshKey((k) => k + 1)
-    setSelectedIds(new Set())
-  }
-
-  function handleSearch() {
-    setApplied({ ...filters })
-    setPage(1)
-  }
-
-  function handleReset() {
-    setFilters(defaultFilters)
-    setApplied(defaultFilters)
-    setPage(1)
+    setSelectedRowKeys([])
   }
 
   function openConfirm(order: PurchaseOrder, action: ConfirmAction) {
@@ -107,68 +124,68 @@ export function PurchaseOrderList() {
   }
 
   function runConfirm() {
-    if (!confirmTarget || !confirmAction) return
+    if (!confirmTarget || !confirmAction || confirmLoading) return
     const id = confirmTarget.id
     const ts = nowString()
 
-    switch (confirmAction) {
-      case 'delete':
-        if (deletePurchaseOrder(id)) {
-          setToast('采购订单已删除')
-        }
-        break
-      case 'submit':
-        updateOrderStatus(id, 'PENDING_AUDIT')
-        setToast('已提交审核，等待审核确认')
-        break
-      case 'approve':
-        updateOrderStatus(id, 'PENDING_STOCK_IN', {
-          auditedBy: '林强',
-          auditedAt: ts,
-        })
-        setToast('审核通过')
-        break
-      case 'reject':
-        updateOrderStatus(id, 'DRAFT', { auditedBy: null, auditedAt: null })
-        setToast('已驳回，单据已退回草稿')
-        break
-      case 'void':
-        updateOrderStatus(id, 'VOIDED')
-        setToast('采购订单已作废')
-        break
-      case 'close':
-        updateOrderStatus(id, 'COMPLETED')
-        setToast('订单已关闭，剩余数量不再接收')
-        break
-      default:
-        break
+    if (confirmAction === 'submit') {
+      const order = getPurchaseOrderById(id)
+      if (!order) {
+        closeConfirm()
+        return
+      }
+      const result = validateOrderForSubmit(order)
+      if (!result.ok) {
+        setToast(submitFailureToast(result))
+        closeConfirm()
+        return
+      }
     }
-    closeConfirm()
-    bump()
-  }
 
-  function toggleRow(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  function toggleAllPage() {
-    const ids = pageRows.map((r) => r.id)
-    const allSelected = ids.every((id) => selectedIds.has(id))
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (allSelected) ids.forEach((id) => next.delete(id))
-      else ids.forEach((id) => next.add(id))
-      return next
-    })
+    setConfirmLoading(true)
+    try {
+      switch (confirmAction) {
+        case 'delete':
+          if (deletePurchaseOrder(id)) {
+            setToast('采购订单已删除')
+          }
+          break
+        case 'submit':
+          updateOrderStatus(id, 'PENDING_AUDIT')
+          setToast('已提交审核，等待审核确认')
+          break
+        case 'approve':
+          updateOrderStatus(id, 'PENDING_STOCK_IN', {
+            auditedBy: '林强',
+            auditedAt: ts,
+          })
+          setToast('审核通过')
+          break
+        case 'reject':
+          updateOrderStatus(id, 'DRAFT', { auditedBy: null, auditedAt: null })
+          setToast('已驳回，单据已退回草稿')
+          break
+        case 'void':
+          updateOrderStatus(id, 'VOIDED')
+          setToast('采购订单已作废')
+          break
+        case 'close':
+          updateOrderStatus(id, 'COMPLETED')
+          setToast('订单已关闭，剩余数量不再接收')
+          break
+        default:
+          break
+      }
+      closeConfirm()
+      bump()
+      actionRef.current?.reload()
+    } finally {
+      setConfirmLoading(false)
+    }
   }
 
   function handleExport() {
-    const count = selectedIds.size > 0 ? selectedIds.size : filtered.length
+    const count = selectedRowKeys.length > 0 ? selectedRowKeys.length : filterPurchaseOrders(applied, tab).length
     setToast(`导出成功，共导出 ${count} 条记录`)
   }
 
@@ -209,372 +226,397 @@ export function PurchaseOrderList() {
     },
   }
 
+  const columns: ProColumns<PurchaseOrder>[] = useMemo(
+    () => [
+      {
+        title: '采购单号',
+        dataIndex: 'orderNos',
+        hideInTable: true,
+        renderFormItem: () => (
+          <Input.TextArea
+            placeholder="多个单号换行或逗号分隔"
+            autoSize={{ minRows: 1, maxRows: 3 }}
+            allowClear
+          />
+        ),
+      },
+      {
+        title: '供应商',
+        dataIndex: 'supplierId',
+        hideInTable: true,
+        valueType: 'select',
+        fieldProps: {
+          allowClear: true,
+          showSearch: true,
+          optionFilterProp: 'label',
+          options: suppliers.map((s) => ({
+            label: partnerLabel(s.supplierCode, s.supplierName),
+            value: s.id,
+          })),
+        },
+      },
+      {
+        title: '入库仓库',
+        dataIndex: 'warehouseId',
+        hideInTable: true,
+        valueType: 'select',
+        fieldProps: {
+          allowClear: true,
+          showSearch: true,
+          optionFilterProp: 'label',
+          options: warehouses.map((w) => ({
+            label: partnerLabel(w.warehouseCode, w.warehouseName),
+            value: w.id,
+          })),
+        },
+      },
+      {
+        title: '订单状态',
+        dataIndex: 'status',
+        hideInTable: true,
+        hideInSearch: tab !== 'ALL',
+        valueType: 'select',
+        fieldProps: {
+          allowClear: true,
+          options: STATUS_FILTER_OPTIONS.filter((o) => o.value !== '').map((o) => ({
+            label: o.label,
+            value: o.value,
+          })),
+        },
+      },
+      {
+        title: '下单日期起',
+        dataIndex: 'orderDateFrom',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '下单日期止',
+        dataIndex: 'orderDateTo',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '预计到货起',
+        dataIndex: 'expectedDateFrom',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '预计到货止',
+        dataIndex: 'expectedDateTo',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '最后修改起',
+        dataIndex: 'updatedFrom',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '最后修改止',
+        dataIndex: 'updatedTo',
+        hideInTable: true,
+        valueType: 'date',
+      },
+      {
+        title: '采购单号',
+        dataIndex: 'orderNo',
+        width: 150,
+        fixed: 'left',
+        copyable: true,
+        search: false,
+        render: (_, row) => (
+          <Link to={`/purchase/orders/${row.id}`}>{row.orderNo}</Link>
+        ),
+      },
+      {
+        title: '订单状态',
+        dataIndex: 'status',
+        width: 120,
+        search: false,
+        render: (_, row) => <PurchaseOrderStatusTag status={row.status} />,
+      },
+      {
+        title: '供应商',
+        dataIndex: 'supplierName',
+        ellipsis: true,
+        search: false,
+        render: (_, row) => partnerLabel(row.supplierCode, row.supplierName),
+      },
+      {
+        title: '入库仓库',
+        dataIndex: 'warehouseName',
+        ellipsis: true,
+        search: false,
+        render: (_, row) => partnerLabel(row.warehouseCode, row.warehouseName),
+      },
+      { title: '下单日期', dataIndex: 'orderDate', width: 110, search: false },
+      {
+        title: '预计到货日期',
+        dataIndex: 'expectedArrivalDate',
+        width: 120,
+        search: false,
+        render: (_, row) => row.expectedArrivalDate ?? '-',
+      },
+      {
+        title: '商品种数',
+        dataIndex: 'skuCount',
+        width: 90,
+        search: false,
+        render: (_, row) => `${row.skuCount} 种`,
+      },
+      {
+        title: '采购总金额',
+        dataIndex: 'totalAmount',
+        width: 120,
+        align: 'right',
+        search: false,
+        render: (_, row) => formatYuan(row.totalAmount),
+      },
+      {
+        title: '最后修改时间',
+        dataIndex: 'updatedAt',
+        width: 170,
+        search: false,
+        render: (_, row) => formatDateTime(row.updatedAt),
+      },
+      {
+        title: '操作',
+        valueType: 'option',
+        width: 300,
+        fixed: 'right',
+        search: false,
+        render: (_, row) => (
+          <TableRowActions
+            items={buildPurchaseOrderRowActions(row, navigate, openConfirm, createInbound)}
+          />
+        ),
+      },
+    ],
+    [tab, suppliers, warehouses, navigate],
+  )
+
   return (
-    <div className="space-y-4" data-anno="purchase-order-list">
-      <div>
-        <p className="text-sm text-muted-foreground">采购管理 / 采购订单</p>
-        <h2 className="text-xl font-semibold tracking-tight">采购订单</h2>
+    <PageContainer title="采购订单" data-anno="purchase-order-list">
+      <div data-anno="purchase-order-tabs">
+        <Tabs
+          activeKey={tab}
+          onChange={(key) => {
+            setTab(key as typeof tab)
+            setSelectedRowKeys([])
+            actionRef.current?.reload()
+          }}
+          items={STATUS_TABS.map((t) => ({
+            key: t.key,
+            label: `${t.label} ${tabCountLabel(tabCounts[t.key])}`,
+          }))}
+          style={{ marginBottom: 0 }}
+        />
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b pb-1" data-anno="purchase-order-tabs">
-        {STATUS_TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            className={`rounded-t-lg px-3 py-2 text-sm ${
-              tab === t.key
-                ? 'border border-b-0 bg-card font-medium'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            onClick={() => {
-              setTab(t.key)
-              setPage(1)
-            }}
-          >
-            {t.label} {tabCountLabel(tabCounts[t.key])}
-          </button>
-        ))}
+      <div data-anno="purchase-order-filters">
+        <ProTable<PurchaseOrder>
+          actionRef={actionRef}
+          rowKey="id"
+          columns={columns}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
+          cardProps={{
+            'data-anno': 'purchase-order-table',
+          } as HTMLAttributes<HTMLDivElement>}
+          params={{ tab, refreshKey }}
+          request={async (params) => {
+            const nextApplied = paramsToFilters(params)
+            setApplied(nextApplied)
+            const filtered = filterPurchaseOrders(nextApplied, tab)
+            const current = params.current ?? 1
+            const pageSize = params.pageSize ?? 20
+            const start = (current - 1) * pageSize
+            return {
+              data: filtered.slice(start, start + pageSize),
+              success: true,
+              total: filtered.length,
+            }
+          }}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (keys) => setSelectedRowKeys(keys as string[]),
+          }}
+          toolBarRender={() => [
+            <Space key="toolbar" data-anno="purchase-order-list-toolbar" size="middle">
+              <Button type="primary" onClick={() => navigate('/purchase/orders/new')}>
+                新增
+              </Button>
+              <Button variant="outline" onClick={handleExport}>
+                导出
+              </Button>
+            </Space>,
+          ]}
+          pagination={{
+            defaultPageSize: 20,
+            showSizeChanger: true,
+            pageSizeOptions: [20, 50, 100],
+          }}
+          scroll={{ x: 1100 }}
+          options={false}
+          columnEmptyText="暂无数据"
+        />
       </div>
-
-      <section className="rounded-xl border bg-card p-4" data-anno="purchase-order-filters">
-        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">
-          <label className="grid gap-1 text-sm md:col-span-2">
-            <span className="text-muted-foreground">采购单号</span>
-            <textarea
-              className="min-h-9 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              placeholder="多个单号换行或逗号分隔"
-              rows={1}
-              value={filters.orderNos}
-              onChange={(e) => setFilters((f) => ({ ...f, orderNos: e.target.value }))}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">供应商</span>
-            <select
-              className="h-9 rounded-lg border bg-background px-3 text-sm"
-              value={filters.supplierId}
-              onChange={(e) => setFilters((f) => ({ ...f, supplierId: e.target.value }))}
-            >
-              <option value="">全部</option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {partnerLabel(s.supplierCode, s.supplierName)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">入库仓库</span>
-            <select
-              className="h-9 rounded-lg border bg-background px-3 text-sm"
-              value={filters.warehouseId}
-              onChange={(e) => setFilters((f) => ({ ...f, warehouseId: e.target.value }))}
-            >
-              <option value="">全部</option>
-              {warehouses.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {partnerLabel(w.warehouseCode, w.warehouseName)}
-                </option>
-              ))}
-            </select>
-          </label>
-          {tab === 'ALL' ? (
-            <label className="grid gap-1 text-sm">
-              <span className="text-muted-foreground">订单状态</span>
-              <select
-                className="h-9 rounded-lg border bg-background px-3 text-sm"
-                value={filters.status}
-                onChange={(e) =>
-                  setFilters((f) => ({
-                    ...f,
-                    status: e.target.value as PurchaseOrderListFilters['status'],
-                  }))
-                }
-              >
-                {STATUS_FILTER_OPTIONS.map((o) => (
-                  <option key={o.label} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">下单日期起</span>
-            <input
-              type="date"
-              className="h-9 rounded-lg border bg-background px-3 text-sm"
-              value={filters.orderDateFrom}
-              onChange={(e) => setFilters((f) => ({ ...f, orderDateFrom: e.target.value }))}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">下单日期止</span>
-            <input
-              type="date"
-              className="h-9 rounded-lg border bg-background px-3 text-sm"
-              value={filters.orderDateTo}
-              onChange={(e) => setFilters((f) => ({ ...f, orderDateTo: e.target.value }))}
-            />
-          </label>
-          {expanded ? (
-            <>
-              <label className="grid gap-1 text-sm">
-                <span className="text-muted-foreground">预计到货起</span>
-                <input
-                  type="date"
-                  className="h-9 rounded-lg border bg-background px-3 text-sm"
-                  value={filters.expectedDateFrom}
-                  onChange={(e) => setFilters((f) => ({ ...f, expectedDateFrom: e.target.value }))}
-                />
-              </label>
-              <label className="grid gap-1 text-sm">
-                <span className="text-muted-foreground">预计到货止</span>
-                <input
-                  type="date"
-                  className="h-9 rounded-lg border bg-background px-3 text-sm"
-                  value={filters.expectedDateTo}
-                  onChange={(e) => setFilters((f) => ({ ...f, expectedDateTo: e.target.value }))}
-                />
-              </label>
-              <label className="grid gap-1 text-sm">
-                <span className="text-muted-foreground">最后修改起</span>
-                <input
-                  type="date"
-                  className="h-9 rounded-lg border bg-background px-3 text-sm"
-                  value={filters.updatedFrom}
-                  onChange={(e) => setFilters((f) => ({ ...f, updatedFrom: e.target.value }))}
-                />
-              </label>
-              <label className="grid gap-1 text-sm">
-                <span className="text-muted-foreground">最后修改止</span>
-                <input
-                  type="date"
-                  className="h-9 rounded-lg border bg-background px-3 text-sm"
-                  value={filters.updatedTo}
-                  onChange={(e) => setFilters((f) => ({ ...f, updatedTo: e.target.value }))}
-                />
-              </label>
-            </>
-          ) : null}
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={() => setExpanded((e) => !e)}>
-            {expanded ? '收起' : '展开'}
-          </Button>
-          <Button type="button" variant="outline" size="sm" onClick={handleReset}>
-            重置
-          </Button>
-          <Button type="button" size="sm" onClick={handleSearch}>
-            搜索
-          </Button>
-        </div>
-      </section>
-
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex gap-2">
-          <Button type="button" onClick={() => navigate('/purchase/orders/new')}>
-            新增
-          </Button>
-          <Button type="button" variant="outline" onClick={handleExport}>
-            导出
-          </Button>
-        </div>
-      </div>
-
-      <section className="overflow-hidden rounded-xl border bg-card" data-anno="purchase-order-table">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-                <th className="sticky left-0 z-10 bg-muted/40 px-2 py-2.5 w-12">
-                  <input
-                    type="checkbox"
-                    checked={pageRows.length > 0 && pageRows.every((r) => selectedIds.has(r.id))}
-                    onChange={toggleAllPage}
-                  />
-                </th>
-                <th className="sticky left-12 z-10 bg-muted/40 px-3 py-2.5 font-medium">采购单号</th>
-                <th className="px-3 py-2.5 font-medium">订单状态</th>
-                <th className="px-3 py-2.5 font-medium">供应商</th>
-                <th className="px-3 py-2.5 font-medium">入库仓库</th>
-                <th className="px-3 py-2.5 font-medium">下单日期</th>
-                <th className="px-3 py-2.5 font-medium">预计到货日期</th>
-                <th className="px-3 py-2.5 font-medium">商品种数</th>
-                <th className="px-3 py-2.5 font-medium">采购总金额</th>
-                <th className="px-3 py-2.5 font-medium">最后修改时间</th>
-                <th className="sticky right-0 bg-muted/40 px-3 py-2.5 font-medium shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageRows.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="px-3 py-12 text-center text-muted-foreground">
-                    暂无数据
-                  </td>
-                </tr>
-              ) : (
-                pageRows.map((row) => (
-                  <tr key={row.id} className="border-b hover:bg-muted/20">
-                    <td className="sticky left-0 bg-card px-2 py-2.5">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(row.id)}
-                        onChange={() => toggleRow(row.id)}
-                      />
-                    </td>
-                    <td className="sticky left-12 bg-card px-3 py-2.5 font-mono text-xs">
-                      <Link
-                        to={`/purchase/orders/${row.id}`}
-                        className="text-primary underline-offset-4 hover:underline"
-                      >
-                        {row.orderNo}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <PurchaseOrderStatusTag status={row.status} />
-                    </td>
-                    <td className="px-3 py-2.5">
-                      {partnerLabel(row.supplierCode, row.supplierName)}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      {partnerLabel(row.warehouseCode, row.warehouseName)}
-                    </td>
-                    <td className="px-3 py-2.5">{row.orderDate}</td>
-                    <td className="px-3 py-2.5">{row.expectedArrivalDate ?? '-'}</td>
-                    <td className="px-3 py-2.5">{row.skuCount} 种</td>
-                    <td className="px-3 py-2.5 text-right">{formatYuan(row.totalAmount)}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
-                      {formatDateTime(row.updatedAt)}
-                    </td>
-                    <td className="sticky right-0 bg-card px-3 py-2.5 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.06)]">
-                      <RowActions row={row} onConfirm={openConfirm} onInbound={createInbound} />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-sm text-muted-foreground">
-          <span>
-            共 {filtered.length} 条，第 {pageSafe} / {totalPages} 页
-          </span>
-          <div className="flex items-center gap-2">
-            <select
-              className="h-8 rounded border bg-background px-2 text-sm"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value))
-                setPage(1)
-              }}
-            >
-              {[20, 50, 100].map((n) => (
-                <option key={n} value={n}>
-                  {n} 条/页
-                </option>
-              ))}
-            </select>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={pageSafe <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              上一页
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={pageSafe >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              下一页
-            </Button>
-          </div>
-        </div>
-      </section>
 
       <Modal
         open={Boolean(confirmTarget && confirmAction)}
         title={confirmAction ? confirmCopy[confirmAction].title : ''}
         confirmLabel={confirmAction ? confirmCopy[confirmAction].ok : '确认'}
         confirmVariant={confirmAction === 'delete' || confirmAction === 'void' ? 'destructive' : 'default'}
+        confirmDisabled={confirmLoading}
         onClose={closeConfirm}
         onConfirm={runConfirm}
       >
-        <p className="text-sm text-muted-foreground">
-          {confirmAction ? confirmCopy[confirmAction].body : ''}
-        </p>
+        <Typography.Text type="secondary">
+          {confirmAction && confirmTarget
+            ? confirmAction === 'close'
+              ? closeOrderConfirmBody(confirmTarget)
+              : confirmCopy[confirmAction].body
+            : ''}
+        </Typography.Text>
       </Modal>
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }
 
-function RowActions({
-  row,
-  onConfirm,
-  onInbound,
-}: {
-  row: PurchaseOrder
-  onConfirm: (order: PurchaseOrder, action: ConfirmAction) => void
-  onInbound: (order: PurchaseOrder) => void
-}) {
+function buildPurchaseOrderRowActions(
+  row: PurchaseOrder,
+  navigate: ReturnType<typeof useNavigate>,
+  onConfirm: (order: PurchaseOrder, action: ConfirmAction) => void,
+  onInbound: (order: PurchaseOrder) => void,
+): ReactNode[] {
   const s = row.status
-  const link = (label: string, to: string) => (
-    <Link to={to} className="text-primary hover:underline">
-      {label}
-    </Link>
-  )
-  const btn = (label: string, action: ConfirmAction) => (
-    <button
-      type="button"
-      className={action === 'delete' || action === 'void' ? 'text-destructive hover:underline' : 'text-primary hover:underline'}
-      onClick={() => onConfirm(row, action)}
-    >
-      {label}
-    </button>
-  )
+  const linkStyle = tableActionLinkStyle
 
-  return (
-    <div className="flex flex-wrap gap-x-2 gap-y-1 text-sm">
-      {link('查看', `/purchase/orders/${row.id}`)}
-      {s === 'DRAFT' && (
-        <>
-          {link('编辑', `/purchase/orders/${row.id}/edit`)}
-          {btn('提交审核', 'submit')}
-          {btn('删除', 'delete')}
-        </>
-      )}
-      {s === 'PENDING_AUDIT' && (
-        <>
-          {btn('审核', 'approve')}
-          {btn('驳回', 'reject')}
-          {btn('作废', 'void')}
-        </>
-      )}
-      {s === 'PENDING_STOCK_IN' && (
-        <>
-          <button type="button" className="text-primary hover:underline" onClick={() => onInbound(row)}>
-            创建入库单
-          </button>
-          {btn('作废', 'void')}
-        </>
-      )}
-      {s === 'PARTIAL_STOCK_IN' && (
-        <>
-          <button type="button" className="text-primary hover:underline" onClick={() => onInbound(row)}>
-            创建入库单
-          </button>
-          {btn('关闭订单', 'close')}
-        </>
-      )}
-    </div>
-  )
+  const items: ReactNode[] = [
+    <Button
+      key="view"
+      type="link"
+      size="small"
+      style={linkStyle}
+      onClick={() => navigate(`/purchase/orders/${row.id}`)}
+    >
+      查看
+    </Button>,
+  ]
+
+  if (s === 'DRAFT') {
+    items.push(
+      <Button
+        key="edit"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => navigate(`/purchase/orders/${row.id}/edit`)}
+      >
+        编辑
+      </Button>,
+      <Button
+        key="submit"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'submit')}
+      >
+        提交审核
+      </Button>,
+      <Button
+        key="delete"
+        type="link"
+        size="small"
+        danger
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'delete')}
+      >
+        删除
+      </Button>,
+    )
+  }
+  if (s === 'PENDING_AUDIT') {
+    items.push(
+      <Button
+        key="approve"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'approve')}
+      >
+        审核
+      </Button>,
+      <Button
+        key="reject"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'reject')}
+      >
+        驳回
+      </Button>,
+      <Button
+        key="void"
+        type="link"
+        size="small"
+        danger
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'void')}
+      >
+        作废
+      </Button>,
+    )
+  }
+  if (s === 'PENDING_STOCK_IN') {
+    items.push(
+      <Button
+        key="inbound"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onInbound(row)}
+      >
+        创建入库单
+      </Button>,
+      <Button
+        key="void"
+        type="link"
+        size="small"
+        danger
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'void')}
+      >
+        作废
+      </Button>,
+    )
+  }
+  if (s === 'PARTIAL_STOCK_IN') {
+    items.push(
+      <Button
+        key="inbound"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onInbound(row)}
+      >
+        创建入库单
+      </Button>,
+      <Button
+        key="close"
+        type="link"
+        size="small"
+        style={linkStyle}
+        onClick={() => onConfirm(row, 'close')}
+      >
+        关闭订单
+      </Button>,
+    )
+  }
+
+  return items
 }

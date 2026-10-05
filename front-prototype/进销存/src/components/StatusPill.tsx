@@ -1,19 +1,5 @@
-import { cn } from '@/lib/utils'
+import { Tag } from 'antd'
 import type { ProductStatus } from '@/features/products/types'
-
-const statusConfig: Record<
-  ProductStatus,
-  { label: string; className: string }
-> = {
-  ENABLED: {
-    label: '启用',
-    className: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  },
-  DISABLED: {
-    label: '停用',
-    className: 'bg-muted text-muted-foreground ring-border',
-  },
-}
 
 type StatusPillProps = {
   status: ProductStatus
@@ -22,18 +8,10 @@ type StatusPillProps = {
   disabledLabel?: string
 }
 
-export function StatusPill({ status, className, disabledLabel }: StatusPillProps) {
-  const config = statusConfig[status]
-  const label = status === 'DISABLED' && disabledLabel ? disabledLabel : config.label
+export function StatusPill({ status, disabledLabel }: StatusPillProps) {
+  const label =
+    status === 'DISABLED' ? (disabledLabel ?? '停用') : '启用'
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-        config.className,
-        className,
-      )}
-    >
-      {label}
-    </span>
+    <Tag color={status === 'ENABLED' ? 'success' : 'default'}>{label}</Tag>
   )
 }

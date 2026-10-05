@@ -1,22 +1,21 @@
-import { cn } from '@/lib/utils'
-import { STATUS_LABEL, STATUS_TAG_CLASS } from '@/features/purchaseOrders/constants'
+import { Tag } from 'antd'
+import { STATUS_LABEL } from '@/features/purchaseOrders/constants'
 import type { PurchaseOrderStatus } from '@/features/purchaseOrders/types'
+
+const STATUS_TAG_COLOR: Record<PurchaseOrderStatus, string> = {
+  DRAFT: 'default',
+  PENDING_AUDIT: 'orange',
+  PENDING_STOCK_IN: 'blue',
+  PARTIAL_STOCK_IN: 'cyan',
+  COMPLETED: 'green',
+  VOIDED: 'red',
+}
 
 type PurchaseOrderStatusTagProps = {
   status: PurchaseOrderStatus
   className?: string
 }
 
-export function PurchaseOrderStatusTag({ status, className }: PurchaseOrderStatusTagProps) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-        STATUS_TAG_CLASS[status],
-        className,
-      )}
-    >
-      {STATUS_LABEL[status]}
-    </span>
-  )
+export function PurchaseOrderStatusTag({ status }: PurchaseOrderStatusTagProps) {
+  return <Tag color={STATUS_TAG_COLOR[status]}>{STATUS_LABEL[status]}</Tag>
 }

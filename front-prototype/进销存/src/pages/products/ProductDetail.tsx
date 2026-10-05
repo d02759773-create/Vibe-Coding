@@ -1,8 +1,11 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PageContainer } from '@ant-design/pro-components'
+import { Space, Typography } from 'antd'
 import { Button } from '@/components/ui/button'
+import { DetailFieldRow, DetailSection } from '@/components/detail/DetailSection'
 import { StatusPill } from '@/components/StatusPill'
-import { Modal } from '@/components/Modal'
+import { EnableDisableModal } from '@/components/master/EnableDisableModal'
 import { Toast } from '@/components/Toast'
 import { salesUnitLabel } from '@/features/products/constants'
 import { displayValue, formatDateTime, formatMoney } from '@/features/products/format'
@@ -17,24 +20,6 @@ function nowString(): string {
   const d = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
-}
-
-function FieldRow({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="grid gap-1 border-b border-dashed py-3 last:border-b-0 sm:grid-cols-[140px_1fr]">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm">{value}</dd>
-    </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-xl border bg-card">
-      <h3 className="border-b px-4 py-3 text-sm font-semibold">{title}</h3>
-      <dl className="px-4">{children}</dl>
-    </section>
-  )
 }
 
 export function ProductDetail() {
@@ -53,12 +38,14 @@ export function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">未找到商品档案。</p>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/products')}>
-          返回列表
-        </Button>
-      </div>
+      <PageContainer title="商品详情">
+        <Typography.Text type="secondary">未找到商品档案。</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Button type="button" variant="outline" onClick={() => navigate('/master/products')}>
+            返回列表
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
@@ -118,16 +105,12 @@ export function ProductDetail() {
     product.status === 'DISABLED' ? displayValue(product.disableReason) : '-'
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-xl font-semibold tracking-tight">商品详情</h2>
-            <StatusPill status={product.status} />
-          </div>
-          <p className="font-mono text-sm text-muted-foreground">{product.productCode}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <PageContainer
+      title="商品详情"
+      subTitle={product.productCode}
+      tags={<StatusPill status={product.status} />}
+      extra={
+        <Space wrap>
           <Button type="button" variant="outline" onClick={() => navigate('/master/products')}>
             返回列表
           </Button>
@@ -147,78 +130,62 @@ export function ProductDetail() {
               启用
             </Button>
           )}
-        </div>
-      </div>
+        </Space>
+      }
+    >
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <DetailSection title="基础资料">
+          <DetailFieldRow label="商品编码" value={product.productCode} />
+          <DetailFieldRow label="商品名称" value={product.productName} />
+          <DetailFieldRow label="商品分类" value={product.category} />
+          <DetailFieldRow label="规格型号" value={product.specModel} />
+          <DetailFieldRow label="销售单位" value={salesUnitLabel(product.salesUnit)} />
+          <DetailFieldRow label="条码" value={displayValue(product.barcode)} />
+        </DetailSection>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Section title="基础资料">
-          <FieldRow label="商品编码" value={product.productCode} />
-          <FieldRow label="商品名称" value={product.productName} />
-          <FieldRow label="商品分类" value={product.category} />
-          <FieldRow label="规格型号" value={product.specModel} />
-          <FieldRow label="销售单位" value={salesUnitLabel(product.salesUnit)} />
-          <FieldRow label="条码" value={displayValue(product.barcode)} />
-        </Section>
-
-        <Section title="价格与说明">
-          <FieldRow label="默认零售价" value={formatMoney(product.defaultRetailPrice)} />
-          <FieldRow label="默认批发价" value={formatMoney(product.defaultWholesalePrice)} />
-          <FieldRow
+        <DetailSection title="价格与说明">
+          <DetailFieldRow label="默认零售价" value={formatMoney(product.defaultRetailPrice)} />
+          <DetailFieldRow label="默认批发价" value={formatMoney(product.defaultWholesalePrice)} />
+          <DetailFieldRow
             label="参考采购价"
             value={formatMoney(product.referencePurchasePrice)}
           />
-          <FieldRow label="商品备注" value={displayValue(product.remark)} />
-        </Section>
+          <DetailFieldRow label="商品备注" value={displayValue(product.remark)} />
+        </DetailSection>
 
-        <Section title="补充信息">
-          <FieldRow label="停用原因" value={disableReasonDisplay} />
-        </Section>
+        <DetailSection title="补充信息">
+          <DetailFieldRow label="停用原因" value={disableReasonDisplay} />
+        </DetailSection>
 
-        <Section title="系统信息">
-          <FieldRow label="创建人" value={product.createdBy} />
-          <FieldRow label="创建时间" value={formatDateTime(product.createdAt)} />
-          <FieldRow label="最后修改人" value={product.updatedBy} />
-          <FieldRow label="最后修改时间" value={formatDateTime(product.updatedAt)} />
-        </Section>
-      </div>
+        <DetailSection title="系统信息">
+          <DetailFieldRow label="创建人" value={product.createdBy} />
+          <DetailFieldRow label="创建时间" value={formatDateTime(product.createdAt)} />
+          <DetailFieldRow label="最后修改人" value={product.updatedBy} />
+          <DetailFieldRow label="最后修改时间" value={formatDateTime(product.updatedAt)} />
+        </DetailSection>
+      </Space>
 
-      <Modal
+      <EnableDisableModal
         open={statusAction !== null}
-        title={statusAction === 'disable' ? '确认停用商品？' : '确认启用商品？'}
-        confirmLabel={statusAction === 'disable' ? '确认停用' : '确认启用'}
-        confirmVariant={statusAction === 'disable' ? 'destructive' : 'default'}
+        mode={statusAction ?? 'disable'}
+        entityLabel="商品"
+        maxReasonLength={100}
+        disableReason={disableReason}
+        disableReasonError={disableReasonError}
+        enableHint="启用后商品可再次被下游单据引用。"
+        onReasonChange={(v) => {
+          setDisableReason(v)
+          if (disableReasonError) setDisableReasonError('')
+        }}
         onClose={() => {
           setStatusAction(null)
           setDisableReason('')
           setDisableReasonError('')
         }}
         onConfirm={confirmStatusChange}
-      >
-        {statusAction === 'disable' ? (
-          <label className="grid gap-1 text-sm">
-            <span>
-              停用原因 <span className="text-destructive">*</span>
-            </span>
-            <textarea
-              className="min-h-24 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              maxLength={100}
-              value={disableReason}
-              onChange={(e) => {
-                setDisableReason(e.target.value)
-                if (disableReasonError) setDisableReasonError('')
-              }}
-              aria-invalid={Boolean(disableReasonError)}
-            />
-            {disableReasonError ? (
-              <span className="text-xs text-destructive">{disableReasonError}</span>
-            ) : null}
-          </label>
-        ) : (
-          <p className="text-sm text-muted-foreground">启用后商品可再次被下游单据引用。</p>
-        )}
-      </Modal>
+      />
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }

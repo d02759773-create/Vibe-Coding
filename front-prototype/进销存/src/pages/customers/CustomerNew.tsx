@@ -1,7 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  PageContainer,
+  ProForm,
+  ProFormDependency,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  type ProFormInstance,
+} from '@ant-design/pro-components'
+import { Card, Space, Typography } from 'antd'
 import { Button } from '@/components/ui/button'
 import { Toast } from '@/components/Toast'
+import {
+  MasterFormCol,
+  MasterFormSection,
+  masterFormColFull,
+  masterFormControlProps,
+} from '@/lib/masterFormLayout'
 import {
   CUSTOMER_CODE_MAX_LENGTH,
   CUSTOMER_CODE_MIN_LENGTH,
@@ -29,7 +45,7 @@ import type {
 } from '@/features/customers/types'
 import { formatDateTime } from '@/features/products/format'
 
-type FormState = {
+type FormValues = {
   customerCode: string
   customerName: string
   customerType: CustomerType | ''
@@ -49,9 +65,7 @@ type FormState = {
   remark: string
 }
 
-type FieldErrors = Partial<Record<keyof FormState, string>>
-
-const emptyForm: FormState = {
+const emptyForm: FormValues = {
   customerCode: '',
   customerName: '',
   customerType: '',
@@ -77,7 +91,7 @@ function nowString(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function customerToForm(c: Customer): FormState {
+function customerToForm(c: Customer): FormValues {
   return {
     customerCode: c.customerCode,
     customerName: c.customerName,
@@ -99,202 +113,95 @@ function customerToForm(c: Customer): FormState {
   }
 }
 
-function parseMoneyField(raw: string, fieldLabel: string, errors: FieldErrors, key: keyof FormState) {
+function parseMoneyField(raw: string, fieldLabel: string): number | null {
   const trimmed = raw.trim()
   if (!trimmed) return 0
   if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) {
-    errors[key] = `${fieldLabel}格式不正确`
-    return null
+    throw new Error(`${fieldLabel}格式不正确`)
   }
   const n = Number(trimmed)
-  if (n < 0) {
-    errors[key] = `${fieldLabel}不能为负数`
-    return null
-  }
+  if (n < 0) throw new Error(`${fieldLabel}不能为负数`)
   return Math.round(n * 100) / 100
-}
-
-function inputClass(invalid?: boolean) {
-  return [
-    'h-9 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-    invalid ? 'border-destructive' : '',
-  ].join(' ')
-}
-
-function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="rounded-xl border bg-card p-4">
-      <h3 className="mb-4 text-sm font-semibold">{title}</h3>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
-    </section>
-  )
 }
 
 function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const formRef = useRef<ProFormInstance<FormValues>>(null)
   const existing = useMemo(() => (isEdit && id ? getCustomerById(id) : undefined), [isEdit, id])
-
-  const [form, setForm] = useState<FormState>(() =>
-    existing ? customerToForm(existing) : emptyForm,
-  )
-  const [errors, setErrors] = useState<FieldErrors>({})
   const [toast, setToast] = useState<string | null>(null)
 
-  const cityOptions = useMemo(() => citiesOfProvince(form.province), [form.province])
-  const districtOptions = useMemo(
-    () => districtsOf(form.province, form.city),
-    [form.province, form.city],
+  const initialValues = useMemo(
+    () => (existing ? customerToForm(existing) : emptyForm),
+    [existing],
   )
 
   if (isEdit && !existing) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">未找到客户档案。</p>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
-          返回列表
-        </Button>
-      </div>
+      <PageContainer title="编辑客户">
+        <Typography.Text type="secondary">未找到客户档案。</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
+            返回列表
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
-  const codeReadOnly = isEdit && existing?.isReferenced
-  const paymentTermReadOnly = form.settlementMethod === 'CASH'
+  const codeReadOnly = Boolean(isEdit && existing?.isReferenced)
 
-  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => {
-      const next = { ...prev, [key]: value }
-      if (key === 'province') {
-        next.city = ''
-        next.district = ''
-      }
-      if (key === 'city') {
-        next.district = ''
-      }
-      if (key === 'settlementMethod' && value === 'CASH') {
-        next.paymentTermDays = '0'
-      }
-      return next
-    })
-    setErrors((prev) => {
-      if (!prev[key]) return prev
-      const next = { ...prev }
-      delete next[key]
-      return next
-    })
-  }
-
-  function validate(): FieldErrors {
-    const next: FieldErrors = {}
-    const code = form.customerCode.trim()
-    const name = form.customerName.trim()
-
-    if (!code) next.customerCode = '客户编码不能为空'
-    else if (code.length < CUSTOMER_CODE_MIN_LENGTH || code.length > CUSTOMER_CODE_MAX_LENGTH) {
-      next.customerCode = `客户编码须为 ${CUSTOMER_CODE_MIN_LENGTH}–${CUSTOMER_CODE_MAX_LENGTH} 个字符`
-    } else if (!codeReadOnly) {
-      const dup = getCustomerByCode(code, existing?.id)
-      if (dup) next.customerCode = '客户编码已存在'
-    }
-
-    if (!name) next.customerName = '客户名称不能为空'
-    else if (name.length > 100) next.customerName = '客户名称最多 100 个字符'
-
-    if (!form.customerType) next.customerType = '请选择客户类型'
-    if (!form.customerGrade) next.customerGrade = '请选择客户等级'
-
-    if (!form.contactName.trim()) next.contactName = '联系人不能为空'
-    else if (form.contactName.trim().length > 20) next.contactName = '联系人最多 20 个字符'
-
-    const phone = form.contactPhone.trim()
-    if (!phone) next.contactPhone = '联系电话不能为空'
-    else if (phone.length > 20) next.contactPhone = '联系电话最多 20 个字符'
-    else if (!isValidContactPhone(phone)) next.contactPhone = '请输入有效的手机号或座机号'
-
-    if (!form.province) next.province = '请选择省份'
-    if (!form.city) next.city = '请选择城市'
-    if (!form.district) next.district = '请选择区/县'
-
-    if (form.detailAddress.length > 200) next.detailAddress = '详细地址最多 200 个字符'
-
-    if (!form.settlementMethod) next.settlementMethod = '请选择结算方式'
-
-    if (form.settlementMethod === 'ACCOUNT') {
-      const termRaw = form.paymentTermDays.trim()
-      if (!termRaw) next.paymentTermDays = '请填写账期天数'
-      else if (!/^\d+$/.test(termRaw)) next.paymentTermDays = '账期天数须为 0-365 的整数'
-      else {
-        const days = Number(termRaw)
-        if (days < 0 || days > 365) next.paymentTermDays = '账期天数须为 0-365 的整数'
-      }
-    }
-
-    parseMoneyField(form.openingArrears, '期初欠款', next, 'openingArrears')
-    parseMoneyField(form.openingBalance, '期初余额', next, 'openingBalance')
-    parseMoneyField(form.creditLimit, '信用额度', next, 'creditLimit')
-
-    if (form.remark.length > 200) next.remark = '客户备注最多 200 个字符'
-
-    return next
-  }
-
-  function handleSubmit() {
-    const nextErrors = validate()
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors)
-      return
-    }
-
-    const openingArrears = parseMoneyField(form.openingArrears, '期初欠款', {}, 'openingArrears') ?? 0
-    const openingBalance = parseMoneyField(form.openingBalance, '期初余额', {}, 'openingBalance') ?? 0
-    const creditLimit = parseMoneyField(form.creditLimit, '信用额度', {}, 'creditLimit') ?? 0
+  async function handleFinish(values: FormValues) {
+    const openingArrears = parseMoneyField(values.openingArrears, '期初欠款') ?? 0
+    const openingBalance = parseMoneyField(values.openingBalance, '期初余额') ?? 0
+    const creditLimit = parseMoneyField(values.creditLimit, '信用额度') ?? 0
     const paymentTermDays =
-      form.settlementMethod === 'CASH' ? 0 : Number(form.paymentTermDays.trim())
+      values.settlementMethod === 'CASH' ? 0 : Number(String(values.paymentTermDays).trim())
     const timestamp = nowString()
 
     if (isEdit && existing) {
       upsertCustomer({
         ...existing,
-        customerCode: existing.isReferenced ? existing.customerCode : form.customerCode.trim(),
-        customerName: form.customerName.trim(),
-        customerType: form.customerType as CustomerType,
-        customerGrade: form.customerGrade as CustomerGrade,
-        contactName: form.contactName.trim(),
-        contactPhone: form.contactPhone.trim(),
-        province: form.province,
-        city: form.city,
-        district: form.district,
-        detailAddress: form.detailAddress.trim() || null,
-        salesperson: form.salesperson.trim() || null,
+        customerCode: existing.isReferenced ? existing.customerCode : values.customerCode.trim(),
+        customerName: values.customerName.trim(),
+        customerType: values.customerType as CustomerType,
+        customerGrade: values.customerGrade as CustomerGrade,
+        contactName: values.contactName.trim(),
+        contactPhone: values.contactPhone.trim(),
+        province: values.province,
+        city: values.city,
+        district: values.district,
+        detailAddress: values.detailAddress.trim() || null,
+        salesperson: values.salesperson.trim() || null,
         openingArrears,
         openingBalance,
-        settlementMethod: form.settlementMethod as SettlementMethod,
+        settlementMethod: values.settlementMethod as SettlementMethod,
         paymentTermDays,
         creditLimit,
-        remark: form.remark.trim() || null,
+        remark: values.remark.trim() || null,
         updatedBy: '管理员',
         updatedAt: timestamp,
       })
     } else {
       upsertCustomer({
         id: nextCustomerId(),
-        customerCode: form.customerCode.trim(),
-        customerName: form.customerName.trim(),
-        customerType: form.customerType as CustomerType,
-        customerGrade: form.customerGrade as CustomerGrade,
-        contactName: form.contactName.trim(),
-        contactPhone: form.contactPhone.trim(),
-        province: form.province,
-        city: form.city,
-        district: form.district,
-        detailAddress: form.detailAddress.trim() || null,
-        salesperson: form.salesperson.trim() || null,
+        customerCode: values.customerCode.trim(),
+        customerName: values.customerName.trim(),
+        customerType: values.customerType as CustomerType,
+        customerGrade: values.customerGrade as CustomerGrade,
+        contactName: values.contactName.trim(),
+        contactPhone: values.contactPhone.trim(),
+        province: values.province,
+        city: values.city,
+        district: values.district,
+        detailAddress: values.detailAddress.trim() || null,
+        salesperson: values.salesperson.trim() || null,
         openingArrears,
         openingBalance,
-        settlementMethod: form.settlementMethod as SettlementMethod,
+        settlementMethod: values.settlementMethod as SettlementMethod,
         paymentTermDays,
         creditLimit,
-        remark: form.remark.trim() || null,
+        remark: values.remark.trim() || null,
         status: 'ENABLED',
         disableReason: null,
         isReferenced: false,
@@ -311,324 +218,295 @@ function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold tracking-tight">{isEdit ? '编辑客户' : '新增客户'}</h2>
-        <div className="flex gap-2">
+    <PageContainer
+      title={isEdit ? '编辑客户' : '新增客户'}
+      extra={
+        <Space>
           <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
             返回列表
           </Button>
-          <Button type="button" onClick={handleSubmit}>
+          <Button type="button" onClick={() => formRef.current?.submit()}>
             保存
           </Button>
-        </div>
-      </div>
+        </Space>
+      }
+    >
+      <ProForm<FormValues>
+        formRef={formRef}
+        initialValues={initialValues}
+        layout="vertical"
+        submitter={false}
+        onFinish={handleFinish}
+        onValuesChange={(changed) => {
+          if ('province' in changed) {
+            formRef.current?.setFieldsValue({ city: '', district: '' })
+          }
+          if ('city' in changed) {
+            formRef.current?.setFieldsValue({ district: '' })
+          }
+          if (changed.settlementMethod === 'CASH') {
+            formRef.current?.setFieldsValue({ paymentTermDays: '0' })
+          }
+        }}
+      >
+        <MasterFormSection title="基础识别信息">
+          <MasterFormCol>
+            <ProFormText
+              name="customerCode"
+              label="客户编码"
+              placeholder="建议格式: CUST-0001"
+              readonly={codeReadOnly}
+              rules={[
+                { required: true, message: '客户编码不能为空' },
+                {
+                  min: CUSTOMER_CODE_MIN_LENGTH,
+                  max: CUSTOMER_CODE_MAX_LENGTH,
+                  message: `客户编码须为 ${CUSTOMER_CODE_MIN_LENGTH}–${CUSTOMER_CODE_MAX_LENGTH} 个字符`,
+                },
+                {
+                  validator: async (_, value) => {
+                    if (codeReadOnly || !value) return
+                    const dup = getCustomerByCode(String(value).trim(), existing?.id)
+                    if (dup) throw new Error('客户编码已存在')
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="customerName"
+              label="客户名称"
+              placeholder="请输入客户名称"
+              rules={[
+                { required: true, message: '客户名称不能为空' },
+                { max: 100, message: '客户名称最多 100 个字符' },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormSelect
+              name="customerType"
+              label="客户类型"
+              options={CUSTOMER_TYPE_OPTIONS}
+              rules={[{ required: true, message: '请选择客户类型' }]}
+              fieldProps={{ ...masterFormControlProps, placeholder: '请选择' }}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormSelect
+              name="customerGrade"
+              label="客户等级"
+              options={CUSTOMER_GRADE_OPTIONS}
+              rules={[{ required: true, message: '请选择客户等级' }]}
+              fieldProps={{ ...masterFormControlProps, placeholder: '请选择' }}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="contactName"
+              label="联系人"
+              rules={[
+                { required: true, message: '联系人不能为空' },
+                { max: 20, message: '联系人最多 20 个字符' },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="contactPhone"
+              label="联系电话"
+              rules={[
+                { required: true, message: '联系电话不能为空' },
+                { max: 20, message: '联系电话最多 20 个字符' },
+                {
+                  validator: async (_, value) => {
+                    const phone = String(value ?? '').trim()
+                    if (phone && !isValidContactPhone(phone)) {
+                      throw new Error('请输入有效的手机号或座机号')
+                    }
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormSelect
+              name="province"
+              label="省份"
+              options={PROVINCES.map((p) => ({ label: p, value: p }))}
+              rules={[{ required: true, message: '请选择省份' }]}
+              fieldProps={{ ...masterFormControlProps, placeholder: '请选择省份', showSearch: true }}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormDependency name={['province']}>
+              {({ province }) => (
+                <ProFormSelect
+                  name="city"
+                  label="城市"
+                  options={citiesOfProvince(province ?? '').map((c) => ({ label: c, value: c }))}
+                  rules={[{ required: true, message: '请选择城市' }]}
+                  fieldProps={{
+                    ...masterFormControlProps,
+                    placeholder: province ? '请选择城市' : '请先选择省份',
+                    disabled: !province,
+                    showSearch: true,
+                  }}
+                />
+              )}
+            </ProFormDependency>
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormDependency name={['province', 'city']}>
+              {({ province, city }) => (
+                <ProFormSelect
+                  name="district"
+                  label="区/县"
+                  options={districtsOf(province ?? '', city ?? '').map((d) => ({
+                    label: d,
+                    value: d,
+                  }))}
+                  rules={[{ required: true, message: '请选择区/县' }]}
+                  fieldProps={{
+                    ...masterFormControlProps,
+                    placeholder: city ? '请选择区/县' : '请先选择城市',
+                    disabled: !city,
+                    showSearch: true,
+                  }}
+                />
+              )}
+            </ProFormDependency>
+          </MasterFormCol>
+          <MasterFormCol colProps={masterFormColFull}>
+            <ProFormText
+              name="detailAddress"
+              label="详细地址"
+              placeholder="请输入街道、门牌号等详细地址"
+              rules={[{ max: 200, message: '详细地址最多 200 个字符' }]}
+            />
+          </MasterFormCol>
+        </MasterFormSection>
 
-      <FormSection title="基础识别信息">
-        <label className="grid gap-1 text-sm">
-          <span>
-            客户编码 <span className="text-destructive">*</span>
-          </span>
-          <input
-            className={inputClass(Boolean(errors.customerCode))}
-            placeholder="建议格式: CUST-0001"
-            readOnly={codeReadOnly}
-            value={form.customerCode}
-            onChange={(e) => updateField('customerCode', e.target.value)}
-          />
-          {errors.customerCode ? (
-            <span className="text-xs text-destructive">{errors.customerCode}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            客户名称 <span className="text-destructive">*</span>
-          </span>
-          <input
-            className={inputClass(Boolean(errors.customerName))}
-            placeholder="请输入客户名称"
-            value={form.customerName}
-            onChange={(e) => updateField('customerName', e.target.value)}
-          />
-          {errors.customerName ? (
-            <span className="text-xs text-destructive">{errors.customerName}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            客户类型 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.customerType))}
-            value={form.customerType}
-            onChange={(e) =>
-              updateField('customerType', e.target.value as FormState['customerType'])
-            }
-          >
-            <option value="">请选择</option>
-            {CUSTOMER_TYPE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          {errors.customerType ? (
-            <span className="text-xs text-destructive">{errors.customerType}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            客户等级 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.customerGrade))}
-            value={form.customerGrade}
-            onChange={(e) =>
-              updateField('customerGrade', e.target.value as FormState['customerGrade'])
-            }
-          >
-            <option value="">请选择</option>
-            {CUSTOMER_GRADE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          {errors.customerGrade ? (
-            <span className="text-xs text-destructive">{errors.customerGrade}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            联系人 <span className="text-destructive">*</span>
-          </span>
-          <input
-            className={inputClass(Boolean(errors.contactName))}
-            placeholder="请输入联系人"
-            value={form.contactName}
-            onChange={(e) => updateField('contactName', e.target.value)}
-          />
-          {errors.contactName ? (
-            <span className="text-xs text-destructive">{errors.contactName}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            联系电话 <span className="text-destructive">*</span>
-          </span>
-          <input
-            className={inputClass(Boolean(errors.contactPhone))}
-            placeholder="请输入联系电话"
-            value={form.contactPhone}
-            onChange={(e) => updateField('contactPhone', e.target.value)}
-          />
-          {errors.contactPhone ? (
-            <span className="text-xs text-destructive">{errors.contactPhone}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            省份 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.province))}
-            value={form.province}
-            onChange={(e) => updateField('province', e.target.value)}
-          >
-            <option value="">请选择省份</option>
-            {PROVINCES.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-          {errors.province ? (
-            <span className="text-xs text-destructive">{errors.province}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            城市 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.city))}
-            value={form.city}
-            disabled={!form.province}
-            onChange={(e) => updateField('city', e.target.value)}
-          >
-            <option value="">{form.province ? '请选择城市' : '请先选择省份'}</option>
-            {cityOptions.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          {errors.city ? <span className="text-xs text-destructive">{errors.city}</span> : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            区/县 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.district))}
-            value={form.district}
-            disabled={!form.city}
-            onChange={(e) => updateField('district', e.target.value)}
-          >
-            <option value="">{form.city ? '请选择区/县' : '请先选择城市'}</option>
-            {districtOptions.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-          {errors.district ? (
-            <span className="text-xs text-destructive">{errors.district}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm sm:col-span-2">
-          <span>详细地址</span>
-          <input
-            className={inputClass(Boolean(errors.detailAddress))}
-            placeholder="请输入街道、门牌号等详细地址"
-            value={form.detailAddress}
-            onChange={(e) => updateField('detailAddress', e.target.value)}
-          />
-          {errors.detailAddress ? (
-            <span className="text-xs text-destructive">{errors.detailAddress}</span>
-          ) : null}
-        </label>
-      </FormSection>
-
-      <FormSection title="经营与结算信息">
-        <label className="grid gap-1 text-sm">
-          <span>归属业务员</span>
-          <input
-            className={inputClass()}
-            placeholder="请输入归属业务员"
-            value={form.salesperson}
-            onChange={(e) => updateField('salesperson', e.target.value)}
-          />
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>期初欠款</span>
-          <input
-            className={inputClass(Boolean(errors.openingArrears))}
-            inputMode="decimal"
-            value={form.openingArrears}
-            onChange={(e) => updateField('openingArrears', e.target.value)}
-          />
-          {errors.openingArrears ? (
-            <span className="text-xs text-destructive">{errors.openingArrears}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>期初余额</span>
-          <input
-            className={inputClass(Boolean(errors.openingBalance))}
-            inputMode="decimal"
-            value={form.openingBalance}
-            onChange={(e) => updateField('openingBalance', e.target.value)}
-          />
-          {errors.openingBalance ? (
-            <span className="text-xs text-destructive">{errors.openingBalance}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>
-            结算方式 <span className="text-destructive">*</span>
-          </span>
-          <select
-            className={inputClass(Boolean(errors.settlementMethod))}
-            value={form.settlementMethod}
-            onChange={(e) =>
-              updateField('settlementMethod', e.target.value as FormState['settlementMethod'])
-            }
-          >
-            <option value="">请选择</option>
-            {SETTLEMENT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          {errors.settlementMethod ? (
-            <span className="text-xs text-destructive">{errors.settlementMethod}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>账期天数</span>
-          <input
-            className={inputClass(Boolean(errors.paymentTermDays))}
-            readOnly={paymentTermReadOnly}
-            value={paymentTermReadOnly ? '0' : form.paymentTermDays}
-            onChange={(e) => updateField('paymentTermDays', e.target.value)}
-          />
-          {errors.paymentTermDays ? (
-            <span className="text-xs text-destructive">{errors.paymentTermDays}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm">
-          <span>信用额度</span>
-          <input
-            className={inputClass(Boolean(errors.creditLimit))}
-            inputMode="decimal"
-            value={form.creditLimit}
-            onChange={(e) => updateField('creditLimit', e.target.value)}
-          />
-          <span className="text-xs text-muted-foreground">0 表示不启用销售硬控</span>
-          {errors.creditLimit ? (
-            <span className="text-xs text-destructive">{errors.creditLimit}</span>
-          ) : null}
-        </label>
-        <label className="grid gap-1 text-sm sm:col-span-2 lg:col-span-3">
-          <span>客户备注</span>
-          <textarea
-            className="min-h-20 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            placeholder="记录补充信息或特殊合作说明"
-            maxLength={200}
-            value={form.remark}
-            onChange={(e) => updateField('remark', e.target.value)}
-          />
-          {errors.remark ? <span className="text-xs text-destructive">{errors.remark}</span> : null}
-        </label>
-      </FormSection>
+        <MasterFormSection title="经营与结算信息">
+          <MasterFormCol>
+            <ProFormText name="salesperson" label="归属业务员" placeholder="请输入归属业务员" />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="openingArrears"
+              label="期初欠款"
+              fieldProps={{ inputMode: 'decimal' }}
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    parseMoneyField(String(value ?? ''), '期初欠款')
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="openingBalance"
+              label="期初余额"
+              fieldProps={{ inputMode: 'decimal' }}
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    parseMoneyField(String(value ?? ''), '期初余额')
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormSelect
+              name="settlementMethod"
+              label="结算方式"
+              options={SETTLEMENT_OPTIONS}
+              rules={[{ required: true, message: '请选择结算方式' }]}
+              fieldProps={{ ...masterFormControlProps, placeholder: '请选择' }}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormDependency name={['settlementMethod']}>
+              {({ settlementMethod }) => (
+                <ProFormText
+                  name="paymentTermDays"
+                  label="账期天数"
+                  readonly={settlementMethod === 'CASH'}
+                  fieldProps={{
+                    value: settlementMethod === 'CASH' ? '0' : undefined,
+                  }}
+                  rules={[
+                    {
+                      validator: async (_, value) => {
+                        if (settlementMethod !== 'ACCOUNT') return
+                        const termRaw = String(value ?? '').trim()
+                        if (!termRaw) throw new Error('请填写账期天数')
+                        if (!/^\d+$/.test(termRaw)) throw new Error('账期天数须为 0-365 的整数')
+                        const days = Number(termRaw)
+                        if (days < 0 || days > 365) throw new Error('账期天数须为 0-365 的整数')
+                      },
+                    },
+                  ]}
+                />
+              )}
+            </ProFormDependency>
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="creditLimit"
+              label="信用额度"
+              extra="0 表示不启用销售硬控"
+              fieldProps={{ inputMode: 'decimal' }}
+              rules={[
+                {
+                  validator: async (_, value) => {
+                    parseMoneyField(String(value ?? ''), '信用额度')
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol colProps={masterFormColFull}>
+            <ProFormTextArea
+              name="remark"
+              label="客户备注"
+              placeholder="记录补充信息或特殊合作说明"
+              fieldProps={{ maxLength: 200, rows: 3 }}
+              rules={[{ max: 200, message: '客户备注最多 200 个字符' }]}
+            />
+          </MasterFormCol>
+        </MasterFormSection>
+      </ProForm>
 
       {isEdit && existing ? (
-        <section className="rounded-xl border bg-card p-4">
-          <h3 className="mb-4 text-sm font-semibold">系统信息</h3>
-          <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            <div>
-              <span className="text-muted-foreground">创建人 </span>
+        <Card title="系统信息" size="small" style={{ marginBottom: 16 }}>
+          <Space direction="vertical" size="small">
+            <Typography.Text>
+              <Typography.Text type="secondary">创建人 </Typography.Text>
               {existing.createdBy}
-            </div>
-            <div>
-              <span className="text-muted-foreground">创建时间 </span>
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">创建时间 </Typography.Text>
               {formatDateTime(existing.createdAt)}
-            </div>
-            <div>
-              <span className="text-muted-foreground">最后修改人 </span>
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改人 </Typography.Text>
               {existing.updatedBy}
-            </div>
-            <div>
-              <span className="text-muted-foreground">最后修改时间 </span>
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改时间 </Typography.Text>
               {formatDateTime(existing.updatedAt)}
-            </div>
-          </dl>
-        </section>
+            </Typography.Text>
+          </Space>
+        </Card>
       ) : null}
 
-      <div className="flex justify-end gap-2 pb-4">
-        <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
-          取消
-        </Button>
-        <Button type="button" onClick={handleSubmit}>
-          保存
-        </Button>
-      </div>
-
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }
 

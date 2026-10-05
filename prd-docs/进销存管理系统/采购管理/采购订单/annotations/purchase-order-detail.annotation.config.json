@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "title": "采购订单-详情页",
+  "scope": "purchase-order-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    {
+      "id": "PO-DETAIL-GLOBAL",
+      "source": "../采购订单主PRD.md#7-业务规则",
+      "page": "#/purchase/orders/:id"
+    },
+    {
+      "id": "PO-DETAIL-ACTIONS",
+      "source": "../采购订单_Demo_详情页.md#21-页头操作按钮矩阵按状态",
+      "page": "#/purchase/orders/:id"
+    },
+    {
+      "id": "PO-DETAIL-BASIC",
+      "source": "../采购订单_Demo_详情页.md#三基本信息卡片",
+      "page": "#/purchase/orders/:id"
+    },
+    {
+      "id": "PO-DETAIL-LINES",
+      "source": "../采购订单_Demo_详情页.md#四商品明细卡片",
+      "page": "#/purchase/orders/:id"
+    },
+    {
+      "id": "PO-DETAIL-INBOUND",
+      "source": "../采购订单_Demo_详情页.md#五关联单据卡片",
+      "page": "#/purchase/orders/:id"
+    },
+    {
+      "id": "PO-DETAIL-META",
+      "source": "../采购订单字段清单.md#四系统字段",
+      "page": "#/purchase/orders/:id"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": ["PO-DETAIL-GLOBAL"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='purchase-order-detail-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["PO-DETAIL-ACTIONS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "基本信息",
+      "target": { "selector": "[data-anno='purchase-order-detail-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["PO-DETAIL-BASIC"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "商品明细",
+      "target": { "selector": "[data-anno='purchase-order-detail-lines']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "3",
+      "sourceRefs": ["PO-DETAIL-LINES"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "关联入库单",
+      "target": { "selector": "[data-anno='purchase-order-detail-inbound']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "4",
+      "sourceRefs": ["PO-DETAIL-INBOUND"]
+    },
+    {
+      "id": "5",
+      "order": 5,
+      "page": "#/purchase/orders/",
+      "routeMatcher": "(^#|^/#)/purchase/orders/(?!new$)[^/]+$",
+      "moduleName": "制单信息",
+      "target": { "selector": "[data-anno='purchase-order-detail-meta']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-detail.md",
+      "blockId": "5",
+      "sourceRefs": ["PO-DETAIL-META"]
+    }
+  ]
+}

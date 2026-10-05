@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "title": "采购订单-列表页",
+  "scope": "purchase-order-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    {
+      "id": "PO-LIST-GLOBAL",
+      "source": "../采购订单主PRD.md#5-状态机",
+      "page": "#/purchase/orders"
+    },
+    {
+      "id": "PO-LIST-TABS",
+      "source": "../采购订单_Demo_列表页.md#二状态-tab-栏",
+      "page": "#/purchase/orders"
+    },
+    {
+      "id": "PO-LIST-FILTER",
+      "source": "../采购订单_Demo_列表页.md#三查询区",
+      "page": "#/purchase/orders"
+    },
+    {
+      "id": "PO-LIST-TOOLBAR",
+      "source": "../采购订单_Demo_列表页.md#四工具条",
+      "page": "#/purchase/orders"
+    },
+    {
+      "id": "PO-LIST-TABLE",
+      "source": "../采购订单_Demo_列表页.md#五表格",
+      "page": "#/purchase/orders"
+    },
+    {
+      "id": "PO-LIST-ROW-SUBMIT",
+      "source": "../采购订单_Demo_列表页.md#55-行内提交审核草稿",
+      "page": "#/purchase/orders"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/orders",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-order-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["PO-LIST-GLOBAL"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/orders",
+      "moduleName": "状态 Tab",
+      "target": { "selector": "[data-anno='purchase-order-tabs']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-list.md",
+      "blockId": "1",
+      "sourceRefs": ["PO-LIST-TABS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/orders",
+      "moduleName": "查询区",
+      "target": { "selector": "[data-anno='purchase-order-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-list.md",
+      "blockId": "2",
+      "sourceRefs": ["PO-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/orders",
+      "moduleName": "工具条",
+      "target": { "selector": "[data-anno='purchase-order-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-list.md",
+      "blockId": "3",
+      "sourceRefs": ["PO-LIST-TOOLBAR"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/purchase/orders",
+      "moduleName": "列表与行操作",
+      "target": { "selector": "[data-anno='purchase-order-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/purchase-order-list.md",
+      "blockId": "4",
+      "sourceRefs": ["PO-LIST-TABLE", "PO-LIST-ROW-SUBMIT"]
+    }
+  ]
+}

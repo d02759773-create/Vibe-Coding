@@ -1,7 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  PageContainer,
+  ProForm,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  type ProFormInstance,
+} from '@ant-design/pro-components'
+import { Card, Form, Space, Typography } from 'antd'
 import { Button } from '@/components/ui/button'
 import { Toast } from '@/components/Toast'
+import {
+  MasterFormCol,
+  MasterFormSection,
+  masterFormColFull,
+  masterFormControlProps,
+} from '@/lib/masterFormLayout'
 import { formatDateTime } from '@/features/products/format'
 import { isValidContactPhone } from '@/features/suppliers/constants'
 import {
@@ -17,7 +32,7 @@ import {
 } from '@/features/warehouses/storage'
 import type { Warehouse, WarehouseType } from '@/features/warehouses/types'
 
-type FormState = {
+type FormValues = {
   warehouseCode: string
   warehouseName: string
   warehouseType: WarehouseType | ''
@@ -27,9 +42,7 @@ type FormState = {
   remark: string
 }
 
-type FieldErrors = Partial<Record<keyof FormState, string>>
-
-const emptyForm: FormState = {
+const emptyForm: FormValues = {
   warehouseCode: '',
   warehouseName: '',
   warehouseType: '',
@@ -45,7 +58,7 @@ function nowString(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function warehouseToForm(w: Warehouse): FormState {
+function warehouseToForm(w: Warehouse): FormValues {
   return {
     warehouseCode: w.warehouseCode,
     warehouseName: w.warehouseName,
@@ -57,116 +70,62 @@ function warehouseToForm(w: Warehouse): FormState {
   }
 }
 
-function inputClass(invalid?: boolean) {
-  return [
-    'h-9 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-    invalid ? 'border-destructive' : '',
-  ].join(' ')
-}
-
-export function WarehouseNew() {
+function WarehouseFormPage({ isEdit }: { isEdit: boolean }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isEdit = Boolean(id)
-  const existing = useMemo(() => (id ? getWarehouseById(id) : undefined), [id])
-
-  const [form, setForm] = useState<FormState>(() =>
-    existing ? warehouseToForm(existing) : emptyForm,
+  const formRef = useRef<ProFormInstance<FormValues>>(null)
+  const existing = useMemo(
+    () => (isEdit && id ? getWarehouseById(id) : undefined),
+    [isEdit, id],
   )
-  const [errors, setErrors] = useState<FieldErrors>({})
   const [toast, setToast] = useState<string | null>(null)
+
+  const initialValues = useMemo(
+    () => (existing ? warehouseToForm(existing) : emptyForm),
+    [existing],
+  )
 
   if (isEdit && !existing) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">未找到仓库档案。</p>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/warehouses')}>
-          返回列表
-        </Button>
-      </div>
+      <PageContainer title="编辑仓库">
+        <Typography.Text type="secondary">未找到仓库档案。</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Button type="button" variant="outline" onClick={() => navigate('/master/warehouses')}>
+            返回列表
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
-  const codeReadOnly = isEdit && existing?.isReferenced
+  const codeReadOnly = Boolean(isEdit && existing?.isReferenced)
 
-  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setErrors((prev) => {
-      if (!prev[key]) return prev
-      const next = { ...prev }
-      delete next[key]
-      return next
-    })
-  }
-
-  function validate(): FieldErrors {
-    const next: FieldErrors = {}
-    const code = form.warehouseCode.trim()
-    const name = form.warehouseName.trim()
-    const manager = form.managerName.trim()
-    const phone = form.contactPhone.trim()
-
-    if (!code) next.warehouseCode = '仓库编码不能为空'
-    else if (code.length < WAREHOUSE_CODE_MIN_LENGTH || code.length > WAREHOUSE_CODE_MAX_LENGTH) {
-      next.warehouseCode = `仓库编码须为 ${WAREHOUSE_CODE_MIN_LENGTH}–${WAREHOUSE_CODE_MAX_LENGTH} 个字符`
-    } else if (!codeReadOnly) {
-      const dup = getWarehouseByCode(code, existing?.id)
-      if (dup) next.warehouseCode = '仓库编码已存在'
-    }
-
-    if (!name) next.warehouseName = '仓库名称不能为空'
-    else if (name.length > 50) next.warehouseName = '仓库名称最多 50 个字符'
-
-    if (!form.warehouseType) next.warehouseType = '请选择仓库类型'
-
-    if (!form.address.trim()) next.address = '仓库地址不能为空'
-    else if (form.address.trim().length > 200) next.address = '仓库地址最多 200 个字符'
-
-    if (!manager) next.managerName = '负责人不能为空'
-    else if (manager.length > 20) next.managerName = '负责人最多 20 个字符'
-
-    if (phone.length > 20) next.contactPhone = '联系电话最多 20 个字符'
-    else if (phone && !isValidContactPhone(phone)) {
-      next.contactPhone = '请输入有效的手机号或座机号'
-    }
-
-    if (form.remark.length > 200) next.remark = '仓库备注最多 200 个字符'
-
-    return next
-  }
-
-  function handleSubmit() {
-    const nextErrors = validate()
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors)
-      return
-    }
-
+  async function handleFinish(values: FormValues) {
     const timestamp = nowString()
 
     if (isEdit && existing) {
       upsertWarehouse({
         ...existing,
-        warehouseCode: existing.isReferenced ? existing.warehouseCode : form.warehouseCode.trim(),
-        warehouseName: form.warehouseName.trim(),
+        warehouseCode: existing.isReferenced ? existing.warehouseCode : values.warehouseCode.trim(),
+        warehouseName: values.warehouseName.trim(),
         warehouseType: existing.warehouseType,
-        address: form.address.trim(),
-        managerName: form.managerName.trim(),
-        contactPhone: form.contactPhone.trim() || null,
-        remark: form.remark.trim() || null,
+        address: values.address.trim(),
+        managerName: values.managerName.trim(),
+        contactPhone: values.contactPhone.trim() || null,
+        remark: values.remark.trim() || null,
         updatedBy: '管理员',
         updatedAt: timestamp,
       })
     } else {
       upsertWarehouse({
         id: nextWarehouseId(),
-        warehouseCode: form.warehouseCode.trim(),
-        warehouseName: form.warehouseName.trim(),
-        warehouseType: form.warehouseType as WarehouseType,
-        address: form.address.trim(),
-        managerName: form.managerName.trim(),
-        contactPhone: form.contactPhone.trim() || null,
-        remark: form.remark.trim() || null,
+        warehouseCode: values.warehouseCode.trim(),
+        warehouseName: values.warehouseName.trim(),
+        warehouseType: values.warehouseType as WarehouseType,
+        address: values.address.trim(),
+        managerName: values.managerName.trim(),
+        contactPhone: values.contactPhone.trim() || null,
+        remark: values.remark.trim() || null,
         status: 'ENABLED',
         disableReason: null,
         isReferenced: false,
@@ -183,216 +142,177 @@ export function WarehouseNew() {
     }
 
     setToast('保存成功')
-    window.setTimeout(() => navigate('/master/warehouses'), 400)
+    setTimeout(() => navigate('/master/warehouses'), 400)
   }
 
+  const warehouseTypeLabel =
+    WAREHOUSE_TYPE_OPTIONS.find((o) => o.value === existing?.warehouseType)?.label ?? ''
+
   return (
-    <div className="mx-auto max-w-3xl space-y-4" data-anno="warehouse-form-page">
-      <div className="flex flex-wrap items-center justify-between gap-3" data-anno="warehouse-form-header">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight">
-            {isEdit ? '编辑仓库' : '新增仓库'}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {isEdit ? '修改仓库资料' : '创建仓库档案，保存后默认启用'}
-          </p>
-        </div>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/warehouses')}>
-          取消
-        </Button>
-      </div>
-
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleSubmit()
-        }}
-      >
-        <section className="rounded-xl border bg-card p-4" data-anno="warehouse-form-basic">
-          <h3 className="mb-4 text-sm font-semibold">基础资料</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-1 text-sm sm:col-span-2">
-              <span>
-                仓库编码 <span className="text-destructive">*</span>
-              </span>
-              <input
-                className={inputClass(Boolean(errors.warehouseCode))}
-                value={form.warehouseCode}
-                readOnly={codeReadOnly}
-                disabled={codeReadOnly}
-                maxLength={WAREHOUSE_CODE_MAX_LENGTH}
-                placeholder="WH-CN-DG"
-                onChange={(e) => updateField('warehouseCode', e.target.value)}
-              />
-              {codeReadOnly ? (
-                <span className="text-xs text-muted-foreground">
-                  该仓库已被业务单据引用，编码不可修改
-                </span>
-              ) : null}
-              {errors.warehouseCode ? (
-                <span className="text-xs text-destructive">{errors.warehouseCode}</span>
-              ) : null}
-            </label>
-
-            <label className="grid gap-1 text-sm sm:col-span-2">
-              <span>
-                仓库名称 <span className="text-destructive">*</span>
-              </span>
-              <input
-                className={inputClass(Boolean(errors.warehouseName))}
-                maxLength={50}
-                value={form.warehouseName}
-                onChange={(e) => updateField('warehouseName', e.target.value)}
-              />
-              {errors.warehouseName ? (
-                <span className="text-xs text-destructive">{errors.warehouseName}</span>
-              ) : null}
-            </label>
-
-            <label className="grid gap-1 text-sm sm:col-span-2">
-              <span>
-                仓库类型 <span className="text-destructive">*</span>
-              </span>
-              {isEdit ? (
-                <input
-                  className={inputClass()}
-                  readOnly
-                  disabled
-                  value={
-                    WAREHOUSE_TYPE_OPTIONS.find((o) => o.value === form.warehouseType)?.label ??
-                    ''
-                  }
-                />
-              ) : (
-                <select
-                  className={inputClass(Boolean(errors.warehouseType))}
-                  value={form.warehouseType}
-                  onChange={(e) =>
-                    updateField('warehouseType', e.target.value as WarehouseType | '')
-                  }
-                >
-                  <option value="">请选择</option>
-                  {WAREHOUSE_TYPE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {errors.warehouseType ? (
-                <span className="text-xs text-destructive">{errors.warehouseType}</span>
-              ) : null}
-            </label>
-          </div>
-        </section>
-
-        <section className="rounded-xl border bg-card p-4" data-anno="warehouse-form-contact">
-          <h3 className="mb-4 text-sm font-semibold">联系信息</h3>
-          <div className="grid gap-4">
-            <label className="grid gap-1 text-sm">
-              <span>
-                仓库地址 <span className="text-destructive">*</span>
-              </span>
-              <textarea
-                className="min-h-20 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                maxLength={200}
-                value={form.address}
-                onChange={(e) => updateField('address', e.target.value)}
-              />
-              {errors.address ? (
-                <span className="text-xs text-destructive">{errors.address}</span>
-              ) : null}
-            </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-1 text-sm">
-                <span>
-                  负责人 <span className="text-destructive">*</span>
-                </span>
-                <input
-                  className={inputClass(Boolean(errors.managerName))}
-                  maxLength={20}
-                  value={form.managerName}
-                  onChange={(e) => updateField('managerName', e.target.value)}
-                />
-                {errors.managerName ? (
-                  <span className="text-xs text-destructive">{errors.managerName}</span>
-                ) : null}
-              </label>
-
-              <label className="grid gap-1 text-sm">
-                <span>联系电话</span>
-                <input
-                  className={inputClass(Boolean(errors.contactPhone))}
-                  maxLength={20}
-                  value={form.contactPhone}
-                  onChange={(e) => updateField('contactPhone', e.target.value)}
-                  onBlur={() => {
-                    const phone = form.contactPhone.trim()
-                    if (phone && !isValidContactPhone(phone)) {
-                      setErrors((prev) => ({
-                        ...prev,
-                        contactPhone: '请输入有效的手机号或座机号',
-                      }))
-                    }
-                  }}
-                />
-                {errors.contactPhone ? (
-                  <span className="text-xs text-destructive">{errors.contactPhone}</span>
-                ) : null}
-              </label>
-            </div>
-
-            <label className="grid gap-1 text-sm">
-              <span>仓库备注</span>
-              <textarea
-                className="min-h-24 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                maxLength={200}
-                value={form.remark}
-                onChange={(e) => updateField('remark', e.target.value)}
-              />
-            </label>
-          </div>
-        </section>
-
-        {isEdit && existing ? (
-          <section className="rounded-xl border bg-card p-4" data-anno="warehouse-form-system">
-            <h3 className="mb-4 text-sm font-semibold">系统信息</h3>
-            <div className="grid gap-2 text-sm sm:grid-cols-2">
-              <div>
-                <span className="text-muted-foreground">创建人：</span>
-                {existing.createdBy}
-              </div>
-              <div>
-                <span className="text-muted-foreground">创建时间：</span>
-                {formatDateTime(existing.createdAt)}
-              </div>
-              <div>
-                <span className="text-muted-foreground">最后修改人：</span>
-                {existing.updatedBy}
-              </div>
-              <div>
-                <span className="text-muted-foreground">最后修改时间：</span>
-                {formatDateTime(existing.updatedAt)}
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        <div className="flex justify-end gap-2 border-t pt-4" data-anno="warehouse-form-actions">
+    <PageContainer
+      title={isEdit ? '编辑仓库' : '新增仓库'}
+      data-anno="warehouse-form-page"
+      extra={
+        <Space data-anno="warehouse-form-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/warehouses')}>
-            取消
+            返回列表
           </Button>
-          <Button type="submit">保存</Button>
-        </div>
-      </form>
+          <Button type="button" onClick={() => formRef.current?.submit()}>
+            保存
+          </Button>
+        </Space>
+      }
+    >
+      <ProForm<FormValues>
+        formRef={formRef}
+        initialValues={initialValues}
+        layout="vertical"
+        submitter={false}
+        onFinish={handleFinish}
+      >
+        <MasterFormSection title="基础资料" data-anno="warehouse-form-basic">
+          <MasterFormCol>
+            <ProFormText
+              name="warehouseCode"
+              label="仓库编码"
+              placeholder="WH-CN-DG"
+              readonly={codeReadOnly}
+              extra={codeReadOnly ? '该仓库已被业务单据引用，编码不可修改' : undefined}
+              fieldProps={{ maxLength: WAREHOUSE_CODE_MAX_LENGTH }}
+              rules={[
+                { required: true, message: '仓库编码不能为空' },
+                {
+                  min: WAREHOUSE_CODE_MIN_LENGTH,
+                  max: WAREHOUSE_CODE_MAX_LENGTH,
+                  message: `仓库编码须为 ${WAREHOUSE_CODE_MIN_LENGTH}–${WAREHOUSE_CODE_MAX_LENGTH} 个字符`,
+                },
+                {
+                  validator: async (_, value) => {
+                    if (codeReadOnly || !value) return
+                    const dup = getWarehouseByCode(String(value).trim(), existing?.id)
+                    if (dup) throw new Error('仓库编码已存在')
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="warehouseName"
+              label="仓库名称"
+              rules={[
+                { required: true, message: '仓库名称不能为空' },
+                { max: 50, message: '仓库名称最多 50 个字符' },
+              ]}
+            />
+          </MasterFormCol>
+          {isEdit ? (
+            <MasterFormCol>
+              <Form.Item label="仓库类型">
+                <Typography.Text>{warehouseTypeLabel}</Typography.Text>
+              </Form.Item>
+            </MasterFormCol>
+          ) : (
+            <MasterFormCol>
+              <ProFormSelect
+                name="warehouseType"
+                label="仓库类型"
+                options={WAREHOUSE_TYPE_OPTIONS}
+                rules={[{ required: true, message: '请选择仓库类型' }]}
+                fieldProps={{ ...masterFormControlProps, placeholder: '请选择' }}
+              />
+            </MasterFormCol>
+          )}
+        </MasterFormSection>
+
+        <MasterFormSection title="联系信息" data-anno="warehouse-form-contact">
+          <MasterFormCol colProps={masterFormColFull}>
+            <ProFormTextArea
+              name="address"
+              label="仓库地址"
+              fieldProps={{ maxLength: 200, rows: 3 }}
+              rules={[
+                { required: true, message: '仓库地址不能为空' },
+                { max: 200, message: '仓库地址最多 200 个字符' },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="managerName"
+              label="负责人"
+              rules={[
+                { required: true, message: '负责人不能为空' },
+                { max: 20, message: '负责人最多 20 个字符' },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol>
+            <ProFormText
+              name="contactPhone"
+              label="联系电话"
+              fieldProps={{ maxLength: 20 }}
+              rules={[
+                { max: 20, message: '联系电话最多 20 个字符' },
+                {
+                  validator: async (_, value) => {
+                    const phone = String(value ?? '').trim()
+                    if (phone && !isValidContactPhone(phone)) {
+                      throw new Error('请输入有效的手机号或座机号')
+                    }
+                  },
+                },
+              ]}
+            />
+          </MasterFormCol>
+          <MasterFormCol colProps={masterFormColFull}>
+            <ProFormTextArea
+              name="remark"
+              label="仓库备注"
+              fieldProps={{ maxLength: 200, rows: 4 }}
+              rules={[{ max: 200, message: '仓库备注最多 200 个字符' }]}
+            />
+          </MasterFormCol>
+        </MasterFormSection>
+      </ProForm>
+
+      {isEdit && existing ? (
+        <Card
+          title="系统信息"
+          size="small"
+          style={{ marginBottom: 16 }}
+          data-anno="warehouse-form-system"
+        >
+          <Space direction="vertical" size="small">
+            <Typography.Text>
+              <Typography.Text type="secondary">创建人 </Typography.Text>
+              {existing.createdBy}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">创建时间 </Typography.Text>
+              {formatDateTime(existing.createdAt)}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改人 </Typography.Text>
+              {existing.updatedBy}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改时间 </Typography.Text>
+              {formatDateTime(existing.updatedAt)}
+            </Typography.Text>
+          </Space>
+        </Card>
+      ) : null}
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }
 
+export function WarehouseNew() {
+  return <WarehouseFormPage isEdit={false} />
+}
+
 export function WarehouseEdit() {
-  return <WarehouseNew />
+  return <WarehouseFormPage isEdit={true} />
 }

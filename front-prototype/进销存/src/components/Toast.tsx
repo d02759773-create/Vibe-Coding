@@ -1,5 +1,5 @@
+import { App } from 'antd'
 import { useEffect } from 'react'
-import { cn } from '@/lib/utils'
 
 type ToastProps = {
   message: string | null
@@ -7,24 +7,15 @@ type ToastProps = {
   className?: string
 }
 
-export function Toast({ message, onDismiss, className }: ToastProps) {
+/** 兼容旧页面：将 toast 文案映射为 Ant Design message */
+export function Toast({ message, onDismiss }: ToastProps) {
+  const { message: messageApi } = App.useApp()
+
   useEffect(() => {
     if (!message) return
-    const timer = window.setTimeout(onDismiss, 2500)
-    return () => window.clearTimeout(timer)
-  }, [message, onDismiss])
+    messageApi.success(message)
+    onDismiss()
+  }, [message, messageApi, onDismiss])
 
-  if (!message) return null
-
-  return (
-    <div
-      className={cn(
-        'fixed bottom-6 right-6 z-[100] rounded-lg border bg-foreground px-4 py-2 text-sm text-background shadow-lg',
-        className,
-      )}
-      role="status"
-    >
-      {message}
-    </div>
-  )
+  return null
 }

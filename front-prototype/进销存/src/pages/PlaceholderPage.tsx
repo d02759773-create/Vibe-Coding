@@ -1,11 +1,5 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, Typography } from 'antd'
 import { getRouteMeta } from '@/config/routes'
 
 export function PlaceholderPage() {
@@ -25,15 +19,14 @@ export function PlaceholderPage() {
   }
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle>{meta.title}</CardTitle>
-        <CardDescription>{extra}</CardDescription>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
+    <Card title={meta.title} style={{ maxWidth: 672 }}>
+      <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
+        {extra}
+      </Typography.Paragraph>
+      <Typography.Text type="secondary">
         路由：{pathname}
         {params.toString() ? `?${params.toString()}` : ''}
-      </CardContent>
+      </Typography.Text>
     </Card>
   )
 }

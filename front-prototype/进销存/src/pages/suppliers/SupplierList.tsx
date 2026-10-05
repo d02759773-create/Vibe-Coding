@@ -1,8 +1,12 @@
-import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useRef, useState } from 'react'
+import type { ActionType, ProColumns } from '@ant-design/pro-components'
+import { PageContainer, ProTable } from '@ant-design/pro-components'
+import { Input } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
+import { EnableDisableModal } from '@/components/master/EnableDisableModal'
 import { StatusPill } from '@/components/StatusPill'
-import { Modal } from '@/components/Modal'
 import { Toast } from '@/components/Toast'
 import {
   SETTLEMENT_FILTER_OPTIONS,
@@ -15,26 +19,28 @@ import type { Supplier, SupplierListFilters, SupplierStatus } from '@/features/s
 
 const PAGE_SIZE = 10
 
-const defaultFilters: SupplierListFilters = {
-  keyword: '',
-  settlementMethod: '',
-  status: '',
-}
-
 function nowString(): string {
   const d = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
+function filterRows(all: Supplier[], applied: SupplierListFilters): Supplier[] {
+  const kw = applied.keyword.trim().toLowerCase()
+  return all.filter((s) => {
+    if (applied.settlementMethod && s.settlementMethod !== applied.settlementMethod) return false
+    if (applied.status && s.status !== applied.status) return false
+    if (!kw) return true
+    const hay = [s.supplierCode, s.supplierName, s.contactName].join(' ').toLowerCase()
+    return hay.includes(kw)
+  })
+}
+
 export function SupplierList() {
   const navigate = useNavigate()
-  const [filters, setFilters] = useState<SupplierListFilters>(defaultFilters)
-  const [applied, setApplied] = useState<SupplierListFilters>(defaultFilters)
-  const [page, setPage] = useState(1)
+  const actionRef = useRef<ActionType>(undefined)
   const [refreshKey, setRefreshKey] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
-
   const [statusTarget, setStatusTarget] = useState<Supplier | null>(null)
   const [statusAction, setStatusAction] = useState<'enable' | 'disable' | null>(null)
   const [disableReason, setDisableReason] = useState('')
@@ -44,32 +50,6 @@ export function SupplierList() {
     void refreshKey
     return listSuppliers()
   }, [refreshKey])
-
-  const filtered = useMemo(() => {
-    const kw = applied.keyword.trim().toLowerCase()
-    return allSuppliers.filter((s) => {
-      if (applied.settlementMethod && s.settlementMethod !== applied.settlementMethod) return false
-      if (applied.status && s.status !== applied.status) return false
-      if (!kw) return true
-      const hay = [s.supplierCode, s.supplierName, s.contactName].join(' ').toLowerCase()
-      return hay.includes(kw)
-    })
-  }, [allSuppliers, applied])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageSafe = Math.min(page, totalPages)
-  const pageRows = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE)
-
-  function handleSearch() {
-    setApplied({ ...filters })
-    setPage(1)
-  }
-
-  function handleReset() {
-    setFilters(defaultFilters)
-    setApplied(defaultFilters)
-    setPage(1)
-  }
 
   function openStatusModal(supplier: Supplier, action: 'enable' | 'disable') {
     setStatusTarget(supplier)
@@ -87,7 +67,6 @@ export function SupplierList() {
 
   function confirmStatusChange() {
     if (!statusTarget || !statusAction) return
-
     if (statusAction === 'disable') {
       const reason = disableReason.trim()
       if (!reason) {
@@ -128,223 +107,180 @@ export function SupplierList() {
       )
       setToast('供应商已启用')
     }
-
     closeStatusModal()
     setRefreshKey((k) => k + 1)
+    actionRef.current?.reload()
   }
 
+  const columns: ProColumns<Supplier>[] = [
+    {
+      title: '综合搜索',
+      dataIndex: 'keyword',
+      hideInTable: true,
+      renderFormItem: () => <Input placeholder="供应商编码 / 名称 / 联系人" allowClear />,
+    },
+    {
+      title: '结算方式',
+      dataIndex: 'settlementMethod',
+      hideInTable: true,
+      valueType: 'select',
+      fieldProps: {
+        allowClear: true,
+        options: SETTLEMENT_FILTER_OPTIONS.filter((o) => o.value !== '').map((o) => ({
+          label: o.label,
+          value: o.value,
+        })),
+      },
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      hideInTable: true,
+      valueType: 'select',
+      fieldProps: {
+        allowClear: true,
+        options: STATUS_FILTER_OPTIONS.filter((o) => o.value !== '').map((o) => ({
+          label: o.label,
+          value: o.value,
+        })),
+      },
+    },
+    { title: '供应商编码', dataIndex: 'supplierCode', width: 130, copyable: true, search: false },
+    { title: '供应商名称', dataIndex: 'supplierName', ellipsis: true, search: false },
+    { title: '联系人', dataIndex: 'contactName', width: 100, search: false },
+    { title: '联系电话', dataIndex: 'contactPhone', width: 130, search: false },
+    {
+      title: '结算方式',
+      dataIndex: 'settlementMethod',
+      width: 100,
+      search: false,
+      render: (_, row) => settlementLabel(row.settlementMethod),
+    },
+    { title: '账期天数', dataIndex: 'paymentTermDays', width: 90, search: false },
+    {
+      title: '税率',
+      dataIndex: 'taxRate',
+      width: 80,
+      search: false,
+      render: (_, row) => displayValue(row.taxRate),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 80,
+      search: false,
+      render: (_, row) => <StatusPill status={row.status} />,
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      width: 180,
+      fixed: 'right',
+      search: false,
+      render: (_, row) => (
+        <TableRowActions
+          items={[
+            <Button
+              key="view"
+              type="link"
+              size="small"
+              style={tableActionLinkStyle}
+              onClick={() => navigate(`/master/suppliers/${row.id}`)}
+            >
+              查看
+            </Button>,
+            <Button
+              key="edit"
+              type="link"
+              size="small"
+              style={tableActionLinkStyle}
+              onClick={() => navigate(`/master/suppliers/${row.id}/edit`)}
+            >
+              编辑
+            </Button>,
+            row.status === 'ENABLED' ? (
+              <Button
+                key="off"
+                type="link"
+                size="small"
+                danger
+                style={tableActionLinkStyle}
+                onClick={() => openStatusModal(row, 'disable')}
+              >
+                停用
+              </Button>
+            ) : (
+              <Button
+                key="on"
+                type="link"
+                size="small"
+                style={tableActionLinkStyle}
+                onClick={() => openStatusModal(row, 'enable')}
+              >
+                启用
+              </Button>
+            ),
+          ]}
+        />
+      ),
+    },
+  ]
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight">供应商管理</h2>
-          <p className="text-sm text-muted-foreground">查询、维护供应商档案与结算规则</p>
-        </div>
-        <Button type="button" onClick={() => navigate('/master/suppliers/new')}>
+    <PageContainer
+      title="供应商管理"
+      subTitle="查询、维护供应商档案与结算规则"
+      extra={
+        <Button type="primary" onClick={() => navigate('/master/suppliers/new')}>
           新增供应商
         </Button>
-      </div>
+      }
+    >
+      <ProTable<Supplier>
+        actionRef={actionRef}
+        rowKey="id"
+        columns={columns}
+        search={{ labelWidth: 'auto' }}
+        request={async (params) => {
+          const applied: SupplierListFilters = {
+            keyword: String(params.keyword ?? ''),
+            settlementMethod: (params.settlementMethod ??
+              '') as SupplierListFilters['settlementMethod'],
+            status: (params.status ?? '') as SupplierListFilters['status'],
+          }
+          const filtered = filterRows(allSuppliers, applied)
+          const current = params.current ?? 1
+          const pageSize = params.pageSize ?? PAGE_SIZE
+          const start = (current - 1) * pageSize
+          return {
+            data: filtered.slice(start, start + pageSize),
+            success: true,
+            total: filtered.length,
+          }
+        }}
+        params={{ refreshKey }}
+        pagination={{ defaultPageSize: PAGE_SIZE, showSizeChanger: true }}
+        scroll={{ x: 1000 }}
+        options={false}
+        columnEmptyText="暂无数据"
+      />
 
-      <section className="rounded-xl border bg-card p-4">
-        <div className="grid gap-3 md:grid-cols-4">
-          <label className="grid gap-1 text-sm md:col-span-2">
-            <span className="text-muted-foreground">综合搜索</span>
-            <input
-              className="h-9 rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              placeholder="供应商编码 / 名称 / 联系人"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value }))}
-            />
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">结算方式</span>
-            <select
-              className="h-9 rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              value={filters.settlementMethod}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  settlementMethod: e.target.value as SupplierListFilters['settlementMethod'],
-                }))
-              }
-            >
-              {SETTLEMENT_FILTER_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="grid gap-1 text-sm">
-            <span className="text-muted-foreground">状态</span>
-            <select
-              className="h-9 rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              value={filters.status}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  status: e.target.value as SupplierListFilters['status'],
-                }))
-              }
-            >
-              {STATUS_FILTER_OPTIONS.map((o) => (
-                <option key={o.label} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="mt-3 flex gap-2">
-          <Button type="button" onClick={handleSearch}>
-            查询
-          </Button>
-          <Button type="button" variant="outline" onClick={handleReset}>
-            重置
-          </Button>
-        </div>
-      </section>
-
-      <section className="overflow-hidden rounded-xl border bg-card">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-                <th className="px-3 py-2.5 font-medium">供应商编码</th>
-                <th className="px-3 py-2.5 font-medium">供应商名称</th>
-                <th className="px-3 py-2.5 font-medium">联系人</th>
-                <th className="px-3 py-2.5 font-medium">联系电话</th>
-                <th className="px-3 py-2.5 font-medium">结算方式</th>
-                <th className="px-3 py-2.5 font-medium">账期天数</th>
-                <th className="px-3 py-2.5 font-medium">税率</th>
-                <th className="px-3 py-2.5 font-medium">状态</th>
-                <th className="sticky right-0 bg-muted/40 px-3 py-2.5 font-medium shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {pageRows.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-3 py-10 text-center text-muted-foreground">
-                    暂无数据
-                  </td>
-                </tr>
-              ) : (
-                pageRows.map((row) => (
-                  <tr key={row.id} className="border-b last:border-b-0 hover:bg-muted/20">
-                    <td className="px-3 py-2.5 font-mono text-xs">{row.supplierCode}</td>
-                    <td className="px-3 py-2.5">{row.supplierName}</td>
-                    <td className="px-3 py-2.5">{row.contactName}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap">{row.contactPhone}</td>
-                    <td className="px-3 py-2.5">{settlementLabel(row.settlementMethod)}</td>
-                    <td className="px-3 py-2.5 tabular-nums">{row.paymentTermDays}</td>
-                    <td className="px-3 py-2.5">{displayValue(row.taxRate)}</td>
-                    <td className="px-3 py-2.5">
-                      <StatusPill status={row.status} />
-                    </td>
-                    <td className="sticky right-0 bg-card px-3 py-2.5 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.06)]">
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <Link
-                          to={`/master/suppliers/${row.id}`}
-                          className="text-primary underline-offset-4 hover:underline"
-                        >
-                          查看
-                        </Link>
-                        <Link
-                          to={`/master/suppliers/${row.id}/edit`}
-                          className="text-primary underline-offset-4 hover:underline"
-                        >
-                          编辑
-                        </Link>
-                        {row.status === 'ENABLED' ? (
-                          <button
-                            type="button"
-                            className="text-destructive hover:underline"
-                            onClick={() => openStatusModal(row, 'disable')}
-                          >
-                            停用
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="text-primary hover:underline"
-                            onClick={() => openStatusModal(row, 'enable')}
-                          >
-                            启用
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t px-4 py-3 text-sm text-muted-foreground">
-          <span>
-            共 {filtered.length} 条，第 {pageSafe} / {totalPages} 页
-          </span>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={pageSafe <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              上一页
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={pageSafe >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              下一页
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <Modal
+      <EnableDisableModal
         open={Boolean(statusTarget && statusAction)}
-        title={statusAction === 'disable' ? '确认停用供应商？' : '确认启用供应商？'}
-        confirmLabel={statusAction === 'disable' ? '确认停用' : '确认启用'}
-        confirmVariant={statusAction === 'disable' ? 'destructive' : 'default'}
+        mode={statusAction ?? 'disable'}
+        entityLabel="供应商"
+        maxReasonLength={100}
+        disableReason={disableReason}
+        disableReasonError={disableReasonError}
+        onReasonChange={(v) => {
+          setDisableReason(v)
+          if (disableReasonError) setDisableReasonError('')
+        }}
         onClose={closeStatusModal}
         onConfirm={confirmStatusChange}
-      >
-        {statusAction === 'disable' ? (
-          <label className="grid gap-1 text-sm">
-            <span>
-              停用原因 <span className="text-destructive">*</span>
-            </span>
-            <textarea
-              className="min-h-24 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              maxLength={100}
-              value={disableReason}
-              onChange={(e) => {
-                setDisableReason(e.target.value)
-                if (disableReasonError) setDisableReasonError('')
-              }}
-              aria-invalid={Boolean(disableReasonError)}
-            />
-            {disableReasonError ? (
-              <span className="text-xs text-destructive">{disableReasonError}</span>
-            ) : null}
-          </label>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            启用后供应商可再次被采购等业务单据引用。
-          </p>
-        )}
-      </Modal>
+      />
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }

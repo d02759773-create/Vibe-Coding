@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { PageContainer } from '@ant-design/pro-components'
+import { Col, Row, Space, Table, Typography } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button'
+import { PageSection } from '@/components/layout/PageSection'
 import { Modal } from '@/components/Modal'
 import { Toast } from '@/components/Toast'
 import { PurchaseOrderStatusTag } from '@/components/PurchaseOrderStatusTag'
@@ -8,6 +12,8 @@ import {
   formatYuan,
   partnerLabel,
   taxRateLabel,
+  closeOrderConfirmBody,
+  inboundLinkStatusLabel,
 } from '@/features/purchaseOrders/constants'
 import {
   deletePurchaseOrder,
@@ -16,7 +22,16 @@ import {
   unreceivedQty,
   updateOrderStatus,
 } from '@/features/purchaseOrders/storage'
-import type { PurchaseOrder, PurchaseOrderStatus } from '@/features/purchaseOrders/types'
+import {
+  submitFailureToast,
+  validateOrderForSubmit,
+} from '@/features/purchaseOrders/validate'
+import type {
+  PurchaseInboundLink,
+  PurchaseOrder,
+  PurchaseOrderLine,
+  PurchaseOrderStatus,
+} from '@/features/purchaseOrders/types'
 import { displayValue, formatDateTime } from '@/features/products/format'
 
 type ConfirmAction = 'delete' | 'submit' | 'approve' | 'reject' | 'void' | 'close'
@@ -27,66 +42,140 @@ export function PurchaseOrderDetail() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [toast, setToast] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+  const [actionPending, setActionPending] = useState(false)
 
   const order = useMemo(() => {
     void refreshKey
     return id ? getPurchaseOrderById(id) : undefined
   }, [id, refreshKey])
 
+  const showInboundCols = Boolean(
+    order && ['PENDING_STOCK_IN', 'PARTIAL_STOCK_IN', 'COMPLETED'].includes(order.status),
+  )
+  const showUnreceived = Boolean(
+    order && ['PENDING_STOCK_IN', 'PARTIAL_STOCK_IN'].includes(order.status),
+  )
+  const showInboundCard = showInboundCols
+
+  const lineColumns = useMemo(() => {
+    if (!order) return []
+    const cols: ColumnsType<PurchaseOrderLine> = [
+      { title: '序号', width: 60, render: (_v, _r, index) => index + 1 },
+      {
+        title: '商品编码',
+        dataIndex: 'productCode',
+        render: (code: string) => <Typography.Text code>{code}</Typography.Text>,
+      },
+      { title: '商品名称', dataIndex: 'productName' },
+      { title: '商品条码', dataIndex: 'barcode', render: (v) => displayValue(v) },
+      { title: '规格型号', dataIndex: 'specModel', render: (v) => displayValue(v) },
+      { title: '单位', dataIndex: 'unit', render: (v) => displayValue(v) },
+      { title: '采购数量', dataIndex: 'quantity' },
+      { title: '单价（含税）', dataIndex: 'unitPrice', render: (v) => formatYuan(v) },
+      { title: '税率', dataIndex: 'taxRate', render: (v) => taxRateLabel(v) },
+      { title: '金额（含税）', dataIndex: 'lineAmount', render: (v) => formatYuan(v) },
+    ]
+    if (showInboundCols) {
+      cols.push({ title: '累计已入库数量', dataIndex: 'receivedQty' })
+    }
+    if (showUnreceived) {
+      cols.push({
+        title: '未入库数量',
+        render: (_v, line) => unreceivedQty(line),
+      })
+    }
+    cols.push({ title: '行备注', dataIndex: 'lineRemark', render: (v) => displayValue(v) })
+    return cols
+  }, [order, showInboundCols, showUnreceived])
+
+  const inboundColumns = useMemo(
+    (): ColumnsType<PurchaseInboundLink> => [
+      {
+        title: '入库单号',
+        dataIndex: 'inboundNo',
+        render: (no: string) => (
+          <Link to={`/purchase/inbound?inboundNo=${encodeURIComponent(no)}`}>
+            <Typography.Link>{no}</Typography.Link>
+          </Link>
+        ),
+      },
+      { title: '入库日期', dataIndex: 'inboundDate' },
+      { title: '本次入库数量', dataIndex: 'totalQty' },
+      { title: '操作人', dataIndex: 'operator' },
+      {
+        title: '状态',
+        dataIndex: 'status',
+        render: (status) => inboundLinkStatusLabel(status),
+      },
+    ],
+    [],
+  )
+
   if (!order) {
     return (
-      <div className="py-12 text-center text-muted-foreground">
-        采购订单不存在
-        <div className="mt-4">
-          <Link to="/purchase/orders" className="text-primary hover:underline">
-            返回列表
+      <PageContainer title="采购订单">
+        <Typography.Text type="secondary">采购订单不存在</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Link to="/purchase/orders">
+            <Typography.Link>返回列表</Typography.Link>
           </Link>
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
-  const showInboundCols = ['PENDING_STOCK_IN', 'PARTIAL_STOCK_IN', 'COMPLETED'].includes(order.status)
-  const showUnreceived = ['PENDING_STOCK_IN', 'PARTIAL_STOCK_IN'].includes(order.status)
-  const showInboundCard = ['PENDING_STOCK_IN', 'PARTIAL_STOCK_IN', 'COMPLETED'].includes(order.status)
-
   function runAction(action: ConfirmAction) {
-    if (!order) return
+    if (!order || actionPending) return
     const current = order
-    const ts = nowString()
-    switch (action) {
-      case 'delete':
-        if (deletePurchaseOrder(current.id)) {
-          setToast('采购订单已删除')
-          navigate('/purchase/orders')
-        }
-        break
-      case 'submit':
-        updateOrderStatus(current.id, 'PENDING_AUDIT')
-        setToast('已提交审核，等待审核确认')
-        break
-      case 'approve':
-        updateOrderStatus(current.id, 'PENDING_STOCK_IN', {
-          auditedBy: '林强',
-          auditedAt: ts,
-        })
-        setToast('审核通过')
-        break
-      case 'reject':
-        updateOrderStatus(current.id, 'DRAFT', { auditedBy: null, auditedAt: null })
-        setToast('已驳回，单据已退回草稿')
-        break
-      case 'void':
-        updateOrderStatus(current.id, 'VOIDED')
-        setToast('采购订单已作废')
-        break
-      case 'close':
-        updateOrderStatus(current.id, 'COMPLETED')
-        setToast('订单已关闭，剩余数量不再接收')
-        break
+
+    if (action === 'submit') {
+      const result = validateOrderForSubmit(current)
+      if (!result.ok) {
+        setToast(submitFailureToast(result))
+        setConfirmAction(null)
+        return
+      }
     }
-    setConfirmAction(null)
-    setRefreshKey((k) => k + 1)
+
+    setActionPending(true)
+    try {
+      const ts = nowString()
+      switch (action) {
+        case 'delete':
+          if (deletePurchaseOrder(current.id)) {
+            setToast('采购订单已删除')
+            navigate('/purchase/orders')
+          }
+          break
+        case 'submit':
+          updateOrderStatus(current.id, 'PENDING_AUDIT')
+          setToast('已提交审核，等待审核确认')
+          break
+        case 'approve':
+          updateOrderStatus(current.id, 'PENDING_STOCK_IN', {
+            auditedBy: '林强',
+            auditedAt: ts,
+          })
+          setToast('审核通过')
+          break
+        case 'reject':
+          updateOrderStatus(current.id, 'DRAFT', { auditedBy: null, auditedAt: null })
+          setToast('已驳回，单据已退回草稿')
+          break
+        case 'void':
+          updateOrderStatus(current.id, 'VOIDED')
+          setToast('采购订单已作废')
+          break
+        case 'close':
+          updateOrderStatus(current.id, 'COMPLETED')
+          setToast('订单已关闭，剩余数量不再接收')
+          break
+      }
+      setConfirmAction(null)
+      setRefreshKey((k) => k + 1)
+    } finally {
+      setActionPending(false)
+    }
   }
 
   const confirmCopy: Record<ConfirmAction, { title: string; body: string; ok: string }> = {
@@ -123,147 +212,94 @@ export function PurchaseOrderDetail() {
   }
 
   return (
-    <div className="space-y-4 pb-8" data-anno="purchase-order-detail">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-muted-foreground">采购管理 / 采购订单</p>
-          <h2 className="text-xl font-semibold">
-            采购订单 <span className="font-mono">{order.orderNo}</span>
-          </h2>
-          <div className="mt-2">
-            <PurchaseOrderStatusTag status={order.status} />
-          </div>
+    <PageContainer
+      title={`采购订单 ${order.orderNo}`}
+      subTitle="采购管理 / 采购订单"
+      tags={<PurchaseOrderStatusTag status={order.status} />}
+      extra={
+        <div data-anno="purchase-order-detail-actions">
+          <DetailActions
+            order={order}
+            onAction={(a) => setConfirmAction(a)}
+            onInbound={() =>
+              navigate(
+                `/purchase/inbound?purchaseOrderId=${order.id}&orderNo=${encodeURIComponent(order.orderNo)}`,
+              )
+            }
+          />
         </div>
-        <DetailActions
-          order={order}
-          onAction={(a) => setConfirmAction(a)}
-          onInbound={() =>
-            navigate(
-              `/purchase/inbound?purchaseOrderId=${order.id}&orderNo=${encodeURIComponent(order.orderNo)}`,
-            )
-          }
-        />
-      </div>
-
-      <section className="rounded-xl border bg-card p-4">
-        <h3 className="mb-3 text-sm font-semibold">基本信息</h3>
-        <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
+      }
+      data-anno="purchase-order-detail"
+    >
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <PageSection variant="form" title="基本信息" data-anno="purchase-order-detail-basic">
+        <Row gutter={[16, 16]}>
           <Field label="采购单号" value={order.orderNo} />
           <Field label="供应商" value={partnerLabel(order.supplierCode, order.supplierName)} />
           <Field label="入库仓库" value={partnerLabel(order.warehouseCode, order.warehouseName)} />
           <Field label="下单日期" value={order.orderDate} />
           <Field label="预计到货日期" value={displayValue(order.expectedArrivalDate)} />
-          <Field label="采购备注" value={displayValue(order.remark)} className="md:col-span-2 lg:col-span-4" />
-        </div>
-      </section>
+          <Field label="采购备注" value={displayValue(order.remark)} span={24} />
+        </Row>
+      </PageSection>
 
-      <section className="rounded-xl border bg-card p-4">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="text-sm font-semibold">商品明细</h3>
-          <p className="text-sm text-muted-foreground">
-            共 {order.skuCount} 种商品 | 总数量 {order.totalQuantity} 件 | 总金额{' '}
-            {formatYuan(order.totalAmount)}
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-                <th className="px-2 py-2">序号</th>
-                <th className="px-2 py-2">商品编码</th>
-                <th className="px-2 py-2">商品名称</th>
-                <th className="px-2 py-2">商品条码</th>
-                <th className="px-2 py-2">规格型号</th>
-                <th className="px-2 py-2">单位</th>
-                <th className="px-2 py-2">采购数量</th>
-                <th className="px-2 py-2">单价（含税）</th>
-                <th className="px-2 py-2">税率</th>
-                <th className="px-2 py-2">金额（含税）</th>
-                {showInboundCols ? <th className="px-2 py-2">累计已入库数量</th> : null}
-                {showUnreceived ? <th className="px-2 py-2">未入库数量</th> : null}
-                <th className="px-2 py-2">行备注</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.lines.map((line, i) => (
-                <tr key={line.id} className="border-b">
-                  <td className="px-2 py-2">{i + 1}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{line.productCode}</td>
-                  <td className="px-2 py-2">{line.productName}</td>
-                  <td className="px-2 py-2">{displayValue(line.barcode)}</td>
-                  <td className="px-2 py-2">{displayValue(line.specModel)}</td>
-                  <td className="px-2 py-2">{displayValue(line.unit)}</td>
-                  <td className="px-2 py-2">{line.quantity}</td>
-                  <td className="px-2 py-2">{formatYuan(line.unitPrice)}</td>
-                  <td className="px-2 py-2">{taxRateLabel(line.taxRate)}</td>
-                  <td className="px-2 py-2">{formatYuan(line.lineAmount)}</td>
-                  {showInboundCols ? <td className="px-2 py-2">{line.receivedQty}</td> : null}
-                  {showUnreceived ? <td className="px-2 py-2">{unreceivedQty(line)}</td> : null}
-                  <td className="px-2 py-2">{displayValue(line.lineRemark)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-3 rounded-lg bg-zinc-100 px-4 py-3 text-sm font-semibold">
+      <PageSection variant="form" title="商品明细" data-anno="purchase-order-detail-lines">
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 12 }}>
+          共 {order.skuCount} 种商品 | 总数量 {order.totalQuantity} 件 | 总金额{' '}
+          {formatYuan(order.totalAmount)}
+        </Typography.Paragraph>
+        <Table<PurchaseOrderLine>
+          rowKey="id"
+          size="small"
+          pagination={false}
+          scroll={{ x: 900 }}
+          columns={lineColumns}
+          dataSource={order.lines}
+        />
+        <div
+          style={{
+            marginTop: 12,
+            padding: '12px 16px',
+            borderRadius: 8,
+            background: 'var(--ant-color-fill-quaternary)',
+            fontWeight: 600,
+          }}
+        >
           共 {order.skuCount} 种商品　合计 {order.totalQuantity} 件　{formatYuan(order.totalAmount)}
         </div>
-      </section>
+      </PageSection>
 
       {showInboundCard ? (
-        <section className="rounded-xl border bg-card p-4">
-          <h3 className="mb-3 text-sm font-semibold">关联入库单</h3>
+        <PageSection variant="form" title="关联入库单" data-anno="purchase-order-detail-inbound">
           {order.inboundLinks.length === 0 ? (
-            <p className="text-sm text-muted-foreground">暂无关联入库单</p>
+            <Typography.Text type="secondary">暂无关联入库单</Typography.Text>
           ) : (
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-2 pr-4">入库单号</th>
-                  <th className="py-2 pr-4">入库日期</th>
-                  <th className="py-2 pr-4">本次入库数量</th>
-                  <th className="py-2 pr-4">操作人</th>
-                  <th className="py-2">状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.inboundLinks.map((link) => (
-                  <tr key={link.id} className="border-b">
-                    <td className="py-2 pr-4">
-                      <Link
-                        to={`/purchase/inbound?inboundNo=${encodeURIComponent(link.inboundNo)}`}
-                        className="text-primary hover:underline"
-                      >
-                        {link.inboundNo}
-                      </Link>
-                    </td>
-                    <td className="py-2 pr-4">{link.inboundDate}</td>
-                    <td className="py-2 pr-4">{link.totalQty}</td>
-                    <td className="py-2 pr-4">{link.operator}</td>
-                    <td className="py-2">已入库</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <Table<PurchaseInboundLink>
+              rowKey="id"
+              size="small"
+              pagination={false}
+              columns={inboundColumns}
+              dataSource={order.inboundLinks}
+            />
           )}
-        </section>
+        </PageSection>
       ) : (
-        <section className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-          审核通过后可查看关联入库单
-        </section>
+        <PageSection variant="form" title="关联入库单" data-anno="purchase-order-detail-inbound">
+          <Typography.Text type="secondary">审核通过后可查看关联入库单</Typography.Text>
+        </PageSection>
       )}
 
-      <section className="rounded-xl border bg-card p-4">
-        <h3 className="mb-3 text-sm font-semibold">制单信息</h3>
-        <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
+      <PageSection variant="form" title="制单信息" data-anno="purchase-order-detail-meta">
+        <Row gutter={[16, 16]}>
           <Field label="创建人" value={order.createdBy} />
           <Field label="创建时间" value={formatDateTime(order.createdAt)} />
           <Field label="最后修改人" value={displayValue(order.updatedBy)} />
           <Field label="最后修改时间" value={formatDateTime(order.updatedAt)} />
           <Field label="审核人" value={displayValue(order.auditedBy)} />
           <Field label="审核时间" value={formatDateTime(order.auditedAt)} />
-        </div>
-      </section>
+        </Row>
+      </PageSection>
+      </Space>
 
       <Modal
         open={Boolean(confirmAction)}
@@ -272,33 +308,32 @@ export function PurchaseOrderDetail() {
         confirmVariant={
           confirmAction === 'delete' || confirmAction === 'void' ? 'destructive' : 'default'
         }
+        confirmDisabled={actionPending}
         onClose={() => setConfirmAction(null)}
         onConfirm={() => confirmAction && runAction(confirmAction)}
       >
-        <p className="text-sm text-muted-foreground">
-          {confirmAction ? confirmCopy[confirmAction].body : ''}
-        </p>
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+          {confirmAction
+            ? confirmAction === 'close'
+              ? closeOrderConfirmBody(order)
+              : confirmCopy[confirmAction].body
+            : ''}
+        </Typography.Paragraph>
       </Modal>
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }
 
-function Field({
-  label,
-  value,
-  className,
-}: {
-  label: string
-  value: string
-  className?: string
-}) {
+function Field({ label, value, span = 6 }: { label: string; value: string; span?: number }) {
   return (
-    <div className={className}>
-      <div className="text-muted-foreground">{label}</div>
-      <div className="mt-0.5 break-all">{value}</div>
-    </div>
+    <Col xs={24} md={12} lg={span}>
+      <Typography.Text type="secondary">{label}</Typography.Text>
+      <div style={{ marginTop: 2, wordBreak: 'break-all' }}>
+        <Typography.Text>{value}</Typography.Text>
+      </div>
+    </Col>
   )
 }
 
@@ -313,20 +348,14 @@ function DetailActions({
 }) {
   const s: PurchaseOrderStatus = order.status
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <Link
-        to="/purchase/orders"
-        className="inline-flex h-7 items-center rounded-lg border px-2.5 text-sm hover:bg-muted"
-      >
-        返回列表
+    <Space wrap>
+      <Link to="/purchase/orders">
+        <Typography.Link>返回列表</Typography.Link>
       </Link>
       {s === 'DRAFT' && (
         <>
-          <Link
-            to={`/purchase/orders/${order.id}/edit`}
-            className="inline-flex h-7 items-center rounded-lg border px-2.5 text-sm hover:bg-muted"
-          >
-            编辑
+          <Link to={`/purchase/orders/${order.id}/edit`}>
+            <Typography.Link>编辑</Typography.Link>
           </Link>
           <Button type="button" size="sm" variant="destructive" onClick={() => onAction('delete')}>
             删除
@@ -365,6 +394,6 @@ function DetailActions({
           )}
         </>
       )}
-    </div>
+    </Space>
   )
 }

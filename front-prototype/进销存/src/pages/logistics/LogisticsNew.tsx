@@ -1,7 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  PageContainer,
+  ProForm,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  type ProFormInstance,
+} from '@ant-design/pro-components'
+import { Card, Form, Space, Typography } from 'antd'
 import { Button } from '@/components/ui/button'
 import { Toast } from '@/components/Toast'
+import {
+  MasterFormCol,
+  MasterFormSection,
+  masterFormColFull,
+  masterFormControlProps,
+} from '@/lib/masterFormLayout'
 import { formatDateTime } from '@/features/products/format'
 import { LOGISTICS_TYPE_OPTIONS } from '@/features/logistics/constants'
 import {
@@ -12,16 +27,14 @@ import {
 } from '@/features/logistics/storage'
 import type { Logistics, LogisticsType } from '@/features/logistics/types'
 
-type FormState = {
+type FormValues = {
   logisticsName: string
   logisticsType: LogisticsType | ''
   serviceProvider: string
   remark: string
 }
 
-type FieldErrors = Partial<Record<keyof FormState, string>>
-
-const emptyForm: FormState = {
+const emptyForm: FormValues = {
   logisticsName: '',
   logisticsType: '',
   serviceProvider: '',
@@ -34,7 +47,7 @@ function nowString(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function toForm(row: Logistics): FormState {
+function toForm(row: Logistics): FormValues {
   return {
     logisticsName: row.logisticsName,
     logisticsType: row.logisticsType,
@@ -43,78 +56,44 @@ function toForm(row: Logistics): FormState {
   }
 }
 
-function inputClass(invalid?: boolean) {
-  return [
-    'h-9 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-    invalid ? 'border-destructive' : '',
-  ].join(' ')
-}
-
-export function LogisticsNew() {
+function LogisticsFormPage({ isEdit }: { isEdit: boolean }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const isEdit = Boolean(id)
-  const existing = useMemo(() => (id ? getLogisticsById(id) : undefined), [id])
-
-  const [form, setForm] = useState<FormState>(() => (existing ? toForm(existing) : emptyForm))
-  const [errors, setErrors] = useState<FieldErrors>({})
+  const formRef = useRef<ProFormInstance<FormValues>>(null)
+  const existing = useMemo(
+    () => (isEdit && id ? getLogisticsById(id) : undefined),
+    [isEdit, id],
+  )
   const [toast, setToast] = useState<string | null>(null)
+
+  const initialValues = useMemo(() => (existing ? toForm(existing) : emptyForm), [existing])
 
   if (isEdit && !existing) {
     return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">未找到物流档案。</p>
-        <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
-          返回列表
-        </Button>
-      </div>
+      <PageContainer title="编辑物流">
+        <Typography.Text type="secondary">未找到物流档案。</Typography.Text>
+        <div style={{ marginTop: 16 }}>
+          <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
+            返回列表
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
-  function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    setErrors((prev) => {
-      if (!prev[key]) return prev
-      const next = { ...prev }
-      delete next[key]
-      return next
-    })
-  }
+  const logisticsTypeLabel =
+    LOGISTICS_TYPE_OPTIONS.find((o) => o.value === existing?.logisticsType)?.label ?? ''
 
-  function validate(): FieldErrors {
-    const next: FieldErrors = {}
-    const name = form.logisticsName.trim()
-
-    if (!name) next.logisticsName = '物流名称不能为空'
-    else if (name.length > 50) next.logisticsName = '物流名称最多 50 个字符'
-
-    if (!form.logisticsType) next.logisticsType = '请选择物流类型'
-
-    if (form.serviceProvider.trim().length > 50) {
-      next.serviceProvider = '物流服务商最多 50 个字符'
-    }
-
-    if (form.remark.length > 200) next.remark = '物流备注最多 200 个字符'
-
-    return next
-  }
-
-  function handleSubmit() {
-    const nextErrors = validate()
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors)
-      return
-    }
-
+  async function handleFinish(values: FormValues) {
     const timestamp = nowString()
 
     if (isEdit && existing) {
       upsertLogistics({
         ...existing,
-        logisticsName: form.logisticsName.trim(),
+        logisticsName: values.logisticsName.trim(),
         logisticsType: existing.logisticsType,
-        serviceProvider: form.serviceProvider.trim() || null,
-        remark: form.remark.trim() || null,
+        serviceProvider: values.serviceProvider.trim() || null,
+        remark: values.remark.trim() || null,
         updatedBy: '管理员',
         updatedAt: timestamp,
       })
@@ -122,10 +101,10 @@ export function LogisticsNew() {
       upsertLogistics({
         id: nextLogisticsId(),
         logisticsCode: nextLogisticsCode(),
-        logisticsName: form.logisticsName.trim(),
-        logisticsType: form.logisticsType as LogisticsType,
-        serviceProvider: form.serviceProvider.trim() || null,
-        remark: form.remark.trim() || null,
+        logisticsName: values.logisticsName.trim(),
+        logisticsType: values.logisticsType as LogisticsType,
+        serviceProvider: values.serviceProvider.trim() || null,
+        remark: values.remark.trim() || null,
         status: 'ENABLED',
         disableReason: null,
         isReferenced: false,
@@ -142,162 +121,131 @@ export function LogisticsNew() {
     }
 
     setToast('保存成功')
-    window.setTimeout(() => navigate('/master/logistics'), 400)
+    setTimeout(() => navigate('/master/logistics'), 400)
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4" data-anno="logistics-form-page">
-      <div
-        className="flex flex-wrap items-center justify-between gap-3"
-        data-anno="logistics-form-header"
-      >
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {isEdit ? '基础资料 / 物流管理 / 编辑' : '基础资料 / 新增物流管理'}
-          </p>
-          <h2 className="text-xl font-semibold tracking-tight">
-            {isEdit ? '编辑物流' : '新增物流'}
-          </h2>
-          <p className="text-sm text-muted-foreground">基础识别信息</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer
+      title={isEdit ? '编辑物流' : '新增物流'}
+      data-anno="logistics-form-page"
+      extra={
+        <Space data-anno="logistics-form-header">
           <Button type="button" variant="outline" onClick={() => navigate('/master/logistics')}>
             返回列表
           </Button>
-          <Button type="button" onClick={handleSubmit}>
+          <Button type="button" onClick={() => formRef.current?.submit()}>
             保存
           </Button>
-        </div>
-      </div>
-
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault()
-          handleSubmit()
-        }}
+        </Space>
+      }
+    >
+      <ProForm<FormValues>
+        formRef={formRef}
+        initialValues={initialValues}
+        layout="vertical"
+        submitter={false}
+        onFinish={handleFinish}
       >
-        <section className="rounded-xl border bg-card p-4" data-anno="logistics-form-basic">
-          <h3 className="mb-4 text-sm font-semibold">基础识别信息</h3>
+        <MasterFormSection title="基础识别信息" data-anno="logistics-form-basic">
           {!isEdit ? (
-            <p className="mb-4 text-sm text-muted-foreground">物流编码将在保存后由系统自动生成（LOG-xxxx）。</p>
+            <MasterFormCol colProps={masterFormColFull}>
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                物流编码将在保存后由系统自动生成（LOG-xxxx）。
+              </Typography.Paragraph>
+            </MasterFormCol>
           ) : null}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {isEdit && existing ? (
-              <label className="grid gap-1 text-sm lg:col-span-2">
-                <span>物流编码</span>
-                <input className={inputClass()} readOnly disabled value={existing.logisticsCode} />
-              </label>
-            ) : null}
-
-            <label className="grid gap-1 text-sm">
-              <span>
-                物流名称 <span className="text-destructive">*</span>
-              </span>
-              <input
-                className={inputClass(Boolean(errors.logisticsName))}
-                maxLength={50}
-                placeholder="请输入物流名称"
-                value={form.logisticsName}
-                onChange={(e) => updateField('logisticsName', e.target.value)}
-              />
-              {errors.logisticsName ? (
-                <span className="text-xs text-destructive">{errors.logisticsName}</span>
-              ) : null}
-            </label>
-
-            <label className="grid gap-1 text-sm">
-              <span>
-                物流类型 <span className="text-destructive">*</span>
-              </span>
-              {isEdit ? (
-                <input
-                  className={inputClass()}
-                  readOnly
-                  disabled
-                  value={
-                    LOGISTICS_TYPE_OPTIONS.find((o) => o.value === form.logisticsType)?.label ?? ''
-                  }
-                />
-              ) : (
-                <select
-                  className={inputClass(Boolean(errors.logisticsType))}
-                  value={form.logisticsType}
-                  onChange={(e) =>
-                    updateField('logisticsType', e.target.value as LogisticsType | '')
-                  }
-                >
-                  <option value="">请选择</option>
-                  {LOGISTICS_TYPE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {errors.logisticsType ? (
-                <span className="text-xs text-destructive">{errors.logisticsType}</span>
-              ) : null}
-            </label>
-
-            <label className="grid gap-1 text-sm">
-              <span>物流服务商</span>
-              <input
-                className={inputClass(Boolean(errors.serviceProvider))}
-                maxLength={50}
-                placeholder="可填写顺丰/圆通/中通/韵达/申通/邮政/其他，或自定义"
-                value={form.serviceProvider}
-                onChange={(e) => updateField('serviceProvider', e.target.value)}
-              />
-              {errors.serviceProvider ? (
-                <span className="text-xs text-destructive">{errors.serviceProvider}</span>
-              ) : null}
-            </label>
-          </div>
-
-          <label className="mt-4 grid gap-1 text-sm">
-            <span>物流备注</span>
-            <textarea
-              className="min-h-24 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              maxLength={200}
-              placeholder="补充物流说明或特殊限制"
-              value={form.remark}
-              onChange={(e) => updateField('remark', e.target.value)}
+          {isEdit && existing ? (
+            <MasterFormCol>
+              <Form.Item label="物流编码">
+                <Typography.Text>{existing.logisticsCode}</Typography.Text>
+              </Form.Item>
+            </MasterFormCol>
+          ) : null}
+          <MasterFormCol>
+            <ProFormText
+              name="logisticsName"
+              label="物流名称"
+              placeholder="请输入物流名称"
+              rules={[
+                { required: true, message: '物流名称不能为空' },
+                { max: 50, message: '物流名称最多 50 个字符' },
+              ]}
             />
-            {errors.remark ? <span className="text-xs text-destructive">{errors.remark}</span> : null}
-          </label>
-        </section>
+          </MasterFormCol>
+          {isEdit ? (
+            <MasterFormCol>
+              <Form.Item label="物流类型">
+                <Typography.Text>{logisticsTypeLabel}</Typography.Text>
+              </Form.Item>
+            </MasterFormCol>
+          ) : (
+            <MasterFormCol>
+              <ProFormSelect
+                name="logisticsType"
+                label="物流类型"
+                options={LOGISTICS_TYPE_OPTIONS}
+                rules={[{ required: true, message: '请选择物流类型' }]}
+                fieldProps={{ ...masterFormControlProps, placeholder: '请选择' }}
+              />
+            </MasterFormCol>
+          )}
+          <MasterFormCol>
+            <ProFormText
+              name="serviceProvider"
+              label="物流服务商"
+              placeholder="可填写顺丰/圆通/中通/韵达/申通/邮政/其他，或自定义"
+              rules={[{ max: 50, message: '物流服务商最多 50 个字符' }]}
+            />
+          </MasterFormCol>
+          <MasterFormCol colProps={masterFormColFull}>
+            <ProFormTextArea
+              name="remark"
+              label="物流备注"
+              placeholder="补充物流说明或特殊限制"
+              fieldProps={{ maxLength: 200, rows: 4 }}
+              rules={[{ max: 200, message: '物流备注最多 200 个字符' }]}
+            />
+          </MasterFormCol>
+        </MasterFormSection>
+      </ProForm>
 
-        {isEdit && existing ? (
-          <section className="rounded-xl border bg-card p-4" data-anno="logistics-form-system">
-            <h3 className="mb-4 text-sm font-semibold">系统信息</h3>
-            <div className="grid gap-2 text-sm sm:grid-cols-2">
-              <div>
-                <span className="text-muted-foreground">创建人：</span>
-                {existing.createdBy}
-              </div>
-              <div>
-                <span className="text-muted-foreground">创建时间：</span>
-                {formatDateTime(existing.createdAt)}
-              </div>
-              <div>
-                <span className="text-muted-foreground">最后修改人：</span>
-                {existing.updatedBy}
-              </div>
-              <div>
-                <span className="text-muted-foreground">最后修改时间：</span>
-                {formatDateTime(existing.updatedAt)}
-              </div>
-            </div>
-          </section>
-        ) : null}
-      </form>
+      {isEdit && existing ? (
+        <Card
+          title="系统信息"
+          size="small"
+          style={{ marginBottom: 16 }}
+          data-anno="logistics-form-system"
+        >
+          <Space direction="vertical" size="small">
+            <Typography.Text>
+              <Typography.Text type="secondary">创建人 </Typography.Text>
+              {existing.createdBy}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">创建时间 </Typography.Text>
+              {formatDateTime(existing.createdAt)}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改人 </Typography.Text>
+              {existing.updatedBy}
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text type="secondary">最后修改时间 </Typography.Text>
+              {formatDateTime(existing.updatedAt)}
+            </Typography.Text>
+          </Space>
+        </Card>
+      ) : null}
 
       <Toast message={toast} onDismiss={() => setToast(null)} />
-    </div>
+    </PageContainer>
   )
 }
 
+export function LogisticsNew() {
+  return <LogisticsFormPage isEdit={false} />
+}
+
 export function LogisticsEdit() {
-  return <LogisticsNew />
+  return <LogisticsFormPage isEdit={true} />
 }
