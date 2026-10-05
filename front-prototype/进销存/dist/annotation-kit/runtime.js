@@ -650,6 +650,7 @@ function openPageRulesPopup() {
 
 function diagnostics() {
   return {
+    buildId: VPA_STATE.config?.buildId || null,
     route: location.pathname + location.search + location.hash,
     view: currentViewScope(),
     coverage: VPA_STATE.config?.coverage || null,
@@ -1475,7 +1476,9 @@ async function loadConfig(refresh = false) {
     return reloadInlineBundle(new URL('./annotation.bundle.inline.js', scriptUrl).href);
   }
   // HTTP deployments always re-read the published JSON, never a stale inline snapshot.
-  const response = await fetch(bundleUrl, {cache: 'no-store'});
+  const requestUrl = new URL(bundleUrl);
+  requestUrl.searchParams.set('vpa_refresh', String(Date.now()));
+  const response = await fetch(requestUrl.href, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Failed to load annotation bundle (${response.status}): ${bundleUrl}`);
   return response.json();
 }

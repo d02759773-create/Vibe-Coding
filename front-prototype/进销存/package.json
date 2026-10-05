@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "annotations:build": "python tools/annotation/compile_annotations.py annotations/annotation.workspace.json --check-sources && python tools/annotation/compile_annotations.py annotations/annotation.workspace.json",
-    "build": "npm run annotations:build && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
