@@ -5,7 +5,7 @@ export type NavItem = {
 }
 
 export const navigation: NavItem[] = [
-  { title: '首页', path: '/' },
+  { title: 'AI 工作台', path: '/' },
   {
     title: '销售管理',
     children: [

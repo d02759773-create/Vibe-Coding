@@ -4,6 +4,7 @@ import { proLayoutRoute } from '@/config/proLayoutMenu'
 
 export function AppLayout() {
   const location = useLocation()
+  const isHomeAgent = location.pathname === '/'
 
   return (
     <ProLayout
@@ -30,7 +31,12 @@ export function AppLayout() {
         title: '管理员（占位）',
         size: 'small',
       }}
-      contentStyle={{ padding: 24 }}
+      className={isHomeAgent ? 'app-layout--agent-home' : undefined}
+      contentStyle={
+        isHomeAgent
+          ? { padding: 0, margin: 0, height: 'calc(100vh - 56px)', overflow: 'hidden' }
+          : { padding: 24 }
+      }
     >
       <Outlet />
     </ProLayout>

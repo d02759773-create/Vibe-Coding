@@ -7,7 +7,7 @@ export type RouteMeta = {
 const salesOrderMessage = '销售订单页面将在下一步生成'
 
 export const routeMetaList: RouteMeta[] = [
-  { path: '/', title: '首页' },
+  { path: '/', title: 'AI 工作台' },
   {
     path: '/sales/orders',
     title: '销售订单',

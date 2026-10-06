@@ -20,9 +20,6 @@ import { LogisticsList } from '@/pages/logistics/LogisticsList'
 import { PurchaseOrderDetail } from '@/pages/purchaseOrders/PurchaseOrderDetail'
 import { PurchaseOrderEdit, PurchaseOrderNew } from '@/pages/purchaseOrders/PurchaseOrderNew'
 import { PurchaseOrderList } from '@/pages/purchaseOrders/PurchaseOrderList'
-import { SalesOrderDetail } from '@/pages/salesOrders/SalesOrderDetail'
-import { SalesOrderEdit, SalesOrderNew } from '@/pages/salesOrders/SalesOrderNew'
-import { SalesOrderList } from '@/pages/salesOrders/SalesOrderList'
 import { DictionariesPage } from '@/pages/dictionaries/DictionariesPage'
 
 export const router = createHashRouter([
@@ -31,10 +28,11 @@ export const router = createHashRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'sales/orders', element: <SalesOrderList /> },
-      { path: 'sales/orders/new', element: <SalesOrderNew /> },
-      { path: 'sales/orders/:id/edit', element: <SalesOrderEdit /> },
-      { path: 'sales/orders/:id', element: <SalesOrderDetail /> },
+      { path: 'agent', element: <Navigate to="/" replace /> },
+      { path: 'sales/orders', element: <PlaceholderPage /> },
+      { path: 'sales/orders/new', element: <PlaceholderPage /> },
+      { path: 'sales/orders/:id/edit', element: <PlaceholderPage /> },
+      { path: 'sales/orders/:id', element: <PlaceholderPage /> },
       { path: 'sales/outbound', element: <PlaceholderPage /> },
       { path: 'sales/returns', element: <PlaceholderPage /> },
       { path: 'sales/return-inbound', element: <PlaceholderPage /> },
