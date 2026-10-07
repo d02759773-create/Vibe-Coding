@@ -220,8 +220,9 @@ function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
   return (
     <PageContainer
       title={isEdit ? '编辑客户' : '新增客户'}
+      data-anno="customer-form-page"
       extra={
-        <Space>
+        <Space data-anno="customer-form-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
             返回列表
           </Button>
@@ -249,7 +250,7 @@ function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
           }
         }}
       >
-        <MasterFormSection title="基础识别信息">
+        <MasterFormSection title="基础识别信息" data-anno="customer-form-basic">
           <MasterFormCol>
             <ProFormText
               name="customerCode"
@@ -388,7 +389,7 @@ function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
           </MasterFormCol>
         </MasterFormSection>
 
-        <MasterFormSection title="经营与结算信息">
+        <MasterFormSection title="经营与结算信息" data-anno="customer-form-settlement">
           <MasterFormCol>
             <ProFormText name="salesperson" label="归属业务员" placeholder="请输入归属业务员" />
           </MasterFormCol>
@@ -483,7 +484,7 @@ function CustomerFormPage({ isEdit }: { isEdit: boolean }) {
       </ProForm>
 
       {isEdit && existing ? (
-        <Card title="系统信息" size="small" style={{ marginBottom: 16 }}>
+        <Card title="系统信息" size="small" style={{ marginBottom: 16 }} data-anno="customer-form-system">
           <Space direction="vertical" size="small">
             <Typography.Text>
               <Typography.Text type="secondary">创建人 </Typography.Text>

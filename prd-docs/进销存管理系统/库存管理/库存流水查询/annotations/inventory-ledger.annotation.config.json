@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "库存流水查询",
+  "scope": "inventory-ledger",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "INVENTORY_LEDGER-LIST",
+      "source": "../库存流水查询_Demo_列表页.md",
+      "page": "#/inventory/ledger"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/ledger",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/inventory-ledger.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "INVENTORY_LEDGER-LIST"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/ledger",
+      "moduleName": "查询与列表",
+      "target": {
+        "selector": "[data-anno='inventory-ledger-list']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/inventory-ledger.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "INVENTORY_LEDGER-LIST"
+      ]
+    }
+  ]
+}

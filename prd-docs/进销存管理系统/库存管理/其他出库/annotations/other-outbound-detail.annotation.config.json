@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "其他出库单-详情页",
+  "scope": "other-outbound-detail",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "OTHER_OUTBOUND-DETAIL",
+      "source": "../其他出库_Demo_详情页.md",
+      "page": "#/inventory/other-outbound/:id"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/other-outbound/:id",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound/[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/other-outbound-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/other-outbound/:id",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound/[^/]+$",
+      "moduleName": "页头动作",
+      "target": {
+        "selector": "[data-anno='other-outbound-detail-actions']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-detail.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/inventory/other-outbound/:id",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound/[^/]+$",
+      "moduleName": "基本信息与明细",
+      "target": {
+        "selector": "[data-anno='other-outbound-detail-basic']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-detail.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/inventory/other-outbound/:id",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound/[^/]+$",
+      "moduleName": "制单信息",
+      "target": {
+        "selector": "[data-anno='other-outbound-detail-meta']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-detail.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-DETAIL"
+      ]
+    }
+  ]
+}

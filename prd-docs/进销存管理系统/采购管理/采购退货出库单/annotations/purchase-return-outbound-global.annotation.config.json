@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "title": "采购退货出库单-模块共用规则",
+  "scope": "purchase-return-outbound-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "PRO-G-BG", "source": "../采购退货出库单主PRD.md#1-业务背景", "page": "#/purchase/return-outbound" },
+    { "id": "PRO-G-SC", "source": "../采购退货出库单主PRD.md#6-验收", "page": "#/purchase/return-outbound" },
+    { "id": "PRO-G-ST", "source": "../采购退货出库单主PRD.md#4-状态机", "page": "#/purchase/return-outbound" },
+    { "id": "PRO-G-RU", "source": "../采购退货出库单主PRD.md#5-规则", "page": "#/purchase/return-outbound" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "模块背景与链路", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-background", "sourceRefs": ["PRO-G-BG"] },
+    { "id": "g-scenarios", "type": "global", "order": 2, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "业务场景", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-scenarios", "sourceRefs": ["PRO-G-SC"] },
+    { "id": "g-state", "type": "global", "order": 3, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "状态与流转", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-state", "sourceRefs": ["PRO-G-ST"] },
+    { "id": "g-actions", "type": "global", "order": 4, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "动作能力矩阵", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-actions", "sourceRefs": ["PRO-G-RU"] },
+    { "id": "g-rules", "type": "global", "order": 5, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "核心业务规则", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-rules", "sourceRefs": ["PRO-G-RU"] },
+    { "id": "g-permission", "type": "global", "order": 6, "page": "#/purchase/return-outbound", "routeMatcher": "(^#|^/#)/purchase/return-outbound", "moduleName": "权限与校验反馈", "markdownFile": "pages/purchase-return-outbound-global.md", "blockId": "g-permission", "sourceRefs": ["PRO-G-RU"] }
+  ]
+}

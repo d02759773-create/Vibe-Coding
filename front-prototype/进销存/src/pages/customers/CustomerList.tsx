@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type HTMLAttributes } from 'react'
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Input } from 'antd'
+import { Input, Space } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
@@ -349,17 +349,22 @@ export function CustomerList() {
     <PageContainer
       title="客户管理"
       subTitle="维护客户档案、结算与信用额度"
+      data-anno="customer-list-page"
       extra={
-        <Button type="primary" onClick={() => navigate('/master/customers/new')}>
-          新增
-        </Button>
+        <Space data-anno="customer-list-toolbar">
+          <Button type="primary" onClick={() => navigate('/master/customers/new')}>
+            新增
+          </Button>
+        </Space>
       }
     >
-      <ProTable<Customer>
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        search={{ labelWidth: 'auto', defaultCollapsed: true }}
+      <div data-anno="customer-list-filters">
+        <ProTable<Customer>
+          actionRef={actionRef}
+          rowKey="id"
+          columns={columns}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
+          cardProps={{ 'data-anno': 'customer-list-table' } as HTMLAttributes<HTMLDivElement>}
         request={async (params, sort) => {
           const applied = paramsToFilters(params)
           let filtered = filterRows(allCustomers, applied)
@@ -384,9 +389,11 @@ export function CustomerList() {
         scroll={{ x: 1200 }}
         options={false}
         columnEmptyText="暂无客户数据"
-      />
+        />
+      </div>
 
       <EnableDisableModal
+        dataAnno="customer-status-modal"
         open={Boolean(statusTarget && statusAction)}
         mode={statusAction ?? 'disable'}
         entityLabel="客户"

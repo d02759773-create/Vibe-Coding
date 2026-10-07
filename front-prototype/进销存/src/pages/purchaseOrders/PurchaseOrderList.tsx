@@ -16,6 +16,7 @@ import {
   tabCountLabel,
   closeOrderConfirmBody,
 } from '@/features/purchaseOrders/constants'
+import { blockDraftInboundsForPurchaseOrder } from '@/features/purchaseInbound/storage'
 import {
   countByTab,
   deletePurchaseOrder,
@@ -171,6 +172,7 @@ export function PurchaseOrderList() {
           break
         case 'close':
           updateOrderStatus(id, 'COMPLETED')
+          blockDraftInboundsForPurchaseOrder(id)
           setToast('订单已关闭，剩余数量不再接收')
           break
         default:
@@ -190,7 +192,7 @@ export function PurchaseOrderList() {
   }
 
   function createInbound(order: PurchaseOrder) {
-    navigate(`/purchase/inbound?purchaseOrderId=${order.id}&orderNo=${encodeURIComponent(order.orderNo)}`)
+    navigate(`/purchase/inbound/new?purchaseOrderId=${order.id}`)
   }
 
   const confirmCopy: Record<NonNullable<ConfirmAction>, { title: string; body: string; ok: string }> = {

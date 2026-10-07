@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "其他入库单-新增编辑页",
+  "scope": "other-inbound-form",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "OTHER_INBOUND-FORM",
+      "source": "../其他入库_Demo_新增编辑页.md",
+      "page": "#/inventory/other-inbound/new"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/other-inbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-inbound(/new|/[^/]+/edit)",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/other-inbound-form.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "OTHER_INBOUND-FORM"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/other-inbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-inbound(/new|/[^/]+/edit)",
+      "moduleName": "基本信息",
+      "target": {
+        "selector": "[data-anno='other-inbound-form-basic']",
+        "fallbackSelectors": [
+          "[data-anno='other-inbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-inbound-form.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "OTHER_INBOUND-FORM"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/inventory/other-inbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-inbound(/new|/[^/]+/edit)",
+      "moduleName": "商品明细",
+      "target": {
+        "selector": "[data-anno='other-inbound-form-lines']",
+        "fallbackSelectors": [
+          "[data-anno='other-inbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-inbound-form.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "OTHER_INBOUND-FORM"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/inventory/other-inbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-inbound(/new|/[^/]+/edit)",
+      "moduleName": "底部操作",
+      "target": {
+        "selector": "[data-anno='other-inbound-form-actions']",
+        "fallbackSelectors": [
+          "[data-anno='other-inbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-inbound-form.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "OTHER_INBOUND-FORM"
+      ]
+    }
+  ]
+}

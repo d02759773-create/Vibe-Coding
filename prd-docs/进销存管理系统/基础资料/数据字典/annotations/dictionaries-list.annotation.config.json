@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "数据字典-列表",
+  "scope": "dictionaries-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "DICTIONARIES_LIST-LIST",
+      "source": "../数据字典_前端Demo版PRD.md",
+      "page": "#/master/dictionaries"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/master/dictionaries",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/dictionaries-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "DICTIONARIES_LIST-LIST"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/dictionaries",
+      "moduleName": "查询与列表",
+      "target": {
+        "selector": "[data-anno='dictionaries-page']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/dictionaries-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "DICTIONARIES_LIST-LIST"
+      ]
+    }
+  ]
+}

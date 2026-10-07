@@ -31,6 +31,21 @@ import { ConfirmActionModal } from './ConfirmActionModal'
 import { MessageContent } from './MessageContent'
 import '../homeAgent.css'
 
+const STARTER_PROMPTS = [
+  {
+    label: '销售订单审核后还能改价吗？',
+    text: '销售订单审核通过后，头部价格和明细还能不能改？请按项目规则说明。',
+  },
+  {
+    label: '采购入库确认会动什么账？',
+    text: '采购入库单和采购订单是什么关系？确认入库会发生什么？请按项目规则说明。',
+  },
+  {
+    label: '主数据为什么不能删除？',
+    text: '主数据为什么没有删除，停用要满足什么条件？请按项目规则说明。',
+  },
+]
+
 export function HomeAgentPage() {
   const navigate = useNavigate()
   const initial = useMemo(() => initSessions(), [])
@@ -176,8 +191,8 @@ export function HomeAgentPage() {
     scrollToEnd()
   }, [])
 
-  const sendMessage = async () => {
-    const text = input.trim()
+  const sendMessage = async (preset?: string) => {
+    const text = (preset ?? input).trim()
     if (!text || loading) return
     if (pendingClarify) {
       setError('请先完成上方的补充信息确认，再发送新消息。')
@@ -314,8 +329,21 @@ export function HomeAgentPage() {
                 <div className="hermes-hero-watermark" aria-hidden>AI</div>
                 <h1 className="hermes-hero-title">AI 工作台</h1>
                 <p className="hermes-hero-sub">
-                  查数据、做分析、操作进销存。说明你的目标，机械性步骤交给 AI；指令不清时会先向您确认。
+                  查数据、做分析、问业务规则。开发对状态机或校验不清楚时，直接提问即可。
                 </p>
+                <div className="hermes-hero-prompts">
+                  {STARTER_PROMPTS.map((p) => (
+                    <button
+                      key={p.label}
+                      type="button"
+                      className="hermes-hero-prompt"
+                      disabled={loading}
+                      onClick={() => void sendMessage(p.text)}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="codex-thread hermes-thread">

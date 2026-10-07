@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type HTMLAttributes } from 'react'
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Input } from 'antd'
+import { Input, Space } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
@@ -297,9 +297,11 @@ export function LogisticsList() {
       title="物流管理"
       subTitle="维护物流方式与使用状态"
       extra={
-        <Button type="primary" onClick={() => navigate('/master/logistics/new')}>
-          新增
-        </Button>
+        <Space data-anno="logistics-list-toolbar">
+          <Button type="primary" onClick={() => navigate('/master/logistics/new')}>
+            新增
+          </Button>
+        </Space>
       }
       data-anno="logistics-list-page"
     >
@@ -309,6 +311,7 @@ export function LogisticsList() {
           rowKey="id"
           columns={columns}
           search={{ labelWidth: 'auto', defaultCollapsed: false }}
+          cardProps={{ 'data-anno': 'logistics-list-table' } as HTMLAttributes<HTMLDivElement>}
           request={async (params) => {
             const applied = paramsToFilters(params)
             const filtered = filterRows(allItems, applied)
@@ -325,7 +328,6 @@ export function LogisticsList() {
           pagination={{ defaultPageSize: PAGE_SIZE, showSizeChanger: true }}
           scroll={{ x: 960 }}
           options={false}
-          data-anno="logistics-list-table"
           columnEmptyText="暂无物流数据"
         />
       </div>

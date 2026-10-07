@@ -36,6 +36,261 @@
       "scope": "purchase-order-detail",
       "config": "../../../prd-docs/进销存管理系统/采购管理/采购订单/annotations/purchase-order-detail.annotation.config.json",
       "order": 12
+    },
+    {
+      "scope": "purchase-inbound-global",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购入库单/annotations/purchase-inbound-global.annotation.config.json",
+      "order": 0
+    },
+    {
+      "scope": "purchase-inbound-list",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购入库单/annotations/purchase-inbound-list.annotation.config.json",
+      "order": 1
+    },
+    {
+      "scope": "purchase-inbound-form",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购入库单/annotations/purchase-inbound-form.annotation.config.json",
+      "order": 2
+    },
+    {
+      "scope": "purchase-inbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购入库单/annotations/purchase-inbound-detail.annotation.config.json",
+      "order": 3
+    },
+    {
+      "scope": "purchase-return-global",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货单/annotations/purchase-return-global.annotation.config.json",
+      "order": 3
+    },
+    {
+      "scope": "purchase-return-list",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货单/annotations/purchase-return-list.annotation.config.json",
+      "order": 4
+    },
+    {
+      "scope": "purchase-return-form",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货单/annotations/purchase-return-form.annotation.config.json",
+      "order": 5
+    },
+    {
+      "scope": "purchase-return-detail",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货单/annotations/purchase-return-detail.annotation.config.json",
+      "order": 6
+    },
+    {
+      "scope": "purchase-return-outbound-global",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货出库单/annotations/purchase-return-outbound-global.annotation.config.json",
+      "order": 6
+    },
+    {
+      "scope": "purchase-return-outbound-list",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货出库单/annotations/purchase-return-outbound-list.annotation.config.json",
+      "order": 7
+    },
+    {
+      "scope": "purchase-return-outbound-form",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货出库单/annotations/purchase-return-outbound-form.annotation.config.json",
+      "order": 8
+    },
+    {
+      "scope": "purchase-return-outbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/采购管理/采购退货出库单/annotations/purchase-return-outbound-detail.annotation.config.json",
+      "order": 9
+    },
+    {
+      "scope": "sales-order-global",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售订单/annotations/sales-order-global.annotation.config.json",
+      "order": 9
+    },
+    {
+      "scope": "sales-order-list",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售订单/annotations/sales-order-list.annotation.config.json",
+      "order": 10
+    },
+    {
+      "scope": "sales-order-form",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售订单/annotations/sales-order-form.annotation.config.json",
+      "order": 11
+    },
+    {
+      "scope": "sales-order-detail",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售订单/annotations/sales-order-detail.annotation.config.json",
+      "order": 12
+    },
+    {
+      "scope": "sales-outbound-global",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售出库/annotations/sales-outbound-global.annotation.config.json",
+      "order": 12
+    },
+    {
+      "scope": "sales-outbound-list",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售出库/annotations/sales-outbound-list.annotation.config.json",
+      "order": 13
+    },
+    {
+      "scope": "sales-outbound-form",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售出库/annotations/sales-outbound-form.annotation.config.json",
+      "order": 14
+    },
+    {
+      "scope": "sales-outbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售出库/annotations/sales-outbound-detail.annotation.config.json",
+      "order": 15
+    },
+    {
+      "scope": "sales-return-global",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货单/annotations/sales-return-global.annotation.config.json",
+      "order": 15
+    },
+    {
+      "scope": "sales-return-list",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货单/annotations/sales-return-list.annotation.config.json",
+      "order": 16
+    },
+    {
+      "scope": "sales-return-form",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货单/annotations/sales-return-form.annotation.config.json",
+      "order": 17
+    },
+    {
+      "scope": "sales-return-detail",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货单/annotations/sales-return-detail.annotation.config.json",
+      "order": 18
+    },
+    {
+      "scope": "sales-return-inbound-global",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货入库/annotations/sales-return-inbound-global.annotation.config.json",
+      "order": 18
+    },
+    {
+      "scope": "sales-return-inbound-list",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货入库/annotations/sales-return-inbound-list.annotation.config.json",
+      "order": 19
+    },
+    {
+      "scope": "sales-return-inbound-form",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货入库/annotations/sales-return-inbound-form.annotation.config.json",
+      "order": 20
+    },
+    {
+      "scope": "sales-return-inbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/销售管理/销售退货入库/annotations/sales-return-inbound-detail.annotation.config.json",
+      "order": 21
+    },
+    {
+      "scope": "other-inbound-global",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他入库/annotations/other-inbound-global.annotation.config.json",
+      "order": 21
+    },
+    {
+      "scope": "other-inbound-list",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他入库/annotations/other-inbound-list.annotation.config.json",
+      "order": 22
+    },
+    {
+      "scope": "other-inbound-form",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他入库/annotations/other-inbound-form.annotation.config.json",
+      "order": 23
+    },
+    {
+      "scope": "other-inbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他入库/annotations/other-inbound-detail.annotation.config.json",
+      "order": 24
+    },
+    {
+      "scope": "other-outbound-global",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他出库/annotations/other-outbound-global.annotation.config.json",
+      "order": 24
+    },
+    {
+      "scope": "other-outbound-list",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他出库/annotations/other-outbound-list.annotation.config.json",
+      "order": 25
+    },
+    {
+      "scope": "other-outbound-form",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他出库/annotations/other-outbound-form.annotation.config.json",
+      "order": 26
+    },
+    {
+      "scope": "other-outbound-detail",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/其他出库/annotations/other-outbound-detail.annotation.config.json",
+      "order": 27
+    },
+    {
+      "scope": "product-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/商品管理/annotations/product-list.annotation.config.json",
+      "order": 28
+    },
+    {
+      "scope": "product-form",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/商品管理/annotations/product-form.annotation.config.json",
+      "order": 35
+    },
+    {
+      "scope": "product-detail",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/商品管理/annotations/product-detail.annotation.config.json",
+      "order": 36
+    },
+    {
+      "scope": "customer-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/客户管理/annotations/customer-list.annotation.config.json",
+      "order": 29
+    },
+    {
+      "scope": "customer-form",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/客户管理/annotations/customer-form.annotation.config.json",
+      "order": 37
+    },
+    {
+      "scope": "customer-detail",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/客户管理/annotations/customer-detail.annotation.config.json",
+      "order": 38
+    },
+    {
+      "scope": "supplier-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/供应商管理/annotations/supplier-list.annotation.config.json",
+      "order": 30
+    },
+    {
+      "scope": "supplier-form",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/供应商管理/annotations/supplier-form.annotation.config.json",
+      "order": 39
+    },
+    {
+      "scope": "supplier-detail",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/供应商管理/annotations/supplier-detail.annotation.config.json",
+      "order": 40
+    },
+    {
+      "scope": "logistics-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/物流管理/annotations/logistics-list.annotation.config.json",
+      "order": 31
+    },
+    {
+      "scope": "logistics-form",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/物流管理/annotations/logistics-form.annotation.config.json",
+      "order": 41
+    },
+    {
+      "scope": "logistics-detail",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/物流管理/annotations/logistics-detail.annotation.config.json",
+      "order": 42
+    },
+    {
+      "scope": "dictionaries-list",
+      "config": "../../../prd-docs/进销存管理系统/基础资料/数据字典/annotations/dictionaries-list.annotation.config.json",
+      "order": 32
+    },
+    {
+      "scope": "inventory-on-hand",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/即时库存查询/annotations/inventory-on-hand.annotation.config.json",
+      "order": 33
+    },
+    {
+      "scope": "inventory-ledger",
+      "config": "../../../prd-docs/进销存管理系统/库存管理/库存流水查询/annotations/inventory-ledger.annotation.config.json",
+      "order": 34
     }
   ],
   "runtime": {

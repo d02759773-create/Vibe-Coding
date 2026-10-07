@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "title": "商品档案-列表页",
+  "scope": "product-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "PRD-LIST-TOOLBAR", "source": "../商品档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/products" },
+    { "id": "PRD-LIST-FILTER", "source": "../商品档案_前端Demo版PRD.md#21-查询条件区", "page": "#/master/products" },
+    { "id": "PRD-LIST-TABLE", "source": "../商品档案_前端Demo版PRD.md#22-表格列定义", "page": "#/master/products" },
+    { "id": "PRD-LIST-STATUS", "source": "../商品档案_前端Demo版PRD.md#22-表格列定义", "page": "#/master/products" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/master/products",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/product-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["PRD-LIST-TOOLBAR"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/products",
+      "moduleName": "列表工具栏",
+      "target": { "selector": "[data-anno='product-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-list.md",
+      "blockId": "1",
+      "sourceRefs": ["PRD-LIST-TOOLBAR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/products",
+      "moduleName": "查询条件",
+      "target": { "selector": "[data-anno='product-list-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-list.md",
+      "blockId": "2",
+      "sourceRefs": ["PRD-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/products",
+      "moduleName": "列表与分页",
+      "target": { "selector": "[data-anno='product-list-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-list.md",
+      "blockId": "3",
+      "sourceRefs": ["PRD-LIST-TABLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/products",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='product-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-list.md",
+      "blockId": "4",
+      "sourceRefs": ["PRD-LIST-STATUS"]
+    }
+  ]
+}

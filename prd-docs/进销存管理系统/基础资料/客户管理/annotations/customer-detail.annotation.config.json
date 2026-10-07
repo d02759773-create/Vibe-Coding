@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "客户档案-详情页",
+  "scope": "customer-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "CUST-DETAIL-ACTIONS", "source": "../客户档案_前端Demo版PRD.md#三查看页规范", "page": "#/master/customers/:id" },
+    { "id": "CUST-DETAIL-FIELDS", "source": "../客户档案_前端Demo版PRD.md#三查看页规范", "page": "#/master/customers/:id" },
+    { "id": "CUST-DETAIL-STATUS", "source": "../客户档案_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/customers/:id" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/customers/",
+      "routeMatcher": "(^#|^/#)/master/customers/(?!new$)[^/]+$",
+      "moduleName": "详情操作区",
+      "target": { "selector": "[data-anno='customer-detail-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["CUST-DETAIL-ACTIONS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/customers/",
+      "routeMatcher": "(^#|^/#)/master/customers/(?!new$)[^/]+$",
+      "moduleName": "详情信息区",
+      "target": { "selector": "[data-anno='customer-detail-sections']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["CUST-DETAIL-FIELDS"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/customers/",
+      "routeMatcher": "(^#|^/#)/master/customers/(?!new$)[^/]+$",
+      "moduleName": "禁用弹窗",
+      "target": { "selector": "[data-anno='customer-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-detail.md",
+      "blockId": "3",
+      "sourceRefs": ["CUST-DETAIL-STATUS"]
+    }
+  ]
+}

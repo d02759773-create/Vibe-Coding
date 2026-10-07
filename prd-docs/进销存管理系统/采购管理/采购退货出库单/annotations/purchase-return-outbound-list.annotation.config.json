@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "采购退货出库单-列表页",
+  "scope": "purchase-return-outbound-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "PURCHASE_RETURN_OUTBOUND-GLOBAL",
+      "source": "../采购退货出库单主PRD.md",
+      "page": "#/purchase/return-outbound"
+    },
+    {
+      "id": "PURCHASE_RETURN_OUTBOUND-LIST",
+      "source": "../采购退货出库单_Demo_列表页.md",
+      "page": "#/purchase/return-outbound"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/return-outbound",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-return-outbound-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "PURCHASE_RETURN_OUTBOUND-GLOBAL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/return-outbound",
+      "moduleName": "状态 Tab",
+      "target": {
+        "selector": "[data-anno='purchase-return-outbound-tabs']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-return-outbound-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "PURCHASE_RETURN_OUTBOUND-LIST"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/return-outbound",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='purchase-return-outbound-filters']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-return-outbound-list.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "PURCHASE_RETURN_OUTBOUND-LIST"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/return-outbound",
+      "moduleName": "工具条",
+      "target": {
+        "selector": "[data-anno='purchase-return-outbound-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-return-outbound-list.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "PURCHASE_RETURN_OUTBOUND-LIST"
+      ]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/purchase/return-outbound",
+      "moduleName": "列表与行操作",
+      "target": {
+        "selector": "[data-anno='purchase-return-outbound-table']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-return-outbound-list.md",
+      "blockId": "4",
+      "sourceRefs": [
+        "PURCHASE_RETURN_OUTBOUND-LIST"
+      ]
+    }
+  ]
+}

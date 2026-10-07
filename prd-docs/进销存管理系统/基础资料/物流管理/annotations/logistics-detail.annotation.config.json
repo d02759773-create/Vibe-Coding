@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "物流档案-详情页",
+  "scope": "logistics-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "LOG-DETAIL-ACTIONS", "source": "../物流管理_前端Demo版PRD.md#三查看页规范", "page": "#/master/logistics/:id" },
+    { "id": "LOG-DETAIL-FIELDS", "source": "../物流管理_前端Demo版PRD.md#三查看页规范", "page": "#/master/logistics/:id" },
+    { "id": "LOG-DETAIL-STATUS", "source": "../物流管理_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/logistics/:id" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/logistics/",
+      "routeMatcher": "(^#|^/#)/master/logistics/(?!new$)[^/]+$",
+      "moduleName": "详情操作区",
+      "target": { "selector": "[data-anno='logistics-detail-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["LOG-DETAIL-ACTIONS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/logistics/",
+      "routeMatcher": "(^#|^/#)/master/logistics/(?!new$)[^/]+$",
+      "moduleName": "详情信息区",
+      "target": { "selector": "[data-anno='logistics-detail-sections']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["LOG-DETAIL-FIELDS"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/logistics/",
+      "routeMatcher": "(^#|^/#)/master/logistics/(?!new$)[^/]+$",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='logistics-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-detail.md",
+      "blockId": "3",
+      "sourceRefs": ["LOG-DETAIL-STATUS"]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { getCustomerById, listCustomers, persistCustomers } from '@/features/customers/storage'
-import { getProductById, listProducts, upsertProduct } from '@/features/products/storage'
+import { getProductById, upsertProduct } from '@/features/products/storage'
 import { getSupplierById, listSuppliers, persistSuppliers } from '@/features/suppliers/storage'
 import { getWarehouseById, listWarehouses, persistWarehouses } from '@/features/warehouses/storage'
 import {
@@ -7,6 +7,7 @@ import {
   type CreatePurchaseOrderInput,
 } from '../actions/createPurchaseOrder'
 import type { ConfirmActionPayload } from '../types'
+import { dataSourceMap } from './dataSources'
 
 export function applyConfirmedAction(payload: ConfirmActionPayload): {
   ok: boolean
@@ -83,23 +84,11 @@ export function applyConfirmedAction(payload: ConfirmActionPayload): {
   if (action === 'export_entity_json') {
     const entity = String(params.entity ?? '')
     const limit = Math.min(Number(params.limit) || 100, 500)
-    let items: unknown[] = []
-    switch (entity) {
-      case 'products':
-        items = listProducts().slice(0, limit)
-        break
-      case 'customers':
-        items = listCustomers().slice(0, limit)
-        break
-      case 'suppliers':
-        items = listSuppliers().slice(0, limit)
-        break
-      case 'warehouses':
-        items = listWarehouses().slice(0, limit)
-        break
-      default:
-        return { ok: false, message: `不支持的导出 entity: ${entity}` }
+    const source = dataSourceMap[entity]
+    if (!source) {
+      return { ok: false, message: `不支持的导出 entity: ${entity}` }
     }
+    const items = source.list().slice(0, limit)
     const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

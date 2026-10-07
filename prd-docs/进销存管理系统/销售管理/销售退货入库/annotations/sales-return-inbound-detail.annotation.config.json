@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "销售退货入库单-详情页",
+  "scope": "sales-return-inbound-detail",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "SALES_RETURN_INBOUND-DETAIL",
+      "source": "../销售退货入库_Demo_.md",
+      "page": "#/sales/return-inbound/:id"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/sales/return-inbound/:id",
+      "routeMatcher": "(^#|^/#)/sales/return-inbound/[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/sales-return-inbound-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/sales/return-inbound/:id",
+      "routeMatcher": "(^#|^/#)/sales/return-inbound/[^/]+$",
+      "moduleName": "页头动作",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-detail-actions']",
+        "fallbackSelectors": [
+          "[data-anno='sales-return-inbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/sales-return-inbound-detail.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/sales/return-inbound/:id",
+      "routeMatcher": "(^#|^/#)/sales/return-inbound/[^/]+$",
+      "moduleName": "基本信息与明细",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-detail-basic']",
+        "fallbackSelectors": [
+          "[data-anno='sales-return-inbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/sales-return-inbound-detail.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-DETAIL"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/sales/return-inbound/:id",
+      "routeMatcher": "(^#|^/#)/sales/return-inbound/[^/]+$",
+      "moduleName": "制单信息",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-detail-meta']",
+        "fallbackSelectors": [
+          "[data-anno='sales-return-inbound-detail']"
+        ]
+      },
+      "markdownFile": "pages/sales-return-inbound-detail.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-DETAIL"
+      ]
+    }
+  ]
+}

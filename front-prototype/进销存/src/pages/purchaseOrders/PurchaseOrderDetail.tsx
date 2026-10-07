@@ -15,6 +15,7 @@ import {
   closeOrderConfirmBody,
   inboundLinkStatusLabel,
 } from '@/features/purchaseOrders/constants'
+import { blockDraftInboundsForPurchaseOrder } from '@/features/purchaseInbound/storage'
 import {
   deletePurchaseOrder,
   getPurchaseOrderById,
@@ -93,14 +94,14 @@ export function PurchaseOrderDetail() {
       {
         title: '入库单号',
         dataIndex: 'inboundNo',
-        render: (no: string) => (
-          <Link to={`/purchase/inbound?inboundNo=${encodeURIComponent(no)}`}>
+        render: (no: string, row) => (
+          <Link to={`/purchase/inbound/${row.id}`}>
             <Typography.Link>{no}</Typography.Link>
           </Link>
         ),
       },
       { title: '入库日期', dataIndex: 'inboundDate' },
-      { title: '本次入库数量', dataIndex: 'totalQty' },
+      { title: '本次入库总数量', dataIndex: 'totalQty' },
       { title: '操作人', dataIndex: 'operator' },
       {
         title: '状态',
@@ -168,6 +169,7 @@ export function PurchaseOrderDetail() {
           break
         case 'close':
           updateOrderStatus(current.id, 'COMPLETED')
+          blockDraftInboundsForPurchaseOrder(current.id)
           setToast('订单已关闭，剩余数量不再接收')
           break
       }
@@ -223,7 +225,7 @@ export function PurchaseOrderDetail() {
             onAction={(a) => setConfirmAction(a)}
             onInbound={() =>
               navigate(
-                `/purchase/inbound?purchaseOrderId=${order.id}&orderNo=${encodeURIComponent(order.orderNo)}`,
+                `/purchase/inbound/new?purchaseOrderId=${order.id}`,
               )
             }
           />
@@ -346,17 +348,18 @@ function DetailActions({
   onAction: (a: ConfirmAction) => void
   onInbound: () => void
 }) {
+  const navigate = useNavigate()
   const s: PurchaseOrderStatus = order.status
   return (
     <Space wrap>
-      <Link to="/purchase/orders">
-        <Typography.Link>返回列表</Typography.Link>
-      </Link>
+      <Button type="default" size="sm" onClick={() => navigate('/purchase/orders')}>
+        返回列表
+      </Button>
       {s === 'DRAFT' && (
         <>
-          <Link to={`/purchase/orders/${order.id}/edit`}>
-            <Typography.Link>编辑</Typography.Link>
-          </Link>
+          <Button type="default" size="sm" onClick={() => navigate(`/purchase/orders/${order.id}/edit`)}>
+            编辑
+          </Button>
           <Button type="button" size="sm" variant="destructive" onClick={() => onAction('delete')}>
             删除
           </Button>

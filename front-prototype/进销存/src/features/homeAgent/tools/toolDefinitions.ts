@@ -1,3 +1,5 @@
+import { ENTITY_KEYS, describeDataSources } from './dataSources'
+
 export const agentToolDefinitions = [
   {
     type: 'function',
@@ -124,18 +126,41 @@ export const agentToolDefinitions = [
     type: 'function',
     function: {
       name: 'query_master_list',
-      description: '只读查询系统 Mock 主数据或订单列表',
+      description: `只读查询系统 Mock 主数据与业务单据。可选 entity：${describeDataSources()}。销售分析用 sales_orders/sales_outbound，采购分析用 purchase_orders/purchase_inbound。`,
       parameters: {
         type: 'object',
         properties: {
           entity: {
             type: 'string',
-            enum: ['products', 'customers', 'suppliers', 'warehouses', 'purchase_orders'],
+            enum: ENTITY_KEYS,
           },
           keyword: { type: 'string', description: '模糊匹配名称或编码' },
-          limit: { type: 'integer', description: '返回条数上限，默认 20' },
+          limit: { type: 'integer', description: '返回条数上限，默认 20，最大 50' },
         },
         required: ['entity'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'query_project_logic',
+      description:
+        '检索已编译业务标注（跨页规则/页面规则：背景、状态机、动作矩阵、字段口径）。不含完整主 PRD。开发问项目逻辑时用它查，禁止编造。keyword 为空且未指定 module 时返回 availableModules 目录。',
+      parameters: {
+        type: 'object',
+        properties: {
+          keyword: {
+            type: 'string',
+            description: '业务关键词，可空格分隔多个词，如「销售出库 确认 库存」',
+          },
+          module: {
+            type: 'string',
+            description: '可选，按模块/页面过滤，如「采购入库」「sales-order」',
+          },
+          page: { type: 'string', description: '可选，按页面路由过滤，如「#/sales/orders」' },
+          limit: { type: 'integer', description: '返回条数，默认 5，最大 10' },
+        },
       },
     },
   },

@@ -109,8 +109,9 @@ export function SupplierDetail() {
       title="供应商详情"
       subTitle={supplier.supplierCode}
       tags={<StatusPill status={supplier.status} />}
+      data-anno="supplier-detail-page"
       extra={
-        <Space wrap>
+        <Space wrap data-anno="supplier-detail-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/suppliers')}>
             返回列表
           </Button>
@@ -133,7 +134,7 @@ export function SupplierDetail() {
         </Space>
       }
     >
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }} data-anno="supplier-detail-sections">
         <DetailSection title="供应商资料">
           <DetailFieldRow label="供应商编码" value={supplier.supplierCode} />
           <DetailFieldRow label="供应商名称" value={supplier.supplierName} />
@@ -162,6 +163,7 @@ export function SupplierDetail() {
       </Space>
 
       <EnableDisableModal
+        dataAnno="supplier-status-modal"
         open={statusAction !== null}
         mode={statusAction ?? 'disable'}
         entityLabel="供应商"

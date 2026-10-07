@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties, type HTMLAttributes } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageContainer } from '@ant-design/pro-components'
-import { Button as AntButton, Col, Input, Row, Select, Space, Table, Typography } from 'antd'
+import { Button as AntButton, Col, DatePicker, Input, InputNumber, Row, Select, Space, Table, Typography } from 'antd'
+import dayjs from 'dayjs'
 import type { ColumnsType } from 'antd/es/table'
 import { Button } from '@/components/ui/button'
 import { PageSection } from '@/components/layout/PageSection'
@@ -355,16 +356,14 @@ function PurchaseOrderForm({ mode }: { mode: 'new' | 'edit' }) {
         title: '采购数量',
         render: (_v, line) => (
           <div>
-            <Input
-              type="number"
+            <InputNumber
               style={{ width: 96 }}
               min={1}
+              precision={0}
               value={line.quantity}
               disabled={!line.productId}
               status={lineErrors[line.id]?.quantity ? 'error' : undefined}
-              onChange={(e) =>
-                updateLine(line.id, { quantity: Math.max(0, parseInt(e.target.value, 10) || 0) })
-              }
+              onChange={(v) => updateLine(line.id, { quantity: Math.max(0, Number(v) || 0) })}
               onBlur={() => validateLineOnBlur(line)}
             />
             {lineErrors[line.id]?.quantity ? (
@@ -379,18 +378,16 @@ function PurchaseOrderForm({ mode }: { mode: 'new' | 'edit' }) {
         title: '单价（含税）',
         render: (_v, line) => (
           <div>
-            <Input
-              type="number"
+            <InputNumber
               style={{ width: 112 }}
               min={0}
               step={0.01}
+              precision={2}
               prefix="¥"
               value={line.unitPrice}
               disabled={!line.productId}
               status={lineErrors[line.id]?.unitPrice ? 'error' : undefined}
-              onChange={(e) =>
-                updateLine(line.id, { unitPrice: Math.max(0, parseFloat(e.target.value) || 0) })
-              }
+              onChange={(v) => updateLine(line.id, { unitPrice: Math.max(0, Number(v) || 0) })}
               onBlur={() => validateLineOnBlur(line)}
             />
             {lineErrors[line.id]?.unitPrice ? (
@@ -517,14 +514,14 @@ function PurchaseOrderForm({ mode }: { mode: 'new' | 'edit' }) {
           <Col {...formFieldCol}>
             <Space direction="vertical" size={4} style={{ width: '100%' }}>
               <Typography.Text>下单日期</Typography.Text>
-              <Input
-                type="date"
+              <DatePicker
+                style={{ width: '100%' }}
                 data-field="orderDate"
                 status={fieldErrors.orderDate ? 'error' : undefined}
-                value={orderDate}
-                max={todayDateString()}
-                onChange={(e) => {
-                  setOrderDate(e.target.value)
+                value={orderDate ? dayjs(orderDate) : undefined}
+                disabledDate={(d) => d.isAfter(dayjs(), 'day')}
+                onChange={(d) => {
+                  setOrderDate(d ? d.format('YYYY-MM-DD') : '')
                   setFieldErrors((prev) => {
                     if (!prev.orderDate) return prev
                     const next = { ...prev }
@@ -544,11 +541,11 @@ function PurchaseOrderForm({ mode }: { mode: 'new' | 'edit' }) {
           <Col {...formFieldCol}>
             <Space direction="vertical" size={4} style={{ width: '100%' }}>
               <Typography.Text>预计到货日期</Typography.Text>
-              <Input
-                type="date"
-                value={expectedArrivalDate}
-                onChange={(e) => {
-                  setExpectedArrivalDate(e.target.value)
+              <DatePicker
+                style={{ width: '100%' }}
+                value={expectedArrivalDate ? dayjs(expectedArrivalDate) : undefined}
+                onChange={(d) => {
+                  setExpectedArrivalDate(d ? d.format('YYYY-MM-DD') : '')
                   markDirty()
                 }}
               />

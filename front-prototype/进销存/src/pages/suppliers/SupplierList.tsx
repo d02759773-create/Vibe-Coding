@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type HTMLAttributes } from 'react'
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Input } from 'antd'
+import { Input, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
@@ -230,17 +230,22 @@ export function SupplierList() {
     <PageContainer
       title="供应商管理"
       subTitle="查询、维护供应商档案与结算规则"
+      data-anno="supplier-list-page"
       extra={
-        <Button type="primary" onClick={() => navigate('/master/suppliers/new')}>
-          新增供应商
-        </Button>
+        <Space data-anno="supplier-list-toolbar">
+          <Button type="primary" onClick={() => navigate('/master/suppliers/new')}>
+            新增供应商
+          </Button>
+        </Space>
       }
     >
-      <ProTable<Supplier>
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        search={{ labelWidth: 'auto' }}
+      <div data-anno="supplier-list-filters">
+        <ProTable<Supplier>
+          actionRef={actionRef}
+          rowKey="id"
+          columns={columns}
+          search={{ labelWidth: 'auto' }}
+          cardProps={{ 'data-anno': 'supplier-list-table' } as HTMLAttributes<HTMLDivElement>}
         request={async (params) => {
           const applied: SupplierListFilters = {
             keyword: String(params.keyword ?? ''),
@@ -263,9 +268,11 @@ export function SupplierList() {
         scroll={{ x: 1000 }}
         options={false}
         columnEmptyText="暂无数据"
-      />
+        />
+      </div>
 
       <EnableDisableModal
+        dataAnno="supplier-status-modal"
         open={Boolean(statusTarget && statusAction)}
         mode={statusAction ?? 'disable'}
         entityLabel="供应商"

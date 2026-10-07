@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "其他出库单-新增编辑页",
+  "scope": "other-outbound-form",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "OTHER_OUTBOUND-FORM",
+      "source": "../其他出库_Demo_新增编辑页.md",
+      "page": "#/inventory/other-outbound/new"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/other-outbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound(/new|/[^/]+/edit)",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/other-outbound-form.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/other-outbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound(/new|/[^/]+/edit)",
+      "moduleName": "基本信息",
+      "target": {
+        "selector": "[data-anno='other-outbound-form-basic']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-form.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/inventory/other-outbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound(/new|/[^/]+/edit)",
+      "moduleName": "商品明细",
+      "target": {
+        "selector": "[data-anno='other-outbound-form-lines']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-form.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/inventory/other-outbound/new",
+      "routeMatcher": "(^#|^/#)/inventory/other-outbound(/new|/[^/]+/edit)",
+      "moduleName": "底部操作",
+      "target": {
+        "selector": "[data-anno='other-outbound-form-actions']",
+        "fallbackSelectors": [
+          "[data-anno='other-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/other-outbound-form.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "OTHER_OUTBOUND-FORM"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "其他入库单-模块共用规则",
+  "scope": "other-inbound-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "OIN-G-BG", "source": "../其他入库-业务流程推演.md", "page": "#/inventory/other-inbound" },
+    { "id": "OIN-G-ST", "source": "../其他入库-业务流程推演.md", "page": "#/inventory/other-inbound" },
+    { "id": "OIN-G-FL", "source": "../其他入库字段清单.md", "page": "#/inventory/other-inbound" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/inventory/other-inbound", "routeMatcher": "(^#|^/#)/inventory/other-inbound", "moduleName": "模块背景与链路", "markdownFile": "pages/other-inbound-global.md", "blockId": "g-background", "sourceRefs": ["OIN-G-BG"] },
+    { "id": "g-state", "type": "global", "order": 2, "page": "#/inventory/other-inbound", "routeMatcher": "(^#|^/#)/inventory/other-inbound", "moduleName": "状态与流转", "markdownFile": "pages/other-inbound-global.md", "blockId": "g-state", "sourceRefs": ["OIN-G-ST"] },
+    { "id": "g-actions", "type": "global", "order": 3, "page": "#/inventory/other-inbound", "routeMatcher": "(^#|^/#)/inventory/other-inbound", "moduleName": "动作能力矩阵", "markdownFile": "pages/other-inbound-global.md", "blockId": "g-actions", "sourceRefs": ["OIN-G-ST"] },
+    { "id": "g-rules", "type": "global", "order": 4, "page": "#/inventory/other-inbound", "routeMatcher": "(^#|^/#)/inventory/other-inbound", "moduleName": "核心业务规则", "markdownFile": "pages/other-inbound-global.md", "blockId": "g-rules", "sourceRefs": ["OIN-G-FL"] },
+    { "id": "g-permission", "type": "global", "order": 5, "page": "#/inventory/other-inbound", "routeMatcher": "(^#|^/#)/inventory/other-inbound", "moduleName": "权限与校验反馈", "markdownFile": "pages/other-inbound-global.md", "blockId": "g-permission", "sourceRefs": ["OIN-G-BG"] }
+  ]
+}

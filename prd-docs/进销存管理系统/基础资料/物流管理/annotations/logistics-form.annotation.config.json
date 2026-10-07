@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "title": "物流档案-新增编辑页",
+  "scope": "logistics-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "LOG-FORM-GLOBAL", "source": "../物流管理_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/logistics/new" },
+    { "id": "LOG-FORM-BASIC", "source": "../物流管理_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/logistics/new" },
+    { "id": "LOG-FORM-SYSTEM", "source": "../物流管理_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/logistics/:id/edit" },
+    { "id": "LOG-FORM-ACTIONS", "source": "../物流管理_前端Demo版PRD.md#七反馈规范", "page": "#/master/logistics/new" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/logistics/new",
+      "routeMatcher": "(^#|^/#)/master/logistics/(new|[^/]+/edit)$",
+      "moduleName": "表单全局规则",
+      "target": { "selector": "[data-anno='logistics-form-page']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-form.md",
+      "blockId": "1",
+      "sourceRefs": ["LOG-FORM-GLOBAL"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/logistics/new",
+      "routeMatcher": "(^#|^/#)/master/logistics/(new|[^/]+/edit)$",
+      "moduleName": "基础识别信息",
+      "target": { "selector": "[data-anno='logistics-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-form.md",
+      "blockId": "2",
+      "sourceRefs": ["LOG-FORM-BASIC"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/logistics/",
+      "routeMatcher": "(^#|^/#)/master/logistics/[^/]+/edit$",
+      "moduleName": "系统信息",
+      "target": { "selector": "[data-anno='logistics-form-system']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-form.md",
+      "blockId": "3",
+      "sourceRefs": ["LOG-FORM-SYSTEM"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/logistics/new",
+      "routeMatcher": "(^#|^/#)/master/logistics/(new|[^/]+/edit)$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='logistics-form-header']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-form.md",
+      "blockId": "4",
+      "sourceRefs": ["LOG-FORM-ACTIONS"]
+    }
+  ]
+}

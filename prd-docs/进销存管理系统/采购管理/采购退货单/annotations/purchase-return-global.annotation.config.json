@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "采购退货单-模块共用规则",
+  "scope": "purchase-return-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "PRT-G-BG", "source": "../采购退货单主PRD.md#1-业务背景", "page": "#/purchase/returns" },
+    { "id": "PRT-G-SC", "source": "../采购退货单主PRD.md#8-验收要点", "page": "#/purchase/returns" },
+    { "id": "PRT-G-ST", "source": "../采购退货单主PRD.md#4-状态机", "page": "#/purchase/returns" },
+    { "id": "PRT-G-AC", "source": "../采购退货单主PRD.md#5-动作矩阵摘要", "page": "#/purchase/returns" },
+    { "id": "PRT-G-RU", "source": "../采购退货单主PRD.md#6-核心业务规则", "page": "#/purchase/returns" },
+    { "id": "PRT-G-PR", "source": "../采购退货单主PRD.md#7-权限一期简化", "page": "#/purchase/returns" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "模块背景与链路", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-background", "sourceRefs": ["PRT-G-BG"] },
+    { "id": "g-scenarios", "type": "global", "order": 2, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "业务场景", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-scenarios", "sourceRefs": ["PRT-G-SC"] },
+    { "id": "g-state", "type": "global", "order": 3, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "状态与流转", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-state", "sourceRefs": ["PRT-G-ST"] },
+    { "id": "g-actions", "type": "global", "order": 4, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "动作能力矩阵", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-actions", "sourceRefs": ["PRT-G-AC"] },
+    { "id": "g-rules", "type": "global", "order": 5, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "核心业务规则", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-rules", "sourceRefs": ["PRT-G-RU"] },
+    { "id": "g-permission", "type": "global", "order": 6, "page": "#/purchase/returns", "routeMatcher": "(^#|^/#)/purchase/returns", "moduleName": "权限与校验反馈", "markdownFile": "pages/purchase-return-global.md", "blockId": "g-permission", "sourceRefs": ["PRT-G-PR"] }
+  ]
+}

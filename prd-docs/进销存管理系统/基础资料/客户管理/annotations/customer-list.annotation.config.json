@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "title": "客户档案-列表页",
+  "scope": "customer-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "CUST-LIST-TOOLBAR", "source": "../客户档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/customers" },
+    { "id": "CUST-LIST-FILTER", "source": "../客户档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/customers" },
+    { "id": "CUST-LIST-TABLE", "source": "../客户档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/customers" },
+    { "id": "CUST-LIST-STATUS", "source": "../客户档案_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/customers" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/master/customers",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/customer-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["CUST-LIST-TOOLBAR"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/customers",
+      "moduleName": "列表工具栏",
+      "target": { "selector": "[data-anno='customer-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-list.md",
+      "blockId": "1",
+      "sourceRefs": ["CUST-LIST-TOOLBAR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/customers",
+      "moduleName": "查询条件",
+      "target": { "selector": "[data-anno='customer-list-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-list.md",
+      "blockId": "2",
+      "sourceRefs": ["CUST-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/customers",
+      "moduleName": "列表与分页",
+      "target": { "selector": "[data-anno='customer-list-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-list.md",
+      "blockId": "3",
+      "sourceRefs": ["CUST-LIST-TABLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/customers",
+      "moduleName": "禁用弹窗",
+      "target": { "selector": "[data-anno='customer-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-list.md",
+      "blockId": "4",
+      "sourceRefs": ["CUST-LIST-STATUS"]
+    }
+  ]
+}

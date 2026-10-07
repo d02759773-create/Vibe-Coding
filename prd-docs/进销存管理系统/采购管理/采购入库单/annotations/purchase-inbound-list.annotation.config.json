@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "采购入库单-列表页",
+  "scope": "purchase-inbound-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "PURCHASE_INBOUND-GLOBAL",
+      "source": "../采购入库单主PRD.md",
+      "page": "#/purchase/inbound"
+    },
+    {
+      "id": "PURCHASE_INBOUND-LIST",
+      "source": "../采购入库单_Demo_列表页.md",
+      "page": "#/purchase/inbound"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/inbound",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-inbound-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "PURCHASE_INBOUND-GLOBAL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/inbound",
+      "moduleName": "状态 Tab",
+      "target": {
+        "selector": "[data-anno='purchase-inbound-tabs']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-inbound-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "PURCHASE_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/inbound",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='purchase-inbound-filters']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-inbound-list.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "PURCHASE_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/inbound",
+      "moduleName": "工具条",
+      "target": {
+        "selector": "[data-anno='purchase-inbound-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-inbound-list.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "PURCHASE_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/purchase/inbound",
+      "moduleName": "列表与行操作",
+      "target": {
+        "selector": "[data-anno='purchase-inbound-table']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/purchase-inbound-list.md",
+      "blockId": "4",
+      "sourceRefs": [
+        "PURCHASE_INBOUND-LIST"
+      ]
+    }
+  ]
+}

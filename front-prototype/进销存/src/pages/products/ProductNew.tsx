@@ -183,8 +183,9 @@ function ProductFormPage({ isEdit }: { isEdit: boolean }) {
   return (
     <PageContainer
       title={isEdit ? '编辑商品' : '新增商品'}
+      data-anno="product-form-page"
       extra={
-        <Space>
+        <Space data-anno="product-form-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/products')}>
             返回列表
           </Button>
@@ -201,7 +202,7 @@ function ProductFormPage({ isEdit }: { isEdit: boolean }) {
         submitter={false}
         onFinish={handleFinish}
       >
-        <MasterFormSection title="基础资料">
+        <MasterFormSection title="基础资料" data-anno="product-form-basic">
           <MasterFormCol>
             <ProFormText
               name="productCode"
@@ -293,7 +294,7 @@ function ProductFormPage({ isEdit }: { isEdit: boolean }) {
           </MasterFormCol>
         </MasterFormSection>
 
-        <MasterFormSection title="价格与说明">
+        <MasterFormSection title="价格与说明" data-anno="product-form-price">
           <MasterFormCol>
             <ProFormText
               name="defaultRetailPrice"
@@ -360,7 +361,7 @@ function ProductFormPage({ isEdit }: { isEdit: boolean }) {
       </ProForm>
 
       {isEdit && existing ? (
-        <Card title="系统信息" size="small" style={{ marginBottom: 16 }}>
+        <Card title="系统信息" size="small" style={{ marginBottom: 16 }} data-anno="product-form-system">
           <Space direction="vertical" size="small">
             <Typography.Text>
               <Typography.Text type="secondary">创建人 </Typography.Text>

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "销售退货入库单-模块共用规则",
+  "scope": "sales-return-inbound-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SRI-G-BG", "source": "../销售退货入库主PRD.md", "page": "#/sales/return-inbound" },
+    { "id": "SRI-G-DEMO", "source": "../销售退货入库_Demo_.md", "page": "#/sales/return-inbound" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "模块背景与链路", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-background", "sourceRefs": ["SRI-G-BG"] },
+    { "id": "g-scenarios", "type": "global", "order": 2, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "业务场景", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-scenarios", "sourceRefs": ["SRI-G-DEMO"] },
+    { "id": "g-state", "type": "global", "order": 3, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "状态与流转", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-state", "sourceRefs": ["SRI-G-BG"] },
+    { "id": "g-actions", "type": "global", "order": 4, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "动作能力矩阵", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-actions", "sourceRefs": ["SRI-G-BG"] },
+    { "id": "g-rules", "type": "global", "order": 5, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "核心业务规则", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-rules", "sourceRefs": ["SRI-G-BG"] },
+    { "id": "g-permission", "type": "global", "order": 6, "page": "#/sales/return-inbound", "routeMatcher": "(^#|^/#)/sales/return-inbound", "moduleName": "权限与校验反馈", "markdownFile": "pages/sales-return-inbound-global.md", "blockId": "g-permission", "sourceRefs": ["SRI-G-DEMO"] }
+  ]
+}

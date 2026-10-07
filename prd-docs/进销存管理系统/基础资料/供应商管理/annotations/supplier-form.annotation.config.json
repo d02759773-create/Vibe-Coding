@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "title": "供应商档案-新增编辑页",
+  "scope": "supplier-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SUP-FORM-GLOBAL", "source": "../供应商档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/suppliers/new" },
+    { "id": "SUP-FORM-BASIC", "source": "../供应商档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/suppliers/new" },
+    { "id": "SUP-FORM-SETTLE", "source": "../供应商档案字段清单.md", "page": "#/master/suppliers/new" },
+    { "id": "SUP-FORM-SYSTEM", "source": "../供应商档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/suppliers/:id/edit" },
+    { "id": "SUP-FORM-ACTIONS", "source": "../供应商档案_前端Demo版PRD.md#七反馈规范", "page": "#/master/suppliers/new" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/suppliers/new",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(new|[^/]+/edit)$",
+      "moduleName": "表单全局规则",
+      "target": { "selector": "[data-anno='supplier-form-page']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-form.md",
+      "blockId": "1",
+      "sourceRefs": ["SUP-FORM-GLOBAL"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/suppliers/new",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(new|[^/]+/edit)$",
+      "moduleName": "供应商资料",
+      "target": { "selector": "[data-anno='supplier-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-form.md",
+      "blockId": "2",
+      "sourceRefs": ["SUP-FORM-BASIC"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/suppliers/new",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(new|[^/]+/edit)$",
+      "moduleName": "结算规则",
+      "target": { "selector": "[data-anno='supplier-form-settlement']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-form.md",
+      "blockId": "3",
+      "sourceRefs": ["SUP-FORM-SETTLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/suppliers/",
+      "routeMatcher": "(^#|^/#)/master/suppliers/[^/]+/edit$",
+      "moduleName": "系统信息",
+      "target": { "selector": "[data-anno='supplier-form-system']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-form.md",
+      "blockId": "4",
+      "sourceRefs": ["SUP-FORM-SYSTEM"]
+    },
+    {
+      "id": "5",
+      "order": 5,
+      "page": "#/master/suppliers/new",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(new|[^/]+/edit)$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='supplier-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-form.md",
+      "blockId": "5",
+      "sourceRefs": ["SUP-FORM-ACTIONS"]
+    }
+  ]
+}

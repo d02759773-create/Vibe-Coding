@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "其他入库单-列表页",
+  "scope": "other-inbound-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "OTHER_INBOUND-GLOBAL",
+      "source": "../其他入库主PRD.md",
+      "page": "#/inventory/other-inbound"
+    },
+    {
+      "id": "OTHER_INBOUND-LIST",
+      "source": "../其他入库_Demo_列表页.md",
+      "page": "#/inventory/other-inbound"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/other-inbound",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/other-inbound-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "OTHER_INBOUND-GLOBAL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/other-inbound",
+      "moduleName": "状态 Tab",
+      "target": {
+        "selector": "[data-anno='other-inbound-tabs']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/other-inbound-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "OTHER_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/inventory/other-inbound",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='other-inbound-filters']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/other-inbound-list.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "OTHER_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/inventory/other-inbound",
+      "moduleName": "工具条",
+      "target": {
+        "selector": "[data-anno='other-inbound-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/other-inbound-list.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "OTHER_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/inventory/other-inbound",
+      "moduleName": "列表与行操作",
+      "target": {
+        "selector": "[data-anno='other-inbound-table']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/other-inbound-list.md",
+      "blockId": "4",
+      "sourceRefs": [
+        "OTHER_INBOUND-LIST"
+      ]
+    }
+  ]
+}

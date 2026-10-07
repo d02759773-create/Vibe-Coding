@@ -222,11 +222,43 @@
 
 .hermes-workbench .hermes-hero-sub {
   margin: 12px 0 0;
-  max-width: 480px;
+  max-width: 520px;
   font-size: 14px;
   line-height: 1.65;
   color: var(--codex-muted);
   position: relative;
+}
+
+.hermes-workbench .hermes-hero-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  max-width: 560px;
+  position: relative;
+}
+
+.hermes-workbench .hermes-hero-prompt {
+  appearance: none;
+  border: 1px solid var(--codex-border, #e5e7eb);
+  background: #fff;
+  color: inherit;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.hermes-workbench .hermes-hero-prompt:hover:not(:disabled) {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+}
+
+.hermes-workbench .hermes-hero-prompt:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .hermes-workbench .hermes-error {

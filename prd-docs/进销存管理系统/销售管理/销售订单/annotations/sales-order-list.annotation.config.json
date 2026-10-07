@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "销售订单-列表页",
+  "scope": "sales-order-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "SALES_ORDER-GLOBAL",
+      "source": "../销售订单主PRD.md",
+      "page": "#/sales/orders"
+    },
+    {
+      "id": "SALES_ORDER-LIST",
+      "source": "../销售订单_Demo_.md",
+      "page": "#/sales/orders"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/sales/orders",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/sales-order-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "SALES_ORDER-GLOBAL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/sales/orders",
+      "moduleName": "状态 Tab",
+      "target": {
+        "selector": "[data-anno='sales-order-tabs']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-order-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "SALES_ORDER-LIST"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/sales/orders",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='sales-order-filters']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-order-list.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "SALES_ORDER-LIST"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/sales/orders",
+      "moduleName": "工具条",
+      "target": {
+        "selector": "[data-anno='sales-order-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-order-list.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "SALES_ORDER-LIST"
+      ]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/sales/orders",
+      "moduleName": "列表与行操作",
+      "target": {
+        "selector": "[data-anno='sales-order-table']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-order-list.md",
+      "blockId": "4",
+      "sourceRefs": [
+        "SALES_ORDER-LIST"
+      ]
+    }
+  ]
+}

@@ -133,7 +133,7 @@ async function runAgentLoop(params: LoopParams): Promise<RunAgentOutcome> {
       for (const call of result.tool_calls) {
         let exec: ToolExecutionResult
         try {
-          exec = executeTool(call.function.name, call.function.arguments, call.id, params.toolContext)
+          exec = await executeTool(call.function.name, call.function.arguments, call.id, params.toolContext)
         } catch {
           exec = { kind: 'result', content: JSON.stringify({ error: '工具参数 JSON 无效' }) }
         }

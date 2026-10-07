@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "title": "销售退货入库单-列表页",
+  "scope": "sales-return-inbound-list",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "SALES_RETURN_INBOUND-GLOBAL",
+      "source": "../销售退货入库主PRD.md",
+      "page": "#/sales/return-inbound"
+    },
+    {
+      "id": "SALES_RETURN_INBOUND-LIST",
+      "source": "../销售退货入库_Demo_.md",
+      "page": "#/sales/return-inbound"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/sales/return-inbound",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/sales-return-inbound-list.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-GLOBAL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/sales/return-inbound",
+      "moduleName": "状态 Tab",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-tabs']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-return-inbound-list.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/sales/return-inbound",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-filters']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-return-inbound-list.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/sales/return-inbound",
+      "moduleName": "工具条",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-list-toolbar']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-return-inbound-list.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-LIST"
+      ]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/sales/return-inbound",
+      "moduleName": "列表与行操作",
+      "target": {
+        "selector": "[data-anno='sales-return-inbound-table']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/sales-return-inbound-list.md",
+      "blockId": "4",
+      "sourceRefs": [
+        "SALES_RETURN_INBOUND-LIST"
+      ]
+    }
+  ]
+}

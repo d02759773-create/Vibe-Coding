@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type HTMLAttributes } from 'react'
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Input } from 'antd'
+import { Input, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { TableRowActions, tableActionLinkStyle } from '@/components/table/TableRowActions'
@@ -242,17 +242,22 @@ export function ProductList() {
     <PageContainer
       title="商品管理"
       subTitle="查询、维护商品档案与启停用状态"
+      data-anno="product-list-page"
       extra={
-        <Button type="primary" onClick={() => navigate('/master/products/new')}>
-          新增商品
-        </Button>
+        <Space data-anno="product-list-toolbar">
+          <Button type="primary" onClick={() => navigate('/master/products/new')}>
+            新增商品
+          </Button>
+        </Space>
       }
     >
-      <ProTable<Product>
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        search={{ labelWidth: 'auto' }}
+      <div data-anno="product-list-filters">
+        <ProTable<Product>
+          actionRef={actionRef}
+          rowKey="id"
+          columns={columns}
+          search={{ labelWidth: 'auto' }}
+          cardProps={{ 'data-anno': 'product-list-table' } as HTMLAttributes<HTMLDivElement>}
         request={async (params) => {
           const applied: ProductListFilters = {
             keyword: String(params.keyword ?? ''),
@@ -274,9 +279,11 @@ export function ProductList() {
         scroll={{ x: 1100 }}
         options={false}
         columnEmptyText="暂无数据"
-      />
+        />
+      </div>
 
       <EnableDisableModal
+        dataAnno="product-status-modal"
         open={Boolean(statusTarget && statusAction)}
         mode={statusAction ?? 'disable'}
         entityLabel="商品"

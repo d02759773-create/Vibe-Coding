@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "销售退货单-模块共用规则",
+  "scope": "sales-return-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SRT-G-BG", "source": "../销售退货单主PRD.md", "page": "#/sales/returns" },
+    { "id": "SRT-G-DEMO", "source": "../销售退货单_Demo_.md", "page": "#/sales/returns" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "模块背景与链路", "markdownFile": "pages/sales-return-global.md", "blockId": "g-background", "sourceRefs": ["SRT-G-BG"] },
+    { "id": "g-scenarios", "type": "global", "order": 2, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "业务场景", "markdownFile": "pages/sales-return-global.md", "blockId": "g-scenarios", "sourceRefs": ["SRT-G-DEMO"] },
+    { "id": "g-state", "type": "global", "order": 3, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "状态与流转", "markdownFile": "pages/sales-return-global.md", "blockId": "g-state", "sourceRefs": ["SRT-G-BG"] },
+    { "id": "g-actions", "type": "global", "order": 4, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "动作能力矩阵", "markdownFile": "pages/sales-return-global.md", "blockId": "g-actions", "sourceRefs": ["SRT-G-BG"] },
+    { "id": "g-rules", "type": "global", "order": 5, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "核心业务规则", "markdownFile": "pages/sales-return-global.md", "blockId": "g-rules", "sourceRefs": ["SRT-G-BG"] },
+    { "id": "g-permission", "type": "global", "order": 6, "page": "#/sales/returns", "routeMatcher": "(^#|^/#)/sales/returns", "moduleName": "权限与校验反馈", "markdownFile": "pages/sales-return-global.md", "blockId": "g-permission", "sourceRefs": ["SRT-G-DEMO"] }
+  ]
+}

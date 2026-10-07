@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "采购退货单-详情页",
+  "scope": "purchase-return-detail",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "PURCHASE_RETURN-DETAIL",
+      "source": "../采购退货单_Demo_详情页.md",
+      "page": "#/purchase/returns/:id"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/purchase/returns/:id",
+      "routeMatcher": "(^#|^/#)/purchase/returns/[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/purchase-return-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "PURCHASE_RETURN-DETAIL"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/purchase/returns/:id",
+      "routeMatcher": "(^#|^/#)/purchase/returns/[^/]+$",
+      "moduleName": "页头动作",
+      "target": {
+        "selector": "[data-anno='purchase-return-detail-actions']",
+        "fallbackSelectors": [
+          "[data-anno='purchase-return-detail']"
+        ]
+      },
+      "markdownFile": "pages/purchase-return-detail.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "PURCHASE_RETURN-DETAIL"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/purchase/returns/:id",
+      "routeMatcher": "(^#|^/#)/purchase/returns/[^/]+$",
+      "moduleName": "基本信息与明细",
+      "target": {
+        "selector": "[data-anno='purchase-return-detail-basic']",
+        "fallbackSelectors": [
+          "[data-anno='purchase-return-detail']"
+        ]
+      },
+      "markdownFile": "pages/purchase-return-detail.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "PURCHASE_RETURN-DETAIL"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/purchase/returns/:id",
+      "routeMatcher": "(^#|^/#)/purchase/returns/[^/]+$",
+      "moduleName": "制单信息",
+      "target": {
+        "selector": "[data-anno='purchase-return-detail-meta']",
+        "fallbackSelectors": [
+          "[data-anno='purchase-return-detail']"
+        ]
+      },
+      "markdownFile": "pages/purchase-return-detail.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "PURCHASE_RETURN-DETAIL"
+      ]
+    }
+  ]
+}

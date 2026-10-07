@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "供应商档案-详情页",
+  "scope": "supplier-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SUP-DETAIL-ACTIONS", "source": "../供应商档案_前端Demo版PRD.md#三查看页规范", "page": "#/master/suppliers/:id" },
+    { "id": "SUP-DETAIL-FIELDS", "source": "../供应商档案_前端Demo版PRD.md#三查看页规范", "page": "#/master/suppliers/:id" },
+    { "id": "SUP-DETAIL-STATUS", "source": "../供应商档案_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/suppliers/:id" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/suppliers/",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(?!new$)[^/]+$",
+      "moduleName": "详情操作区",
+      "target": { "selector": "[data-anno='supplier-detail-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["SUP-DETAIL-ACTIONS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/suppliers/",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(?!new$)[^/]+$",
+      "moduleName": "详情信息区",
+      "target": { "selector": "[data-anno='supplier-detail-sections']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["SUP-DETAIL-FIELDS"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/suppliers/",
+      "routeMatcher": "(^#|^/#)/master/suppliers/(?!new$)[^/]+$",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='supplier-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-detail.md",
+      "blockId": "3",
+      "sourceRefs": ["SUP-DETAIL-STATUS"]
+    }
+  ]
+}

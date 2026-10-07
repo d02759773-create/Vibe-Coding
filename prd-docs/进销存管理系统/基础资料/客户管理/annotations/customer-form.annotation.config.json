@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "title": "客户档案-新增编辑页",
+  "scope": "customer-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "CUST-FORM-GLOBAL", "source": "../客户档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/customers/new" },
+    { "id": "CUST-FORM-BASIC", "source": "../客户档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/customers/new" },
+    { "id": "CUST-FORM-SETTLE", "source": "../客户档案字段清单.md", "page": "#/master/customers/new" },
+    { "id": "CUST-FORM-SYSTEM", "source": "../客户档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/customers/:id/edit" },
+    { "id": "CUST-FORM-ACTIONS", "source": "../客户档案_前端Demo版PRD.md#七反馈规范", "page": "#/master/customers/new" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/customers/new",
+      "routeMatcher": "(^#|^/#)/master/customers/(new|[^/]+/edit)$",
+      "moduleName": "表单全局规则",
+      "target": { "selector": "[data-anno='customer-form-page']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-form.md",
+      "blockId": "1",
+      "sourceRefs": ["CUST-FORM-GLOBAL"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/customers/new",
+      "routeMatcher": "(^#|^/#)/master/customers/(new|[^/]+/edit)$",
+      "moduleName": "基础识别信息",
+      "target": { "selector": "[data-anno='customer-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-form.md",
+      "blockId": "2",
+      "sourceRefs": ["CUST-FORM-BASIC"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/customers/new",
+      "routeMatcher": "(^#|^/#)/master/customers/(new|[^/]+/edit)$",
+      "moduleName": "经营与结算",
+      "target": { "selector": "[data-anno='customer-form-settlement']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-form.md",
+      "blockId": "3",
+      "sourceRefs": ["CUST-FORM-SETTLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/customers/",
+      "routeMatcher": "(^#|^/#)/master/customers/[^/]+/edit$",
+      "moduleName": "系统信息",
+      "target": { "selector": "[data-anno='customer-form-system']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-form.md",
+      "blockId": "4",
+      "sourceRefs": ["CUST-FORM-SYSTEM"]
+    },
+    {
+      "id": "5",
+      "order": 5,
+      "page": "#/master/customers/new",
+      "routeMatcher": "(^#|^/#)/master/customers/(new|[^/]+/edit)$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='customer-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/customer-form.md",
+      "blockId": "5",
+      "sourceRefs": ["CUST-FORM-ACTIONS"]
+    }
+  ]
+}

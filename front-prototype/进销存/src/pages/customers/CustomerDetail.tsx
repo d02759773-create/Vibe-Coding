@@ -134,8 +134,9 @@ export function CustomerDetail() {
       title="客户详情"
       subTitle={customer.customerCode}
       tags={<StatusPill status={customer.status} />}
+      data-anno="customer-detail-page"
       extra={
-        <Space wrap>
+        <Space wrap data-anno="customer-detail-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/customers')}>
             返回列表
           </Button>
@@ -158,7 +159,7 @@ export function CustomerDetail() {
         </Space>
       }
     >
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }} data-anno="customer-detail-sections">
         <DetailSection title="基础识别信息">
           <DetailFieldRow label="客户编码" value={customer.customerCode} />
           <DetailFieldRow label="客户名称" value={customer.customerName} />
@@ -205,6 +206,7 @@ export function CustomerDetail() {
       </Space>
 
       <EnableDisableModal
+        dataAnno="customer-status-modal"
         open={statusAction !== null}
         mode={statusAction ?? 'disable'}
         entityLabel="客户"

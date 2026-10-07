@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "title": "销售出库单-模块共用规则",
+  "scope": "sales-outbound-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "DO-G-BG", "source": "../销售出库主PRD.md", "page": "#/sales/outbound" },
+    { "id": "DO-G-ST", "source": "../销售出库主PRD.md", "page": "#/sales/outbound" },
+    { "id": "DO-G-RU", "source": "../销售出库主PRD.md", "page": "#/sales/outbound" },
+    { "id": "DO-G-DEMO", "source": "../销售出库_Demo_.md", "page": "#/sales/outbound" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "模块背景与链路", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-background", "sourceRefs": ["DO-G-BG"] },
+    { "id": "g-scenarios", "type": "global", "order": 2, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "业务场景", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-scenarios", "sourceRefs": ["DO-G-DEMO"] },
+    { "id": "g-state", "type": "global", "order": 3, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "状态与流转", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-state", "sourceRefs": ["DO-G-ST"] },
+    { "id": "g-actions", "type": "global", "order": 4, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "动作能力矩阵", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-actions", "sourceRefs": ["DO-G-RU"] },
+    { "id": "g-rules", "type": "global", "order": 5, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "核心业务规则", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-rules", "sourceRefs": ["DO-G-RU"] },
+    { "id": "g-permission", "type": "global", "order": 6, "page": "#/sales/outbound", "routeMatcher": "(^#|^/#)/sales/outbound", "moduleName": "权限与校验反馈", "markdownFile": "pages/sales-outbound-global.md", "blockId": "g-permission", "sourceRefs": ["DO-G-DEMO"] }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "其他出库单-模块共用规则",
+  "scope": "other-outbound-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "OOUT-G-BG", "source": "../其他出库-业务流程推演.md", "page": "#/inventory/other-outbound" },
+    { "id": "OOUT-G-ST", "source": "../其他出库-业务流程推演.md", "page": "#/inventory/other-outbound" },
+    { "id": "OOUT-G-FL", "source": "../其他出库字段清单.md", "page": "#/inventory/other-outbound" }
+  ],
+  "annotations": [
+    { "id": "g-background", "type": "global", "order": 1, "page": "#/inventory/other-outbound", "routeMatcher": "(^#|^/#)/inventory/other-outbound", "moduleName": "模块背景与链路", "markdownFile": "pages/other-outbound-global.md", "blockId": "g-background", "sourceRefs": ["OOUT-G-BG"] },
+    { "id": "g-state", "type": "global", "order": 2, "page": "#/inventory/other-outbound", "routeMatcher": "(^#|^/#)/inventory/other-outbound", "moduleName": "状态与流转", "markdownFile": "pages/other-outbound-global.md", "blockId": "g-state", "sourceRefs": ["OOUT-G-ST"] },
+    { "id": "g-actions", "type": "global", "order": 3, "page": "#/inventory/other-outbound", "routeMatcher": "(^#|^/#)/inventory/other-outbound", "moduleName": "动作能力矩阵", "markdownFile": "pages/other-outbound-global.md", "blockId": "g-actions", "sourceRefs": ["OOUT-G-ST"] },
+    { "id": "g-rules", "type": "global", "order": 4, "page": "#/inventory/other-outbound", "routeMatcher": "(^#|^/#)/inventory/other-outbound", "moduleName": "核心业务规则", "markdownFile": "pages/other-outbound-global.md", "blockId": "g-rules", "sourceRefs": ["OOUT-G-FL"] },
+    { "id": "g-permission", "type": "global", "order": 5, "page": "#/inventory/other-outbound", "routeMatcher": "(^#|^/#)/inventory/other-outbound", "moduleName": "权限与校验反馈", "markdownFile": "pages/other-outbound-global.md", "blockId": "g-permission", "sourceRefs": ["OOUT-G-BG"] }
+  ]
+}

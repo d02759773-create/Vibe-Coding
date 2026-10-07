@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "title": "销售订单-模块共用规则",
+  "scope": "sales-order-global",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SO-G-BG", "source": "../销售订单主PRD.md#1-背景", "page": "#/sales/orders" },
+    { "id": "SO-G-SC", "source": "../销售订单主PRD.md#2-范围", "page": "#/sales/orders" },
+    { "id": "SO-G-ST", "source": "../销售订单主PRD.md#3-状态机", "page": "#/sales/orders" },
+    { "id": "SO-G-AC", "source": "../销售订单主PRD.md#4-动作矩阵", "page": "#/sales/orders" },
+    { "id": "SO-G-RU", "source": "../销售订单主PRD.md#5-规则", "page": "#/sales/orders" },
+    { "id": "SO-G-PR", "source": "../销售订单_Demo_.md#八离开与阻断", "page": "#/sales/orders" }
+  ],
+  "annotations": [
+    {
+      "id": "g-background",
+      "type": "global",
+      "order": 1,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "模块背景与链路",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-background",
+      "sourceRefs": ["SO-G-BG", "SO-G-SC"]
+    },
+    {
+      "id": "g-scenarios",
+      "type": "global",
+      "order": 2,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "业务场景",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-scenarios",
+      "sourceRefs": ["SO-G-SC"]
+    },
+    {
+      "id": "g-state",
+      "type": "global",
+      "order": 3,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "状态与流转",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-state",
+      "sourceRefs": ["SO-G-ST"]
+    },
+    {
+      "id": "g-actions",
+      "type": "global",
+      "order": 4,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "动作能力矩阵",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-actions",
+      "sourceRefs": ["SO-G-AC"]
+    },
+    {
+      "id": "g-rules",
+      "type": "global",
+      "order": 5,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "核心业务规则",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-rules",
+      "sourceRefs": ["SO-G-RU"]
+    },
+    {
+      "id": "g-permission",
+      "type": "global",
+      "order": 6,
+      "page": "#/sales/orders",
+      "routeMatcher": "(^#|^/#)/sales/orders",
+      "moduleName": "权限与校验反馈",
+      "markdownFile": "pages/sales-order-global.md",
+      "blockId": "g-permission",
+      "sourceRefs": ["SO-G-PR"]
+    }
+  ]
+}

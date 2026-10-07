@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "title": "销售出库单-新增编辑页",
+  "scope": "sales-outbound-form",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "SALES_OUTBOUND-FORM",
+      "source": "../销售出库_Demo_.md",
+      "page": "#/sales/outbound/new"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/sales/outbound/new",
+      "routeMatcher": "(^#|^/#)/sales/outbound(/new|/[^/]+/edit)",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/sales-outbound-form.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "SALES_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/sales/outbound/new",
+      "routeMatcher": "(^#|^/#)/sales/outbound(/new|/[^/]+/edit)",
+      "moduleName": "基本信息",
+      "target": {
+        "selector": "[data-anno='sales-outbound-form-basic']",
+        "fallbackSelectors": [
+          "[data-anno='sales-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/sales-outbound-form.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "SALES_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/sales/outbound/new",
+      "routeMatcher": "(^#|^/#)/sales/outbound(/new|/[^/]+/edit)",
+      "moduleName": "商品明细",
+      "target": {
+        "selector": "[data-anno='sales-outbound-form-lines']",
+        "fallbackSelectors": [
+          "[data-anno='sales-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/sales-outbound-form.md",
+      "blockId": "2",
+      "sourceRefs": [
+        "SALES_OUTBOUND-FORM"
+      ]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/sales/outbound/new",
+      "routeMatcher": "(^#|^/#)/sales/outbound(/new|/[^/]+/edit)",
+      "moduleName": "底部操作",
+      "target": {
+        "selector": "[data-anno='sales-outbound-form-actions']",
+        "fallbackSelectors": [
+          "[data-anno='sales-outbound-form']"
+        ]
+      },
+      "markdownFile": "pages/sales-outbound-form.md",
+      "blockId": "3",
+      "sourceRefs": [
+        "SALES_OUTBOUND-FORM"
+      ]
+    }
+  ]
+}

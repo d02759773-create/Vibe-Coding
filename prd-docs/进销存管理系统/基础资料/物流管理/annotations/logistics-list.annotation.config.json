@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "title": "物流档案-列表页",
+  "scope": "logistics-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "LOG-LIST-TOOLBAR", "source": "../物流管理_前端Demo版PRD.md#二列表页规范", "page": "#/master/logistics" },
+    { "id": "LOG-LIST-FILTER", "source": "../物流管理_前端Demo版PRD.md#二列表页规范", "page": "#/master/logistics" },
+    { "id": "LOG-LIST-TABLE", "source": "../物流管理_前端Demo版PRD.md#二列表页规范", "page": "#/master/logistics" },
+    { "id": "LOG-LIST-STATUS", "source": "../物流管理_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/logistics" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/master/logistics",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/logistics-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["LOG-LIST-TOOLBAR"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/logistics",
+      "moduleName": "列表工具栏",
+      "target": { "selector": "[data-anno='logistics-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-list.md",
+      "blockId": "1",
+      "sourceRefs": ["LOG-LIST-TOOLBAR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/logistics",
+      "moduleName": "查询条件",
+      "target": { "selector": "[data-anno='logistics-list-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-list.md",
+      "blockId": "2",
+      "sourceRefs": ["LOG-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/logistics",
+      "moduleName": "列表与分页",
+      "target": { "selector": "[data-anno='logistics-list-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-list.md",
+      "blockId": "3",
+      "sourceRefs": ["LOG-LIST-TABLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/logistics",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='logistics-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/logistics-list.md",
+      "blockId": "4",
+      "sourceRefs": ["LOG-LIST-STATUS"]
+    }
+  ]
+}

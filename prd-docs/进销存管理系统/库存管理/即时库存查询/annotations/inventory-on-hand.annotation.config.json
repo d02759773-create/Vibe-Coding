@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "即时库存查询",
+  "scope": "inventory-on-hand",
+  "sourceBase": ".",
+  "mermaid": {
+    "enabled": true,
+    "src": "",
+    "options": {}
+  },
+  "sourceRequirements": [
+    {
+      "id": "INVENTORY_ON_HAND-LIST",
+      "source": "../即时库存查询_Demo_列表页.md",
+      "page": "#/inventory/on-hand"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/inventory/on-hand",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/inventory-on-hand.md",
+      "blockId": "page-global",
+      "sourceRefs": [
+        "INVENTORY_ON_HAND-LIST"
+      ]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/inventory/on-hand",
+      "moduleName": "查询与列表",
+      "target": {
+        "selector": "[data-anno='inventory-on-hand-list']",
+        "fallbackSelectors": []
+      },
+      "markdownFile": "pages/inventory-on-hand.md",
+      "blockId": "1",
+      "sourceRefs": [
+        "INVENTORY_ON_HAND-LIST"
+      ]
+    }
+  ]
+}

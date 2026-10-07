@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "title": "供应商档案-列表页",
+  "scope": "supplier-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "SUP-LIST-TOOLBAR", "source": "../供应商档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/suppliers" },
+    { "id": "SUP-LIST-FILTER", "source": "../供应商档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/suppliers" },
+    { "id": "SUP-LIST-TABLE", "source": "../供应商档案_前端Demo版PRD.md#二列表页规范", "page": "#/master/suppliers" },
+    { "id": "SUP-LIST-STATUS", "source": "../供应商档案_前端Demo版PRD.md#六校验与保存规则", "page": "#/master/suppliers" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/master/suppliers",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/supplier-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["SUP-LIST-TOOLBAR"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/suppliers",
+      "moduleName": "列表工具栏",
+      "target": { "selector": "[data-anno='supplier-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-list.md",
+      "blockId": "1",
+      "sourceRefs": ["SUP-LIST-TOOLBAR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/suppliers",
+      "moduleName": "查询条件",
+      "target": { "selector": "[data-anno='supplier-list-filters']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-list.md",
+      "blockId": "2",
+      "sourceRefs": ["SUP-LIST-FILTER"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/suppliers",
+      "moduleName": "列表与分页",
+      "target": { "selector": "[data-anno='supplier-list-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-list.md",
+      "blockId": "3",
+      "sourceRefs": ["SUP-LIST-TABLE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/suppliers",
+      "moduleName": "启停用弹窗",
+      "target": { "selector": "[data-anno='supplier-status-modal']", "fallbackSelectors": [] },
+      "markdownFile": "pages/supplier-list.md",
+      "blockId": "4",
+      "sourceRefs": ["SUP-LIST-STATUS"]
+    }
+  ]
+}

@@ -109,8 +109,9 @@ export function ProductDetail() {
       title="商品详情"
       subTitle={product.productCode}
       tags={<StatusPill status={product.status} />}
+      data-anno="product-detail-page"
       extra={
-        <Space wrap>
+        <Space wrap data-anno="product-detail-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/products')}>
             返回列表
           </Button>
@@ -133,7 +134,7 @@ export function ProductDetail() {
         </Space>
       }
     >
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }} data-anno="product-detail-sections">
         <DetailSection title="基础资料">
           <DetailFieldRow label="商品编码" value={product.productCode} />
           <DetailFieldRow label="商品名称" value={product.productName} />
@@ -166,6 +167,7 @@ export function ProductDetail() {
       </Space>
 
       <EnableDisableModal
+        dataAnno="product-status-modal"
         open={statusAction !== null}
         mode={statusAction ?? 'disable'}
         entityLabel="商品"

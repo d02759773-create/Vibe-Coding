@@ -157,8 +157,9 @@ function SupplierFormPage({ isEdit }: { isEdit: boolean }) {
   return (
     <PageContainer
       title={isEdit ? '编辑供应商' : '新增供应商'}
+      data-anno="supplier-form-page"
       extra={
-        <Space>
+        <Space data-anno="supplier-form-actions">
           <Button type="button" variant="outline" onClick={() => navigate('/master/suppliers')}>
             返回列表
           </Button>
@@ -180,7 +181,7 @@ function SupplierFormPage({ isEdit }: { isEdit: boolean }) {
           }
         }}
       >
-        <MasterFormSection title="供应商资料">
+        <MasterFormSection title="供应商资料" data-anno="supplier-form-basic">
           <MasterFormCol>
             <ProFormText
               name="supplierCode"
@@ -263,7 +264,7 @@ function SupplierFormPage({ isEdit }: { isEdit: boolean }) {
           </MasterFormCol>
         </MasterFormSection>
 
-        <MasterFormSection title="结算规则">
+        <MasterFormSection title="结算规则" data-anno="supplier-form-settlement">
           <MasterFormCol>
             <ProFormSelect
               name="settlementMethod"
@@ -321,7 +322,7 @@ function SupplierFormPage({ isEdit }: { isEdit: boolean }) {
       </ProForm>
 
       {isEdit && existing ? (
-        <Card title="系统信息" size="small" style={{ marginBottom: 16 }}>
+        <Card title="系统信息" size="small" style={{ marginBottom: 16 }} data-anno="supplier-form-system">
           <Space direction="vertical" size="small">
             <Typography.Text>
               <Typography.Text type="secondary">创建人 </Typography.Text>

@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "title": "商品档案-新增编辑页",
+  "scope": "product-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "PRD-FORM-GLOBAL", "source": "../商品档案_前端Demo版PRD.md#42-模式差异说明", "page": "#/master/products/new" },
+    { "id": "PRD-FORM-BASIC", "source": "../商品档案_前端Demo版PRD.md#41-字段控件与显隐规则", "page": "#/master/products/new" },
+    { "id": "PRD-FORM-PRICE", "source": "../商品档案字段清单.md", "page": "#/master/products/new" },
+    { "id": "PRD-FORM-SYSTEM", "source": "../商品档案_前端Demo版PRD.md#42-模式差异说明", "page": "#/master/products/:id/edit" },
+    { "id": "PRD-FORM-ACTIONS", "source": "../商品档案_前端Demo版PRD.md#四新增--编辑页规范", "page": "#/master/products/new" }
+  ],
+  "annotations": [
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/master/products/new",
+      "routeMatcher": "(^#|^/#)/master/products/(new|[^/]+/edit)$",
+      "moduleName": "表单全局规则",
+      "target": { "selector": "[data-anno='product-form-page']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-form.md",
+      "blockId": "1",
+      "sourceRefs": ["PRD-FORM-GLOBAL"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/master/products/new",
+      "routeMatcher": "(^#|^/#)/master/products/(new|[^/]+/edit)$",
+      "moduleName": "基础资料",
+      "target": { "selector": "[data-anno='product-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-form.md",
+      "blockId": "2",
+      "sourceRefs": ["PRD-FORM-BASIC"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/master/products/new",
+      "routeMatcher": "(^#|^/#)/master/products/(new|[^/]+/edit)$",
+      "moduleName": "价格与说明",
+      "target": { "selector": "[data-anno='product-form-price']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-form.md",
+      "blockId": "3",
+      "sourceRefs": ["PRD-FORM-PRICE"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/master/products/",
+      "routeMatcher": "(^#|^/#)/master/products/[^/]+/edit$",
+      "moduleName": "系统信息",
+      "target": { "selector": "[data-anno='product-form-system']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-form.md",
+      "blockId": "4",
+      "sourceRefs": ["PRD-FORM-SYSTEM"]
+    },
+    {
+      "id": "5",
+      "order": 5,
+      "page": "#/master/products/new",
+      "routeMatcher": "(^#|^/#)/master/products/(new|[^/]+/edit)$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='product-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/product-form.md",
+      "blockId": "5",
+      "sourceRefs": ["PRD-FORM-ACTIONS"]
+    }
+  ]
+}
