@@ -3,6 +3,8 @@ node_modules/
 dist/
 !front-prototype/进销存/dist/
 !front-prototype/进销存/dist/**
+!front-prototype/跨境ERP/dist/
+!front-prototype/跨境ERP/dist/**
 dist-ssr/
 
 # Logs

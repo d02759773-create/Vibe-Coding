@@ -849,6 +849,22 @@
         </svg>`
     };
 
+    /** 个人站卡片所在部署根（与 index.html 同级），避免在 /跨境ERP/dist/ 下点击时路径无限叠加 */
+    function getPersonalHubBase() {
+      const { origin, pathname } = window.location;
+      const marker = "/front-prototype/";
+      const idx = pathname.indexOf(marker);
+      if (idx !== -1) {
+        return `${origin}${pathname.slice(0, idx + marker.length)}`;
+      }
+      return `${origin}/`;
+    }
+
+    function resolveProjectUrl(relativePath) {
+      const rel = relativePath.replace(/^\.\//, "");
+      return new URL(rel, getPersonalHubBase()).href;
+    }
+
     const grid = document.getElementById("projectsGrid");
     const toast = document.getElementById("toast");
     const toastTitle = document.getElementById("toastTitle");
@@ -904,7 +920,8 @@
 
     function handleProjectClick(project) {
       if (project.url) {
-        window.location.assign(project.url);
+        const target = resolveProjectUrl(project.url);
+        window.open(target, "_blank", "noopener,noreferrer");
         return;
       }
 
