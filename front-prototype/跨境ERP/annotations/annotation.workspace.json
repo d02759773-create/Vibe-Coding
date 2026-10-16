@@ -45,7 +45,9 @@
   ],
   "runtime": {
     "zIndexBase": 2147480000,
-    "initialMode": "preview"
+    "initialMode": "preview",
+    "toolbarDocked": true,
+    "toolbarExpanded": true
   },
   "output": "../public/annotation-kit/annotation.bundle.json",
   "coverage": "./coverage.md",

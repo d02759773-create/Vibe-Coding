@@ -1488,6 +1488,9 @@ async function boot() {
     if (VPA_STATE.config?.runtime?.toolbarDocked !== undefined) {
       VPA_STATE.toolbarDocked = Boolean(VPA_STATE.config.runtime.toolbarDocked);
     }
+    if (VPA_STATE.config?.runtime?.toolbarExpanded !== undefined) {
+      VPA_STATE.toolbarExpanded = Boolean(VPA_STATE.config.runtime.toolbarExpanded);
+    }
     await hydrateMarkdownAnnotations();
     ensureRoot();
     VPA_STATE.lastContext = contextKey();

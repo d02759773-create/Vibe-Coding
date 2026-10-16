@@ -4,7 +4,9 @@
   "mermaid": {},
   "runtime": {
     "zIndexBase": 2147480000,
-    "initialMode": "preview"
+    "initialMode": "preview",
+    "toolbarDocked": true,
+    "toolbarExpanded": true
   },
   "annotations": [
     {
@@ -655,5 +657,5 @@
     "mapped": 33,
     "unmapped": 0
   },
-  "buildId": "df2bd56984774038"
+  "buildId": "5f1f5b4ec6a2d102"
 }
