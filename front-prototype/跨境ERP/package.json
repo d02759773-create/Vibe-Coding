@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build:annotations": "python tools/annotation/compile_annotations.py annotations/annotation.workspace.json",
+    "build": "npm run build:annotations && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
