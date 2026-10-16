@@ -68,6 +68,17 @@ function currentRouteCandidates() {
   } catch (error) {
     // Keep the raw pathname variants when decoding fails.
   }
+  // HashRouter: matchers like (^#|^/#)/settings/roles must see the hash itself,
+  // not only pathname + hash (subpath deploys break on .../index.html#/route).
+  const hash = location.hash || '';
+  if (hash) {
+    routes.add(hash);
+    const hashPath = hash.startsWith('#') ? hash.slice(1) : hash;
+    if (hashPath) {
+      routes.add(hashPath);
+      routes.add(`#${hashPath.startsWith('/') ? hashPath : `/${hashPath}`}`);
+    }
+  }
   return [...routes];
 }
 
