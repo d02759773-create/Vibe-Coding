@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "角色管理-新增编辑",
+  "scope": "role-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-RF-PG", "source": "../用户与角色_Demo_新增编辑页.md#三角色新增--编辑页", "page": "#/settings/roles/new" },
+    { "id": "UR-RF-FIELDS", "source": "../用户与角色_Demo_新增编辑页.md#32-表单", "page": "#/settings/roles/new" },
+    { "id": "UR-RF-ACT", "source": "../用户与角色_Demo_新增编辑页.md#33-底栏", "page": "#/settings/roles/new" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/roles/new",
+      "routeMatcher": "(^#|^/#)/settings/roles/(new|[^/]+/edit)$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/role-form.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-RF-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/roles/new",
+      "routeMatcher": "(^#|^/#)/settings/roles/(new|[^/]+/edit)$",
+      "moduleName": "角色表单",
+      "target": { "selector": "[data-anno='role-form-fields']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-form.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-RF-FIELDS"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/roles/new",
+      "routeMatcher": "(^#|^/#)/settings/roles/(new|[^/]+/edit)$",
+      "moduleName": "底栏操作",
+      "target": { "selector": "[data-anno='role-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-form.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-RF-ACT"]
+    }
+  ]
+}

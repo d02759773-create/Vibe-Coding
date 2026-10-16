@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "角色管理-权限配置",
+  "scope": "role-permissions",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-RP-PG", "source": "../用户与角色_Demo_新增编辑页.md#四角色菜单权限配置页", "page": "#/settings/roles/ADMIN/permissions" },
+    { "id": "UR-RP-TBL", "source": "../用户与角色_Demo_新增编辑页.md#43-权限表推荐布局", "page": "#/settings/roles/ADMIN/permissions" },
+    { "id": "UR-RP-ACT", "source": "../用户与角色_Demo_新增编辑页.md#44-底栏", "page": "#/settings/roles/ADMIN/permissions" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/roles/ADMIN/permissions",
+      "routeMatcher": "(^#|^/#)/settings/roles/[^/]+/permissions$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/role-permissions.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-RP-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/roles/ADMIN/permissions",
+      "routeMatcher": "(^#|^/#)/settings/roles/[^/]+/permissions$",
+      "moduleName": "权限表",
+      "target": { "selector": "[data-anno='role-permissions-table']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-permissions.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-RP-TBL"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/roles/ADMIN/permissions",
+      "routeMatcher": "(^#|^/#)/settings/roles/[^/]+/permissions$",
+      "moduleName": "保存与返回",
+      "target": { "selector": "[data-anno='role-permissions-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-permissions.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-RP-ACT"]
+    }
+  ]
+}

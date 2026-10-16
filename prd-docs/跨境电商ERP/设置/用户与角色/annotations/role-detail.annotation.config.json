@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "角色管理-详情页",
+  "scope": "role-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-RD-PG", "source": "../用户与角色_Demo_详情页.md#三角色详情页", "page": "#/settings/roles/ADMIN" },
+    { "id": "UR-RD-HDR", "source": "../用户与角色_Demo_详情页.md#33-顶部操作区", "page": "#/settings/roles/ADMIN" },
+    { "id": "UR-RD-BODY", "source": "../用户与角色_Demo_详情页.md#34-卡片基本信息", "page": "#/settings/roles/ADMIN" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/roles/ADMIN",
+      "routeMatcher": "(^#|^/#)/settings/roles/(?!new$)(?!.+/edit$)(?!.+/permissions$)[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/role-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-RD-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/roles/ADMIN",
+      "routeMatcher": "(^#|^/#)/settings/roles/(?!new$)(?!.+/edit$)(?!.+/permissions$)[^/]+$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='role-detail-header']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-RD-HDR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/roles/ADMIN",
+      "routeMatcher": "(^#|^/#)/settings/roles/(?!new$)(?!.+/edit$)(?!.+/permissions$)[^/]+$",
+      "moduleName": "详情与权限预览",
+      "target": { "selector": "[data-anno='role-detail-body']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-RD-BODY"]
+    }
+  ]
+}

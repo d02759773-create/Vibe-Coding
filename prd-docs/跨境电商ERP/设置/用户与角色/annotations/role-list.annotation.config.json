@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "title": "角色管理-列表页",
+  "scope": "role-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-RL-PG", "source": "../用户与角色_Demo_列表页.md#三内置角色列表", "page": "#/settings/roles" },
+    { "id": "UR-RL-TAB", "source": "../用户与角色_Demo_列表页.md#31-状态-tab-栏", "page": "#/settings/roles" },
+    { "id": "UR-RL-FLT", "source": "../用户与角色_Demo_列表页.md#32-查询区", "page": "#/settings/roles" },
+    { "id": "UR-RL-TB", "source": "../用户与角色_Demo_列表页.md#33-工具条", "page": "#/settings/roles" },
+    { "id": "UR-RL-TBL", "source": "../用户与角色_Demo_列表页.md#35-行内操作", "page": "#/settings/roles" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/roles",
+      "routeMatcher": "(^#|^/#)/settings/roles$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/role-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-RL-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/roles",
+      "routeMatcher": "(^#|^/#)/settings/roles$",
+      "moduleName": "状态 Tab",
+      "target": { "selector": "[data-anno='role-list-tabs']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-list.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-RL-TAB"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/roles",
+      "routeMatcher": "(^#|^/#)/settings/roles$",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='role-list-table'] .role-list-search",
+        "fallbackSelectors": ["[data-anno='role-list-table'] .ant-pro-table-search"]
+      },
+      "markdownFile": "pages/role-list.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-RL-FLT"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/settings/roles",
+      "routeMatcher": "(^#|^/#)/settings/roles$",
+      "moduleName": "表格与行操作",
+      "target": {
+        "selector": "[data-anno='role-list-table-body']",
+        "fallbackSelectors": ["[data-anno='role-list-table'] .ant-table-wrapper"]
+      },
+      "markdownFile": "pages/role-list.md",
+      "blockId": "4",
+      "sourceRefs": ["UR-RL-TBL"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/settings/roles",
+      "routeMatcher": "(^#|^/#)/settings/roles$",
+      "moduleName": "新增角色",
+      "target": { "selector": "[data-anno='role-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/role-list.md",
+      "blockId": "3",
+      "sourceRefs": ["UR-RL-TB"]
+    }
+  ]
+}

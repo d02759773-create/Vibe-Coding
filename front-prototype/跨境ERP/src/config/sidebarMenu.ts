@@ -105,7 +105,8 @@ export const sidebarNavigation: NavItem[] = [
   {
     title: '设置',
     children: [
-      { title: '用户与角色', path: '/settings/users' },
+      { title: '用户管理', path: '/settings/users' },
+      { title: '角色管理', path: '/settings/roles' },
       { title: '质检规则', path: '/settings/inspection-rules' },
       { title: '操作日志', path: '/settings/audit-log' },
       { title: '补货与派单参数', path: '/settings/replenish-dispatch-params' },

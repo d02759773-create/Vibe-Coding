@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "title": "用户管理-新增编辑",
+  "scope": "user-form",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-UF-PG", "source": "../用户与角色_Demo_新增编辑页.md#二用户新增--编辑页", "page": "#/settings/users/new" },
+    { "id": "UR-UF-BASIC", "source": "../用户与角色_Demo_新增编辑页.md#24-卡片一基本信息", "page": "#/settings/users/new" },
+    { "id": "UR-UF-ROLES", "source": "../用户与角色_Demo_新增编辑页.md#25-卡片二角色分配", "page": "#/settings/users/new" },
+    { "id": "UR-UF-ACT", "source": "../用户与角色_Demo_新增编辑页.md#23-底栏按钮", "page": "#/settings/users/new" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/users/new",
+      "routeMatcher": "(^#|^/#)/settings/users/(new|[^/]+/edit)$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/user-form.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-UF-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/users/new",
+      "routeMatcher": "(^#|^/#)/settings/users/(new|[^/]+/edit)$",
+      "moduleName": "基本信息",
+      "target": { "selector": "[data-anno='user-form-basic']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-form.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-UF-BASIC"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/users/new",
+      "routeMatcher": "(^#|^/#)/settings/users/(new|[^/]+/edit)$",
+      "moduleName": "已分配角色",
+      "target": { "selector": "[data-anno='user-form-roles']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-form.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-UF-ROLES"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/settings/users/new",
+      "routeMatcher": "(^#|^/#)/settings/users/(new|[^/]+/edit)$",
+      "moduleName": "底栏操作",
+      "target": { "selector": "[data-anno='user-form-actions']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-form.md",
+      "blockId": "3",
+      "sourceRefs": ["UR-UF-ACT"]
+    }
+  ]
+}

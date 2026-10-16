@@ -1,6 +1,6 @@
 import { PageContainer, ProDescriptions } from '@ant-design/pro-components'
 import { Button, Card, Modal, Space, Table, message } from 'antd'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
 import type { EnableStatus, RoleCode } from '@/features/settings/constants'
 import {
@@ -15,6 +15,10 @@ import {
 export function RoleDetail() {
   const { roleCode } = useParams()
   const navigate = useNavigate()
+  if (roleCode === 'new') {
+    return <Navigate to="/settings/roles/new" replace />
+  }
+
   const code = roleCode as RoleCode
   const role = getRole(code)
 
@@ -49,7 +53,7 @@ export function RoleDetail() {
       subTitle={role.角色编码}
       tags={<EnableStatusTag status={role.启停用状态} />}
       extra={
-        <Space>
+        <Space data-anno="role-detail-header">
           <Button onClick={() => navigate(`/settings/roles/${code}/permissions`)}>配置权限</Button>
           <Button onClick={() => navigate(`/settings/roles/${code}/edit`)}>编辑</Button>
           <Button onClick={toggleStatus}>
@@ -59,6 +63,7 @@ export function RoleDetail() {
       }
       onBack={() => navigate('/settings/roles')}
     >
+      <div data-anno="role-detail-body">
       <Card title="角色信息" style={{ marginBottom: 16 }}>
         <ProDescriptions column={2}>
           <ProDescriptions.Item label="角色编码">{role.角色编码}</ProDescriptions.Item>
@@ -74,16 +79,18 @@ export function RoleDetail() {
       <Card title="菜单权限（只读）" style={{ marginBottom: 16 }}>
         <Table
           size="small"
+          tableLayout="fixed"
           pagination={{ pageSize: 20, hideOnSinglePage: true }}
           rowKey="二级菜单编码"
           dataSource={permRows}
           columns={[
-            { title: '一级菜单', dataIndex: '一级菜单名称', width: 120 },
-            { title: '二级菜单', dataIndex: '二级菜单名称' },
+            { title: '一级菜单', dataIndex: '一级菜单名称', width: 112 },
+            { title: '二级菜单', dataIndex: '二级菜单名称', ellipsis: true },
             {
               title: '菜单可见性',
               dataIndex: '菜单可见性',
-              width: 100,
+              width: 140,
+              align: 'center',
               render: (v) => (v === 'VISIBLE' ? '可见' : '不可见'),
             },
           ]}
@@ -98,6 +105,7 @@ export function RoleDetail() {
           <ProDescriptions.Item label="最后修改时间">{role.最后修改时间}</ProDescriptions.Item>
         </ProDescriptions>
       </Card>
+      </div>
     </PageContainer>
   )
 }

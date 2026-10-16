@@ -1,6 +1,6 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components'
 import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Button, Input, Modal, Space, Tabs, message } from 'antd'
+import { Button, Skeleton, Tabs, message } from 'antd'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
@@ -13,6 +13,14 @@ import {
   saveUsers,
 } from '@/features/settings/storage'
 import type { InternalUser } from '@/features/settings/types'
+import { settingsListSearch } from '@/pages/settings/proTableSearch'
+import { TableRowActions, tableActionLink } from '@/pages/settings/tableActions'
+import { tabCountLabel } from '@/pages/settings/tabCountLabel'
+import { confirmEnableUser } from '@/pages/settings/users/confirmEnableUser'
+import { DisableUserModal } from '@/pages/settings/users/DisableUserModal'
+import { filterUserListRows, userListHasFilters } from '@/pages/settings/users/filterUserList'
+import { SettingsListEmpty } from '@/pages/settings/settingsListEmpty'
+import { withSettingsListLoading } from '@/pages/settings/settingsListFetch'
 
 type StatusTab = 'all' | EnableStatus
 
@@ -23,7 +31,8 @@ export function UserList() {
   const [refreshKey, setRefreshKey] = useState(0)
 
   const [disableTarget, setDisableTarget] = useState<InternalUser | null>(null)
-  const [disableReason, setDisableReason] = useState('')
+  const [tableLoading, setTableLoading] = useState(true)
+  const [listFiltered, setListFiltered] = useState(false)
 
   const allUsers = useMemo(() => {
     void refreshKey
@@ -96,47 +105,27 @@ export function UserList() {
       valueType: 'option',
       width: 180,
       fixed: 'right',
-      render: (_, row) => {
-        const actions = [
-          <a key="view" onClick={() => navigate(`/settings/users/${row.用户账号}`)}>查看</a>,
-          <a key="edit" onClick={() => navigate(`/settings/users/${row.用户账号}/edit`)}>编辑</a>,
-        ]
-        if (row.启停用状态 === 'ENABLED') {
-          actions.push(
-            <a key="disable" onClick={() => setDisableTarget(row)}>停用</a>,
-          )
-        } else {
-          actions.push(
-            <a
-              key="enable"
-              onClick={() => {
-                const users = listUsers().map((u) =>
-                  u.用户账号 === row.用户账号
-                    ? { ...u, 启停用状态: 'ENABLED' as const, 最后修改时间: nowString() }
-                    : u,
-                )
-                saveUsers(users)
-                message.success('已启用')
-                setRefreshKey((k) => k + 1)
-                actionRef.current?.reload()
-              }}
-            >
-              启用
-            </a>,
-          )
-        }
-        return actions
-      },
+      render: (_, row) => (
+        <TableRowActions
+          items={[
+            tableActionLink('查看', () => navigate(`/settings/users/${row.用户账号}`)),
+            tableActionLink('编辑', () => navigate(`/settings/users/${row.用户账号}/edit`)),
+            row.启停用状态 === 'ENABLED'
+              ? tableActionLink('停用', () => setDisableTarget(row))
+              : tableActionLink('启用', () =>
+                  confirmEnableUser(row.用户账号, () => {
+                    setRefreshKey((k) => k + 1)
+                    actionRef.current?.reload()
+                  }),
+                ),
+          ]}
+        />
+      ),
     },
   ]
 
-  const confirmDisable = () => {
+  const handleDisableConfirm = (reason: string) => {
     if (!disableTarget) return
-    const reason = disableReason.trim()
-    if (!reason || reason.length > 200) {
-      message.error('请填写停用原因（1-200 字）')
-      return
-    }
     const isLastAdmin =
       disableTarget.启停用状态 === 'ENABLED' &&
       disableTarget.角色明细.some((r) => r.角色编码 === 'ADMIN') &&
@@ -158,83 +147,77 @@ export function UserList() {
     saveUsers(users)
     message.success('已停用')
     setDisableTarget(null)
-    setDisableReason('')
     setRefreshKey((k) => k + 1)
     actionRef.current?.reload()
   }
 
   return (
-    <PageContainer
-      title="内部用户"
-      extra={
-        <Space>
-          <Button onClick={() => navigate('/settings/roles')}>角色管理</Button>
-          <Button type="primary" onClick={() => navigate('/settings/users/new')}>
-            新增用户
-          </Button>
-        </Space>
-      }
-    >
+    <PageContainer title="内部用户">
       <Tabs
+        data-anno="user-list-tabs"
         activeKey={statusTab}
         onChange={(k) => {
           setStatusTab(k as StatusTab)
           actionRef.current?.reload()
         }}
         items={[
-          { key: 'all', label: `全部 ${tabCounts.all}` },
-          { key: 'ENABLED', label: `启用 ${tabCounts.ENABLED}` },
-          { key: 'DISABLED', label: `停用 ${tabCounts.DISABLED}` },
+          { key: 'all', label: `全部 ${tabCountLabel(tabCounts.all)}` },
+          { key: 'ENABLED', label: `启用 ${tabCountLabel(tabCounts.ENABLED)}` },
+          { key: 'DISABLED', label: `停用 ${tabCountLabel(tabCounts.DISABLED)}` },
         ]}
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 0 }}
       />
+      <div data-anno="user-list-table">
       <ProTable<InternalUser>
         actionRef={actionRef}
         rowKey="用户账号"
         columns={columns}
-        search={{ labelWidth: 'auto', defaultCollapsed: false }}
+        search={{ ...settingsListSearch, className: 'user-list-search' }}
+        locale={{
+          emptyText: <SettingsListEmpty entityLabel="用户" filtered={listFiltered} />,
+        }}
+        tableRender={(_, dom) =>
+          tableLoading ? (
+            <div style={{ padding: 24, background: '#fff' }}>
+              <Skeleton active paragraph={{ rows: 12 }} title={false} />
+            </div>
+          ) : (
+            <div data-anno="user-list-table-body">{dom}</div>
+          )
+        }
+        toolBarRender={() => [
+          <span key="new" data-anno="user-list-toolbar">
+            <Button type="primary" onClick={() => navigate('/settings/users/new')}>
+              新增用户
+            </Button>
+          </span>,
+        ]}
         pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
         options={false}
         request={async (params) => {
-          let rows = [...allUsers]
-          if (statusTab !== 'all') {
-            rows = rows.filter((u) => u.启停用状态 === statusTab)
+          setTableLoading(true)
+          try {
+            setListFiltered(userListHasFilters(params))
+            const loaded = await withSettingsListLoading(() =>
+              filterUserListRows(allUsers, statusTab, params),
+            )
+            if (!loaded.ok) {
+              message.error('加载失败，请重试')
+              return { data: [], success: false, total: 0 }
+            }
+            const rows = loaded.value
+            return { data: rows, success: true, total: rows.length }
+          } finally {
+            setTableLoading(false)
           }
-          const account = String(params.用户账号 ?? '').trim().toLowerCase()
-          const name = String(params.用户姓名 ?? '').trim().toLowerCase()
-          const phone = String(params.手机号 ?? '').trim().toLowerCase()
-          const email = String(params.邮箱 ?? '').trim().toLowerCase()
-          const status = params.启停用状态 as EnableStatus | undefined
-          if (account) rows = rows.filter((u) => u.用户账号.toLowerCase().includes(account))
-          if (name) rows = rows.filter((u) => u.用户姓名.toLowerCase().includes(name))
-          if (phone) rows = rows.filter((u) => u.手机号.toLowerCase().includes(phone))
-          if (email) rows = rows.filter((u) => u.邮箱.toLowerCase().includes(email))
-          if (statusTab === 'all' && status) {
-            rows = rows.filter((u) => u.启停用状态 === status)
-          }
-          return { data: rows, success: true, total: rows.length }
         }}
       />
-      <Modal
-        title="停用用户"
+      </div>
+      <DisableUserModal
         open={!!disableTarget}
-        onCancel={() => {
-          setDisableTarget(null)
-          setDisableReason('')
-        }}
-        onOk={confirmDisable}
-        okText="确认停用"
-      >
-        <p>停用后该账号无法登录。</p>
-        <Input.TextArea
-          rows={3}
-          placeholder="停用原因（必填，1-200 字）"
-          value={disableReason}
-          onChange={(e) => setDisableReason(e.target.value)}
-          maxLength={200}
-          showCount
-        />
-      </Modal>
+        onCancel={() => setDisableTarget(null)}
+        onConfirm={handleDisableConfirm}
+      />
     </PageContainer>
   )
 }

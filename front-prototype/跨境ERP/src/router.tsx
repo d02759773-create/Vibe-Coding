@@ -17,6 +17,7 @@ const settingsRoutes = [
   { path: 'settings/users/:account/edit', element: <UserForm /> },
   { path: 'settings/users/:account', element: <UserDetail /> },
   { path: 'settings/roles', element: <RoleList /> },
+  { path: 'settings/roles/new', element: <RoleForm /> },
   { path: 'settings/roles/:roleCode/permissions', element: <RolePermissions /> },
   { path: 'settings/roles/:roleCode/edit', element: <RoleForm /> },
   { path: 'settings/roles/:roleCode', element: <RoleDetail /> },

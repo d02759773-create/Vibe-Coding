@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "title": "用户管理-详情页",
+  "scope": "user-detail",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-UD-PG", "source": "../用户与角色_Demo_详情页.md#二用户详情页", "page": "#/settings/users/admin" },
+    { "id": "UR-UD-HDR", "source": "../用户与角色_Demo_详情页.md#23-顶部操作区", "page": "#/settings/users/admin" },
+    { "id": "UR-UD-BODY", "source": "../用户与角色_Demo_详情页.md#24-卡片基本信息", "page": "#/settings/users/admin" },
+    { "id": "UR-UD-LOG", "source": "../用户与角色_Demo_详情页.md#27-关联与日志", "page": "#/settings/users/admin" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/users/admin",
+      "routeMatcher": "(^#|^/#)/settings/users/(?!new$)(?!.+/edit$)[^/]+$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/user-detail.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-UD-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/users/admin",
+      "routeMatcher": "(^#|^/#)/settings/users/(?!new$)(?!.+/edit$)[^/]+$",
+      "moduleName": "页头操作",
+      "target": { "selector": "[data-anno='user-detail-header']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-detail.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-UD-HDR"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/users/admin",
+      "routeMatcher": "(^#|^/#)/settings/users/(?!new$)(?!.+/edit$)[^/]+$",
+      "moduleName": "详情卡片",
+      "target": { "selector": "[data-anno='user-detail-body']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-detail.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-UD-BODY"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/settings/users/admin",
+      "routeMatcher": "(^#|^/#)/settings/users/(?!new$)(?!.+/edit$)[^/]+$",
+      "moduleName": "操作日志",
+      "target": { "selector": "[data-anno='user-detail-audit']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-detail.md",
+      "blockId": "3",
+      "sourceRefs": ["UR-UD-LOG"]
+    }
+  ]
+}

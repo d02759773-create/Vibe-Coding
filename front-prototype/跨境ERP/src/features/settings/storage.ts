@@ -1,5 +1,5 @@
 import { buildMenuCatalog } from '@/features/settings/menuCatalog'
-import { ROLE_CODE_LABEL, ROLE_CODES, type RoleCode } from '@/features/settings/constants'
+import { BUILTIN_ROLE_CODES, ROLE_CODE_LABEL, type RoleCode } from '@/features/settings/constants'
 import type { InternalUser, RoleMenuPermission, RoleRecord } from '@/features/settings/types'
 
 const USERS_KEY = 'cb-erp-internal-users'
@@ -12,23 +12,42 @@ function nowString(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function defaultPermissions(): Record<RoleCode, RoleMenuPermission[]> {
+function defaultPermissionTemplate(): RoleMenuPermission[] {
   const catalog = buildMenuCatalog()
-  const allVisible = catalog.map((r) => ({
-    二级菜单编码: r.二级菜单编码,
-    菜单可见性: 'VISIBLE' as const,
-  }))
-  const hiddenExceptSettings = catalog.map((r) => ({
+  return catalog.map((r) => ({
     二级菜单编码: r.二级菜单编码,
     菜单可见性: (r.二级菜单编码.startsWith('settings_') ? 'VISIBLE' : 'HIDDEN') as
       | 'VISIBLE'
       | 'HIDDEN',
   }))
-  const out = {} as Record<RoleCode, RoleMenuPermission[]>
-  for (const code of ROLE_CODES) {
+}
+
+function defaultPermissionsSeed(): Record<string, RoleMenuPermission[]> {
+  const catalog = buildMenuCatalog()
+  const allVisible = catalog.map((r) => ({
+    二级菜单编码: r.二级菜单编码,
+    菜单可见性: 'VISIBLE' as const,
+  }))
+  const hiddenExceptSettings = defaultPermissionTemplate()
+  const out: Record<string, RoleMenuPermission[]> = {}
+  for (const code of BUILTIN_ROLE_CODES) {
     out[code] = code === 'ADMIN' ? allVisible : hiddenExceptSettings
   }
   return out
+}
+
+function syncPermissionsForRoles(
+  perms: Record<string, RoleMenuPermission[]>,
+  roles: RoleRecord[],
+): Record<string, RoleMenuPermission[]> {
+  const next = { ...perms }
+  const template = defaultPermissionTemplate()
+  for (const r of roles) {
+    if (!next[r.角色编码]) {
+      next[r.角色编码] = template.map((p) => ({ ...p }))
+    }
+  }
+  return next
 }
 
 function seedUsers(): InternalUser[] {
@@ -84,9 +103,9 @@ function seedUsers(): InternalUser[] {
 
 function seedRoles(): RoleRecord[] {
   const t = '2026-01-01 00:00:00'
-  return ROLE_CODES.map((code) => ({
+  return BUILTIN_ROLE_CODES.map((code) => ({
     角色编码: code,
-    角色名称: ROLE_CODE_LABEL[code],
+    角色名称: ROLE_CODE_LABEL[code] ?? code,
     启停用状态: code === 'MATERIAL_MGR' ? 'DISABLED' : 'ENABLED',
     角色说明: '',
     创建人: 'system',
@@ -140,29 +159,45 @@ export function listRoles(): RoleRecord[] {
 
 export function saveRoles(roles: RoleRecord[]) {
   writeJson(ROLES_KEY, roles)
+  const perms = syncPermissionsForRoles(listRolePermissions(), roles)
+  writeJson(PERMS_KEY, perms)
 }
 
 export function getRole(code: RoleCode): RoleRecord | undefined {
   return listRoles().find((r) => r.角色编码 === code)
 }
 
-export function listRolePermissions(): Record<RoleCode, RoleMenuPermission[]> {
-  const seeded = readJson<Record<RoleCode, RoleMenuPermission[]> | null>(PERMS_KEY, null)
+export function createRole(record: RoleRecord): void {
+  const roles = listRoles()
+  if (roles.some((r) => r.角色编码 === record.角色编码)) {
+    throw new Error('角色编码已存在')
+  }
+  roles.push(record)
+  saveRoles(roles)
+}
+
+export function listRolePermissions(): Record<string, RoleMenuPermission[]> {
+  const roles = listRoles()
+  const seeded = readJson<Record<string, RoleMenuPermission[]> | null>(PERMS_KEY, null)
   if (!seeded) {
-    const data = defaultPermissions()
+    const data = syncPermissionsForRoles(defaultPermissionsSeed(), roles)
     writeJson(PERMS_KEY, data)
     return data
   }
-  return seeded
+  const synced = syncPermissionsForRoles(seeded, roles)
+  if (JSON.stringify(synced) !== JSON.stringify(seeded)) {
+    writeJson(PERMS_KEY, synced)
+  }
+  return synced
 }
 
-export function saveRolePermissions(perms: Record<RoleCode, RoleMenuPermission[]>) {
+export function saveRolePermissions(perms: Record<string, RoleMenuPermission[]>) {
   writeJson(PERMS_KEY, perms)
 }
 
 export function getRolePermissionRows(code: RoleCode) {
   const catalog = buildMenuCatalog()
-  const perms = listRolePermissions()[code] ?? []
+  const perms = listRolePermissions()[code] ?? defaultPermissionTemplate()
   const map = new Map(perms.map((p) => [p.二级菜单编码, p.菜单可见性]))
   return catalog.map((row) => ({
     ...row,

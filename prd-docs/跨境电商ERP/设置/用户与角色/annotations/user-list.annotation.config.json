@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "title": "用户管理-列表页",
+  "scope": "user-list",
+  "sourceBase": ".",
+  "mermaid": { "enabled": true, "src": "", "options": {} },
+  "sourceRequirements": [
+    { "id": "UR-UL-PG", "source": "../用户与角色_Demo_列表页.md#二内部用户列表", "page": "#/settings/users" },
+    { "id": "UR-UL-TAB", "source": "../用户与角色_Demo_列表页.md#21-状态-tab-栏", "page": "#/settings/users" },
+    { "id": "UR-UL-FLT", "source": "../用户与角色_Demo_列表页.md#22-查询区", "page": "#/settings/users" },
+    { "id": "UR-UL-TB", "source": "../用户与角色_Demo_列表页.md#23-工具条", "page": "#/settings/users" },
+    { "id": "UR-UL-TBL", "source": "../用户与角色_Demo_列表页.md#25-行内操作", "page": "#/settings/users" }
+  ],
+  "annotations": [
+    {
+      "id": "page-global",
+      "type": "page-global",
+      "order": 0,
+      "page": "#/settings/users",
+      "routeMatcher": "(^#|^/#)/settings/users$",
+      "moduleName": "本页规则",
+      "markdownFile": "pages/user-list.md",
+      "blockId": "page-global",
+      "sourceRefs": ["UR-UL-PG"]
+    },
+    {
+      "id": "1",
+      "order": 1,
+      "page": "#/settings/users",
+      "routeMatcher": "(^#|^/#)/settings/users$",
+      "moduleName": "状态 Tab",
+      "target": { "selector": "[data-anno='user-list-tabs']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-list.md",
+      "blockId": "1",
+      "sourceRefs": ["UR-UL-TAB"]
+    },
+    {
+      "id": "2",
+      "order": 2,
+      "page": "#/settings/users",
+      "routeMatcher": "(^#|^/#)/settings/users$",
+      "moduleName": "查询区",
+      "target": {
+        "selector": "[data-anno='user-list-table'] .user-list-search",
+        "fallbackSelectors": ["[data-anno='user-list-table'] .ant-pro-table-search"]
+      },
+      "markdownFile": "pages/user-list.md",
+      "blockId": "2",
+      "sourceRefs": ["UR-UL-FLT"]
+    },
+    {
+      "id": "4",
+      "order": 4,
+      "page": "#/settings/users",
+      "routeMatcher": "(^#|^/#)/settings/users$",
+      "moduleName": "表格与行操作",
+      "target": {
+        "selector": "[data-anno='user-list-table-body']",
+        "fallbackSelectors": ["[data-anno='user-list-table'] .ant-table-wrapper"]
+      },
+      "markdownFile": "pages/user-list.md",
+      "blockId": "4",
+      "sourceRefs": ["UR-UL-TBL"]
+    },
+    {
+      "id": "3",
+      "order": 3,
+      "page": "#/settings/users",
+      "routeMatcher": "(^#|^/#)/settings/users$",
+      "moduleName": "新增用户",
+      "target": { "selector": "[data-anno='user-list-toolbar']", "fallbackSelectors": [] },
+      "markdownFile": "pages/user-list.md",
+      "blockId": "3",
+      "sourceRefs": ["UR-UL-TB"]
+    }
+  ]
+}

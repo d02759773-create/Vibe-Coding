@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "title": "跨境电商 ERP 原型-用户与角色标注",
+  "inputs": [
+    {
+      "scope": "user-role-global",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/user-role-global.annotation.config.json",
+      "order": 1
+    },
+    {
+      "scope": "user-list",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/user-list.annotation.config.json",
+      "order": 2
+    },
+    {
+      "scope": "role-list",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/role-list.annotation.config.json",
+      "order": 3
+    },
+    {
+      "scope": "user-form",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/user-form.annotation.config.json",
+      "order": 4
+    },
+    {
+      "scope": "role-form",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/role-form.annotation.config.json",
+      "order": 5
+    },
+    {
+      "scope": "user-detail",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/user-detail.annotation.config.json",
+      "order": 6
+    },
+    {
+      "scope": "role-detail",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/role-detail.annotation.config.json",
+      "order": 7
+    },
+    {
+      "scope": "role-permissions",
+      "config": "../../../prd-docs/跨境电商ERP/设置/用户与角色/annotations/role-permissions.annotation.config.json",
+      "order": 8
+    }
+  ],
+  "runtime": {
+    "zIndexBase": 2147480000,
+    "initialMode": "preview"
+  },
+  "output": "../public/annotation-kit/annotation.bundle.json",
+  "coverage": "./coverage.md",
+  "htmlOutput": "./annotations-export.html"
+}
