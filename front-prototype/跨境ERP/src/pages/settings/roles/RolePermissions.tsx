@@ -1,8 +1,8 @@
-import { PageContainer } from '@ant-design/pro-components'
-import { App, Button, Card, Space, Switch, Table, message } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { Button, Card, Message, Space, Switch, Table } from '@arco-design/web-react'
+import type { ColumnProps } from '@arco-design/web-react/es/Table'
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PageShell } from '@/components/layout/PageShell'
 import type { MenuVisibility, RoleCode } from '@/features/settings/constants'
 import {
   getRole,
@@ -23,7 +23,6 @@ function sortPermRows(rows: PermRow[]): PermRow[] {
   )
 }
 
-/** 一级菜单列 rowSpan，保证单表内分组展示且「菜单可见性」列纵向对齐 */
 function primaryMenuRowSpans(sorted: PermRow[]): number[] {
   const spans = new Array<number>(sorted.length).fill(1)
   let i = 0
@@ -49,7 +48,6 @@ function permissionSnapshot(rows: PermRow[]): string {
 }
 
 export function RolePermissions() {
-  const { modal } = App.useApp()
   const { roleCode } = useParams()
   const navigate = useNavigate()
   const code = roleCode as RoleCode
@@ -63,26 +61,23 @@ export function RolePermissions() {
   const detailPath = `/settings/roles/${code}`
   const { allowLeaveOnce } = useUnsavedLeaveBlocker(leaveDirty)
   const goRoleDetail = () =>
-    confirmUnsavedNavigate(
-      leaveDirty,
-      () => {
-        allowLeaveOnce()
-        navigate(detailPath)
-      },
-      modal,
-    )
+    confirmUnsavedNavigate(leaveDirty, () => {
+      allowLeaveOnce()
+      navigate(detailPath)
+    })
 
   const sortedRows = useMemo(() => sortPermRows(rows), [rows])
   const rowSpans = useMemo(() => primaryMenuRowSpans(sortedRows), [sortedRows])
 
-  const columns: ColumnsType<PermRow> = useMemo(
+  const columns: ColumnProps<PermRow>[] = useMemo(
     () => [
       {
         title: '一级菜单',
         dataIndex: '一级菜单名称',
         width: 112,
-        onCell: (_, index) => ({
-          rowSpan: rowSpans[index ?? 0] ?? 1,
+        render: (col, _record, index) => ({
+          children: col,
+          props: { rowSpan: rowSpans[index ?? 0] ?? 1 },
         }),
       },
       {
@@ -97,8 +92,8 @@ export function RolePermissions() {
         render: (_, row) => (
           <Switch
             checked={row.菜单可见性 === 'VISIBLE'}
-            checkedChildren="可见"
-            unCheckedChildren="不可见"
+            checkedText="可见"
+            uncheckedText="不可见"
             onChange={(checked) => {
               const vis: MenuVisibility = checked ? 'VISIBLE' : 'HIDDEN'
               setRows((prev) =>
@@ -116,9 +111,9 @@ export function RolePermissions() {
 
   if (!role) {
     return (
-      <PageContainer title="角色不存在">
+      <PageShell title="角色不存在">
         <Button onClick={() => navigate('/settings/roles')}>返回列表</Button>
-      </PageContainer>
+      </PageShell>
     )
   }
 
@@ -132,14 +127,14 @@ export function RolePermissions() {
       }))
       saveRolePermissions(all)
       savedSnapshot.current = permissionSnapshot(rows)
-      message.success('权限已保存')
+      Message.success('权限已保存')
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <PageContainer
+    <PageShell
       title="配置角色权限"
       subTitle={`${role.角色编码} ${role.角色名称}`}
       onBack={goRoleDetail}
@@ -159,7 +154,7 @@ export function RolePermissions() {
             }}
           />
           <Space style={{ position: 'relative', zIndex: 2 }}>
-            <Button type="default" htmlType="button" onClick={goRoleDetail}>返回</Button>
+            <Button type="default" onClick={goRoleDetail}>返回</Button>
             <Button type="primary" loading={saving} onClick={save}>保存</Button>
           </Space>
         </div>
@@ -168,16 +163,15 @@ export function RolePermissions() {
       <Card size="small" data-anno="role-permissions-table">
         <Table<PermRow>
           size="small"
-          tableLayout="fixed"
           pagination={false}
           rowKey="二级菜单编码"
-          dataSource={sortedRows}
+          data={sortedRows}
           columns={columns}
         />
       </Card>
-      <p style={{ color: 'rgba(0,0,0,0.45)', marginTop: 16 }}>
+      <p style={{ color: 'var(--color-text-3)', marginTop: 16 }}>
         保存后立即生效（刷新菜单或重新拉取权限）。
       </p>
-    </PageContainer>
+    </PageShell>
   )
 }

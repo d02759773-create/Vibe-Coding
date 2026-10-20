@@ -1,5 +1,5 @@
+import { Card, Grid, List, Typography } from '@arco-design/web-react'
 import { Link } from 'react-router-dom'
-import { Card, Col, List, Row, Typography } from 'antd'
 
 const todoItems = [
   { title: '补货建议待采纳', path: '/purchase/replenish-suggestion' },
@@ -11,23 +11,25 @@ const todoItems = [
   { title: '委外加工费账单', path: '/finance/garment-processing-bill' },
 ]
 
+const { Row, Col } = Grid
+
 export function WorkbenchPage() {
   return (
     <div>
-      <Typography.Title level={4} style={{ marginTop: 0 }}>
+      <Typography.Title heading={4} style={{ marginTop: 0 }}>
         首页
       </Typography.Title>
-      <Typography.Paragraph type="secondary">
+      <Typography.Paragraph style={{ color: 'var(--color-text-3)' }}>
         腾达科技跨境电商 ERP 一期框架。左侧为《06》全量一级业务域与二级页面菜单；演示壳层，不含登录与权限。
       </Typography.Paragraph>
-      <Row gutter={[16, 16]}>
+      <Row gutter={16}>
         <Col xs={24} lg={14}>
           <Card title="待办汇总（示意）" size="small">
             <List
               size="small"
               dataSource={todoItems}
-              renderItem={(item) => (
-                <List.Item>
+              render={(item) => (
+                <List.Item key={item.path}>
                   <Link to={item.path}>{item.title}</Link>
                 </List.Item>
               )}

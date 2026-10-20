@@ -1,4 +1,4 @@
-import { Empty } from 'antd'
+import { Empty } from '@arco-design/web-react'
 
 type Props = {
   entityLabel: string
@@ -8,7 +8,6 @@ type Props = {
 export function SettingsListEmpty({ entityLabel, filtered }: Props) {
   return (
     <Empty
-      image={Empty.PRESENTED_IMAGE_SIMPLE}
       description={
         filtered
           ? `未找到符合条件的${entityLabel}，请调整筛选条件`

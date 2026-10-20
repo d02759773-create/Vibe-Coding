@@ -1,4 +1,4 @@
-import { Modal } from 'antd'
+import { Modal } from '@arco-design/web-react'
 import { useEffect, useRef } from 'react'
 import { useBlocker } from 'react-router-dom'
 
@@ -23,7 +23,6 @@ export function useUnsavedLeaveBlocker(when: boolean) {
       content: CONTENT,
       okText: '离开',
       cancelText: '继续编辑',
-      zIndex: 2147483640,
       onOk: () => {
         skipRef.current = true
         blocker.proceed()

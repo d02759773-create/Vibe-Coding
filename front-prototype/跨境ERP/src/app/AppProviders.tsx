@@ -1,6 +1,6 @@
+import { ConfigProvider } from '@arco-design/web-react'
+import zhCN from '@arco-design/web-react/es/locale/zh-CN'
 import type { ReactNode } from 'react'
-import { App, ConfigProvider } from 'antd'
-import zhCN from 'antd/locale/zh_CN'
 
 type AppProvidersProps = {
   children: ReactNode
@@ -8,15 +8,8 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ConfigProvider
-      locale={zhCN}
-      theme={{
-        token: {
-          borderRadius: 6,
-        },
-      }}
-    >
-      <App>{children}</App>
+    <ConfigProvider locale={zhCN}>
+      {children}
     </ConfigProvider>
   )
 }

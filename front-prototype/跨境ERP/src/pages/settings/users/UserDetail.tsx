@@ -1,7 +1,7 @@
-import { PageContainer, ProDescriptions } from '@ant-design/pro-components'
-import { Button, Card, Space, Table, message } from 'antd'
+import { Button, Card, Descriptions, Message, Space, Table, Typography } from '@arco-design/web-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { PageShell } from '@/components/layout/PageShell'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
 import {
   countEnabledUsersWithAdmin,
@@ -26,9 +26,9 @@ export function UserDetail() {
 
   if (!current) {
     return (
-      <PageContainer title="用户不存在">
+      <PageShell title="用户不存在">
         <Button onClick={() => navigate('/settings/users')}>返回列表</Button>
-      </PageContainer>
+      </PageShell>
     )
   }
 
@@ -38,7 +38,7 @@ export function UserDetail() {
     const isLastAdmin =
       current.角色明细.some((r) => r.角色编码 === 'ADMIN') && countEnabledUsersWithAdmin() <= 1
     if (isLastAdmin) {
-      message.error('无法停用：系统须至少保留一名启用的管理员')
+      Message.error('无法停用：系统须至少保留一名启用的管理员')
       return
     }
     const users = listUsers().map((u) =>
@@ -47,13 +47,13 @@ export function UserDetail() {
         : u,
     )
     saveUsers(users)
-    message.success('已停用')
+    Message.success('已停用')
     setDisableOpen(false)
     setRefreshKey((k) => k + 1)
   }
 
   return (
-    <PageContainer
+    <PageShell
       title={current.用户姓名}
       subTitle={current.用户账号}
       tags={<EnableStatusTag status={current.启停用状态} />}
@@ -61,7 +61,7 @@ export function UserDetail() {
         <Space data-anno="user-detail-header">
           <Button onClick={() => navigate(`/settings/users/${current.用户账号}/edit`)}>编辑</Button>
           {current.启停用状态 === 'ENABLED' ? (
-            <Button danger onClick={() => setDisableOpen(true)}>停用</Button>
+            <Button status="danger" onClick={() => setDisableOpen(true)}>停用</Button>
           ) : (
             <Button onClick={() => confirmEnableUser(current.用户账号, () => setRefreshKey((k) => k + 1))}>
               启用
@@ -72,49 +72,50 @@ export function UserDetail() {
       onBack={() => navigate('/settings/users')}
     >
       <div data-anno="user-detail-body">
-      <Card title="基本信息" style={{ marginBottom: 16 }}>
-        <ProDescriptions column={2}>
-          <ProDescriptions.Item label="用户账号">{current.用户账号}</ProDescriptions.Item>
-          <ProDescriptions.Item label="用户姓名">{current.用户姓名}</ProDescriptions.Item>
-          <ProDescriptions.Item label="手机号">{current.手机号 || '-'}</ProDescriptions.Item>
-          <ProDescriptions.Item label="邮箱">{current.邮箱 || '-'}</ProDescriptions.Item>
-          <ProDescriptions.Item label="启停用状态">
-            <EnableStatusTag status={current.启停用状态} />
-          </ProDescriptions.Item>
-          <ProDescriptions.Item label="停用原因">
-            {current.启停用状态 === 'ENABLED' ? '-' : current.停用原因 || '-'}
-          </ProDescriptions.Item>
-          <ProDescriptions.Item label="用户备注">{current.用户备注 || '-'}</ProDescriptions.Item>
-          <ProDescriptions.Item label="最后登录时间">{current.最后登录时间 || '-'}</ProDescriptions.Item>
-          <ProDescriptions.Item label="已分配角色摘要">{roleSummary(current)}</ProDescriptions.Item>
-        </ProDescriptions>
-      </Card>
-
-      <Card title="已分配角色" style={{ marginBottom: 16 }}>
-        <Table
-          size="small"
-          pagination={false}
-          rowKey="角色编码"
-          dataSource={current.角色明细}
-          columns={[
-            { title: '角色编码', dataIndex: '角色编码' },
+        <Card title="基本信息" style={{ marginBottom: 16 }}>
+          <Descriptions column={2} data={[
+            { label: '用户账号', value: current.用户账号 },
+            { label: '用户姓名', value: current.用户姓名 },
+            { label: '手机号', value: current.手机号 || '-' },
+            { label: '邮箱', value: current.邮箱 || '-' },
+            { label: '启停用状态', value: <EnableStatusTag status={current.启停用状态} /> },
             {
-              title: '角色名称',
-              render: (_, row) => roles.find((r) => r.角色编码 === row.角色编码)?.角色名称 ?? '-',
+              label: '停用原因',
+              value: current.启停用状态 === 'ENABLED' ? '-' : current.停用原因 || '-',
             },
-          ]}
-          footer={() => `用户已分配角色数：${current.角色明细.length}`}
-        />
-      </Card>
+            { label: '用户备注', value: current.用户备注 || '-' },
+            { label: '最后登录时间', value: current.最后登录时间 || '-' },
+            { label: '已分配角色摘要', value: roleSummary(current) },
+          ]} />
+        </Card>
 
-      <Card title="系统信息">
-        <ProDescriptions column={2}>
-          <ProDescriptions.Item label="创建人">{current.创建人}</ProDescriptions.Item>
-          <ProDescriptions.Item label="创建时间">{current.创建时间}</ProDescriptions.Item>
-          <ProDescriptions.Item label="最后修改人">{current.最后修改人}</ProDescriptions.Item>
-          <ProDescriptions.Item label="最后修改时间">{current.最后修改时间}</ProDescriptions.Item>
-        </ProDescriptions>
-      </Card>
+        <Card title="已分配角色" style={{ marginBottom: 16 }}>
+          <Table
+            size="small"
+            pagination={false}
+            rowKey="角色编码"
+            data={current.角色明细}
+            columns={[
+              { title: '角色编码', dataIndex: '角色编码' },
+              {
+                title: '角色名称',
+                render: (_, row) => roles.find((r) => r.角色编码 === row.角色编码)?.角色名称 ?? '-',
+              },
+            ]}
+          />
+          <Typography.Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+            用户已分配角色数：{current.角色明细.length}
+          </Typography.Text>
+        </Card>
+
+        <Card title="系统信息">
+          <Descriptions column={2} data={[
+            { label: '创建人', value: current.创建人 },
+            { label: '创建时间', value: current.创建时间 },
+            { label: '最后修改人', value: current.最后修改人 },
+            { label: '最后修改时间', value: current.最后修改时间 },
+          ]} />
+        </Card>
       </div>
 
       <div style={{ marginTop: 16 }} data-anno="user-detail-audit">
@@ -126,6 +127,6 @@ export function UserDetail() {
         onCancel={() => setDisableOpen(false)}
         onConfirm={handleDisableConfirm}
       />
-    </PageContainer>
+    </PageShell>
   )
 }

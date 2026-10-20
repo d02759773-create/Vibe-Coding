@@ -1,8 +1,13 @@
-import type { ActionType, ProColumns } from '@ant-design/pro-components'
-import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Button, Modal, Skeleton, Tabs, message } from 'antd'
+import { Button, Message, Modal, Tabs } from '@arco-design/web-react'
+import type { ColumnProps } from '@arco-design/web-react/es/Table'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PageShell } from '@/components/layout/PageShell'
+import {
+  SettingsListTable,
+  type SettingsListTableAction,
+  type SettingsSearchField,
+} from '@/components/settings/SettingsListTable'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
 import type { EnableStatus } from '@/features/settings/constants'
 import { countUsersForRole, listRoles, nowString, saveRoles } from '@/features/settings/storage'
@@ -18,10 +23,9 @@ type StatusTab = 'all' | EnableStatus
 
 export function RoleList() {
   const navigate = useNavigate()
-  const actionRef = useRef<ActionType>(undefined)
+  const actionRef = useRef<SettingsListTableAction>(null)
   const [statusTab, setStatusTab] = useState<StatusTab>('all')
   const [refreshKey, setRefreshKey] = useState(0)
-  const [tableLoading, setTableLoading] = useState(true)
   const [listFiltered, setListFiltered] = useState(false)
 
   const allRoles = useMemo(() => {
@@ -35,11 +39,12 @@ export function RoleList() {
     return { all: allRoles.length, ENABLED: enabled, DISABLED: disabled }
   }, [allRoles])
 
-  const roleCodeFilterEnum = useMemo(
+  const roleCodeOptions = useMemo(
     () =>
-      Object.fromEntries(
-        allRoles.map((r) => [r.角色编码, { text: `${r.角色编码} ${r.角色名称}` }]),
-      ),
+      allRoles.map((r) => ({
+        label: `${r.角色编码} ${r.角色名称}`,
+        value: r.角色编码,
+      })),
     [allRoles],
   )
 
@@ -54,47 +59,56 @@ export function RoleList() {
             : r,
         )
         saveRoles(roles)
-        message.success(next === 'DISABLED' ? '角色已停用' : '已启用')
+        Message.success(next === 'DISABLED' ? '角色已停用' : '已启用')
         setRefreshKey((k) => k + 1)
         actionRef.current?.reload()
       },
     })
   }
 
-  const columns: ProColumns<RoleRecord>[] = useMemo(
+  const searchFields: SettingsSearchField[] = useMemo(
+    () => [
+      { name: '角色编码', label: '角色编码', type: 'select', options: roleCodeOptions },
+      { name: '角色名称', label: '角色名称', type: 'text' },
+      {
+        name: '启停用状态',
+        label: '启停用状态',
+        type: 'select',
+        options: [
+          { label: '启用', value: 'ENABLED' },
+          { label: '停用', value: 'DISABLED' },
+        ],
+        hidden: statusTab !== 'all',
+      },
+    ],
+    [roleCodeOptions, statusTab],
+  )
+
+  const columns: ColumnProps<RoleRecord>[] = useMemo(
     () => [
       {
         title: '角色编码',
         dataIndex: '角色编码',
         width: 160,
         fixed: 'left',
-        valueType: 'select',
-        valueEnum: roleCodeFilterEnum,
         render: (_, row) => <Link to={`/settings/roles/${row.角色编码}`}>{row.角色编码}</Link>,
       },
       { title: '角色名称', dataIndex: '角色名称', width: 140 },
       {
         title: '关联用户数',
-        dataIndex: '关联用户数',
         width: 100,
-        search: false,
         render: (_, row) => countUsersForRole(row.角色编码),
       },
       {
         title: '启停用状态',
         dataIndex: '启停用状态',
         width: 90,
-        search: statusTab === 'all' ? undefined : false,
-        valueType: 'select',
-        valueEnum: { ENABLED: { text: '启用' }, DISABLED: { text: '停用' } },
         render: (_, row) => <EnableStatusTag status={row.启停用状态} />,
       },
       {
         title: '操作',
-        valueType: 'option',
         width: 220,
         fixed: 'right',
-        search: false,
         render: (_, row) => (
           <TableRowActions
             items={[
@@ -111,71 +125,60 @@ export function RoleList() {
         ),
       },
     ],
-    [navigate, roleCodeFilterEnum, statusTab],
+    [navigate],
+  )
+
+  const request = useMemo(
+    () => async (params: Record<string, unknown>) => {
+      setListFiltered(roleListHasFilters(params))
+      const loaded = await withSettingsListLoading(() =>
+        filterRoleListRows(allRoles, statusTab, params),
+      )
+      if (!loaded.ok) {
+        Message.error('加载失败，请重试')
+        return { data: [], success: false, total: 0 }
+      }
+      const rows = loaded.value
+      return { data: rows, success: true, total: rows.length }
+    },
+    [allRoles, statusTab],
   )
 
   return (
-    <PageContainer title="角色管理" subTitle="维护角色档案、菜单可见性与启停用">
+    <PageShell title="角色管理" subTitle="维护角色档案、菜单可见性与启停用">
       <Tabs
         data-anno="role-list-tabs"
-        activeKey={statusTab}
+        activeTab={statusTab}
         onChange={(k) => {
           setStatusTab(k as StatusTab)
           actionRef.current?.reload()
         }}
-        items={[
-          { key: 'all', label: `全部 ${tabCountLabel(tabCounts.all)}` },
-          { key: 'ENABLED', label: `启用 ${tabCountLabel(tabCounts.ENABLED)}` },
-          { key: 'DISABLED', label: `停用 ${tabCountLabel(tabCounts.DISABLED)}` },
-        ]}
         style={{ marginBottom: 0 }}
-      />
+      >
+        <Tabs.TabPane key="all" title={`全部 ${tabCountLabel(tabCounts.all)}`} />
+        <Tabs.TabPane key="ENABLED" title={`启用 ${tabCountLabel(tabCounts.ENABLED)}`} />
+        <Tabs.TabPane key="DISABLED" title={`停用 ${tabCountLabel(tabCounts.DISABLED)}`} />
+      </Tabs>
       <div data-anno="role-list-table">
-      <ProTable<RoleRecord>
-        actionRef={actionRef}
-        rowKey="角色编码"
-        columns={columns}
-        search={{ ...settingsListSearch, className: 'role-list-search' }}
-        locale={{
-          emptyText: <SettingsListEmpty entityLabel="角色" filtered={listFiltered} />,
-        }}
-        tableRender={(_, dom) =>
-          tableLoading ? (
-            <div style={{ padding: 24, background: '#fff' }}>
-              <Skeleton active paragraph={{ rows: 12 }} title={false} />
-            </div>
-          ) : (
-            <div data-anno="role-list-table-body">{dom}</div>
-          )
-        }
-        toolBarRender={() => [
-          <span key="new" data-anno="role-list-toolbar">
-            <Button type="primary" onClick={() => navigate('/settings/roles/new')}>
-              新增角色
-            </Button>
-          </span>,
-        ]}
-        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
-        options={false}
-        request={async (params) => {
-          setTableLoading(true)
-          try {
-            setListFiltered(roleListHasFilters(params))
-            const loaded = await withSettingsListLoading(() =>
-              filterRoleListRows(allRoles, statusTab, params),
-            )
-            if (!loaded.ok) {
-              message.error('加载失败，请重试')
-              return { data: [], success: false, total: 0 }
-            }
-            const rows = loaded.value
-            return { data: rows, success: true, total: rows.length }
-          } finally {
-            setTableLoading(false)
+        <SettingsListTable<RoleRecord>
+          actionRef={actionRef}
+          rowKey="角色编码"
+          columns={columns}
+          searchFields={searchFields}
+          searchClassName={`role-list-search ${settingsListSearch.className ?? ''}`}
+          defaultSearchCollapsed={settingsListSearch.defaultCollapsed}
+          tableBodyAnno="role-list-table-body"
+          emptyNode={<SettingsListEmpty entityLabel="角色" filtered={listFiltered} />}
+          toolbar={
+            <span data-anno="role-list-toolbar">
+              <Button type="primary" onClick={() => navigate('/settings/roles/new')}>
+                新增角色
+              </Button>
+            </span>
           }
-        }}
-      />
+          request={request}
+        />
       </div>
-    </PageContainer>
+    </PageShell>
   )
 }

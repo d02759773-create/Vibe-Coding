@@ -1,4 +1,4 @@
-import { Modal, message } from 'antd'
+import { Message, Modal } from '@arco-design/web-react'
 import { listUsers, nowString, saveUsers } from '@/features/settings/storage'
 
 export function confirmEnableUser(account: string, onDone?: () => void) {
@@ -13,7 +13,7 @@ export function confirmEnableUser(account: string, onDone?: () => void) {
           : u,
       )
       saveUsers(users)
-      message.success('已启用')
+      Message.success('已启用')
       onDone?.()
     },
   })

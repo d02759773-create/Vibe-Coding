@@ -1,8 +1,13 @@
-import type { ActionType, ProColumns } from '@ant-design/pro-components'
-import { PageContainer, ProTable } from '@ant-design/pro-components'
-import { Button, Skeleton, Tabs, message } from 'antd'
+import { Button, Message, Tabs } from '@arco-design/web-react'
+import type { ColumnProps } from '@arco-design/web-react/es/Table'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PageShell } from '@/components/layout/PageShell'
+import {
+  SettingsListTable,
+  type SettingsListTableAction,
+  type SettingsSearchField,
+} from '@/components/settings/SettingsListTable'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
 import type { EnableStatus } from '@/features/settings/constants'
 import {
@@ -26,12 +31,11 @@ type StatusTab = 'all' | EnableStatus
 
 export function UserList() {
   const navigate = useNavigate()
-  const actionRef = useRef<ActionType>(undefined)
+  const actionRef = useRef<SettingsListTableAction>(null)
   const [statusTab, setStatusTab] = useState<StatusTab>('all')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const [disableTarget, setDisableTarget] = useState<InternalUser | null>(null)
-  const [tableLoading, setTableLoading] = useState(true)
   const [listFiltered, setListFiltered] = useState(false)
 
   const allUsers = useMemo(() => {
@@ -45,7 +49,28 @@ export function UserList() {
     return { all: allUsers.length, ENABLED: enabled, DISABLED: disabled }
   }, [allUsers])
 
-  const columns: ProColumns<InternalUser>[] = [
+  const searchFields: SettingsSearchField[] = useMemo(
+    () => [
+      { name: '用户账号', label: '用户账号', type: 'text' },
+      { name: '用户姓名', label: '用户姓名', type: 'text' },
+      {
+        name: '启停用状态',
+        label: '启停用状态',
+        type: 'select',
+        options: [
+          { label: '启用', value: 'ENABLED' },
+          { label: '停用', value: 'DISABLED' },
+        ],
+        hidden: statusTab !== 'all',
+      },
+      { name: '最后登录时间', label: '最后登录时间', type: 'dateTimeRange' },
+      { name: '手机号', label: '手机号', type: 'text' },
+      { name: '邮箱', label: '邮箱', type: 'text' },
+    ],
+    [statusTab],
+  )
+
+  const columns: ColumnProps<InternalUser>[] = [
     {
       title: '用户账号',
       dataIndex: '用户账号',
@@ -56,31 +81,19 @@ export function UserList() {
     { title: '用户姓名', dataIndex: '用户姓名', width: 120 },
     {
       title: '已分配角色摘要',
-      dataIndex: '已分配角色摘要',
       width: 200,
-      search: false,
       render: (_, row) => roleSummary(row),
     },
     {
       title: '启停用状态',
       dataIndex: '启停用状态',
       width: 90,
-      search: statusTab === 'all' ? undefined : false,
-      valueType: 'select',
-      valueEnum: {
-        ENABLED: { text: '启用' },
-        DISABLED: { text: '停用' },
-      },
       render: (_, row) => <EnableStatusTag status={row.启停用状态} />,
     },
     {
       title: '最后登录时间',
       dataIndex: '最后登录时间',
       width: 160,
-      valueType: 'dateTimeRange',
-      search: {
-        transform: (v) => ({ 最后登录时间: v }),
-      },
       render: (_, row) => row.最后登录时间 || '-',
       sorter: (a, b) => (a.最后登录时间 || '').localeCompare(b.最后登录时间 || ''),
     },
@@ -88,21 +101,9 @@ export function UserList() {
       title: '最后修改时间',
       dataIndex: '最后修改时间',
       width: 160,
-      search: false,
-    },
-    {
-      title: '手机号',
-      dataIndex: '手机号',
-      hideInTable: true,
-    },
-    {
-      title: '邮箱',
-      dataIndex: '邮箱',
-      hideInTable: true,
     },
     {
       title: '操作',
-      valueType: 'option',
       width: 180,
       fixed: 'right',
       render: (_, row) => (
@@ -131,7 +132,7 @@ export function UserList() {
       disableTarget.角色明细.some((r) => r.角色编码 === 'ADMIN') &&
       countEnabledUsersWithAdmin() <= 1
     if (isLastAdmin) {
-      message.error('无法停用：系统须至少保留一名启用的管理员')
+      Message.error('无法停用：系统须至少保留一名启用的管理员')
       return
     }
     const users = listUsers().map((u) =>
@@ -145,79 +146,68 @@ export function UserList() {
         : u,
     )
     saveUsers(users)
-    message.success('已停用')
+    Message.success('已停用')
     setDisableTarget(null)
     setRefreshKey((k) => k + 1)
     actionRef.current?.reload()
   }
 
+  const request = useMemo(
+    () => async (params: Record<string, unknown>) => {
+      setListFiltered(userListHasFilters(params))
+      const loaded = await withSettingsListLoading(() =>
+        filterUserListRows(allUsers, statusTab, params),
+      )
+      if (!loaded.ok) {
+        Message.error('加载失败，请重试')
+        return { data: [], success: false, total: 0 }
+      }
+      const rows = loaded.value
+      return { data: rows, success: true, total: rows.length }
+    },
+    [allUsers, statusTab],
+  )
+
   return (
-    <PageContainer title="内部用户">
+    <PageShell title="内部用户">
       <Tabs
         data-anno="user-list-tabs"
-        activeKey={statusTab}
+        activeTab={statusTab}
         onChange={(k) => {
           setStatusTab(k as StatusTab)
           actionRef.current?.reload()
         }}
-        items={[
-          { key: 'all', label: `全部 ${tabCountLabel(tabCounts.all)}` },
-          { key: 'ENABLED', label: `启用 ${tabCountLabel(tabCounts.ENABLED)}` },
-          { key: 'DISABLED', label: `停用 ${tabCountLabel(tabCounts.DISABLED)}` },
-        ]}
         style={{ marginBottom: 0 }}
-      />
+      >
+        <Tabs.TabPane key="all" title={`全部 ${tabCountLabel(tabCounts.all)}`} />
+        <Tabs.TabPane key="ENABLED" title={`启用 ${tabCountLabel(tabCounts.ENABLED)}`} />
+        <Tabs.TabPane key="DISABLED" title={`停用 ${tabCountLabel(tabCounts.DISABLED)}`} />
+      </Tabs>
       <div data-anno="user-list-table">
-      <ProTable<InternalUser>
-        actionRef={actionRef}
-        rowKey="用户账号"
-        columns={columns}
-        search={{ ...settingsListSearch, className: 'user-list-search' }}
-        locale={{
-          emptyText: <SettingsListEmpty entityLabel="用户" filtered={listFiltered} />,
-        }}
-        tableRender={(_, dom) =>
-          tableLoading ? (
-            <div style={{ padding: 24, background: '#fff' }}>
-              <Skeleton active paragraph={{ rows: 12 }} title={false} />
-            </div>
-          ) : (
-            <div data-anno="user-list-table-body">{dom}</div>
-          )
-        }
-        toolBarRender={() => [
-          <span key="new" data-anno="user-list-toolbar">
-            <Button type="primary" onClick={() => navigate('/settings/users/new')}>
-              新增用户
-            </Button>
-          </span>,
-        ]}
-        pagination={{ defaultPageSize: 20, showSizeChanger: true, pageSizeOptions: [20, 50, 100] }}
-        options={false}
-        request={async (params) => {
-          setTableLoading(true)
-          try {
-            setListFiltered(userListHasFilters(params))
-            const loaded = await withSettingsListLoading(() =>
-              filterUserListRows(allUsers, statusTab, params),
-            )
-            if (!loaded.ok) {
-              message.error('加载失败，请重试')
-              return { data: [], success: false, total: 0 }
-            }
-            const rows = loaded.value
-            return { data: rows, success: true, total: rows.length }
-          } finally {
-            setTableLoading(false)
+        <SettingsListTable<InternalUser>
+          actionRef={actionRef}
+          rowKey="用户账号"
+          columns={columns}
+          searchFields={searchFields}
+          searchClassName={`user-list-search ${settingsListSearch.className ?? ''}`}
+          defaultSearchCollapsed={settingsListSearch.defaultCollapsed}
+          tableBodyAnno="user-list-table-body"
+          emptyNode={<SettingsListEmpty entityLabel="用户" filtered={listFiltered} />}
+          toolbar={
+            <span data-anno="user-list-toolbar">
+              <Button type="primary" onClick={() => navigate('/settings/users/new')}>
+                新增用户
+              </Button>
+            </span>
           }
-        }}
-      />
+          request={request}
+        />
       </div>
       <DisableUserModal
         open={!!disableTarget}
         onCancel={() => setDisableTarget(null)}
         onConfirm={handleDisableConfirm}
       />
-    </PageContainer>
+    </PageShell>
   )
 }

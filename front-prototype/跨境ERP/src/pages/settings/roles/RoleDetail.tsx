@@ -1,6 +1,6 @@
-import { PageContainer, ProDescriptions } from '@ant-design/pro-components'
-import { Button, Card, Modal, Space, Table, message } from 'antd'
+import { Button, Card, Descriptions, Message, Modal, Space, Table } from '@arco-design/web-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { PageShell } from '@/components/layout/PageShell'
 import { EnableStatusTag } from '@/components/settings/EnableStatusTag'
 import type { EnableStatus, RoleCode } from '@/features/settings/constants'
 import {
@@ -24,9 +24,9 @@ export function RoleDetail() {
 
   if (!role) {
     return (
-      <PageContainer title="角色不存在">
+      <PageShell title="角色不存在">
         <Button onClick={() => navigate('/settings/roles')}>返回列表</Button>
-      </PageContainer>
+      </PageShell>
     )
   }
 
@@ -41,14 +41,14 @@ export function RoleDetail() {
           r.角色编码 === code ? { ...r, 启停用状态: next, 最后修改时间: nowString() } : r,
         )
         saveRoles(roles)
-        message.success(next === 'DISABLED' ? '角色已停用' : '已启用')
+        Message.success(next === 'DISABLED' ? '角色已停用' : '已启用')
         navigate(0)
       },
     })
   }
 
   return (
-    <PageContainer
+    <PageShell
       title={role.角色名称}
       subTitle={role.角色编码}
       tags={<EnableStatusTag status={role.启停用状态} />}
@@ -64,48 +64,45 @@ export function RoleDetail() {
       onBack={() => navigate('/settings/roles')}
     >
       <div data-anno="role-detail-body">
-      <Card title="角色信息" style={{ marginBottom: 16 }}>
-        <ProDescriptions column={2}>
-          <ProDescriptions.Item label="角色编码">{role.角色编码}</ProDescriptions.Item>
-          <ProDescriptions.Item label="角色名称">{role.角色名称}</ProDescriptions.Item>
-          <ProDescriptions.Item label="角色说明">{role.角色说明 || '-'}</ProDescriptions.Item>
-          <ProDescriptions.Item label="启停用状态">
-            <EnableStatusTag status={role.启停用状态} />
-          </ProDescriptions.Item>
-          <ProDescriptions.Item label="关联用户数">{countUsersForRole(code)}</ProDescriptions.Item>
-        </ProDescriptions>
-      </Card>
+        <Card title="角色信息" style={{ marginBottom: 16 }}>
+          <Descriptions column={2} data={[
+            { label: '角色编码', value: role.角色编码 },
+            { label: '角色名称', value: role.角色名称 },
+            { label: '角色说明', value: role.角色说明 || '-' },
+            { label: '启停用状态', value: <EnableStatusTag status={role.启停用状态} /> },
+            { label: '关联用户数', value: countUsersForRole(code) },
+          ]} />
+        </Card>
 
-      <Card title="菜单权限（只读）" style={{ marginBottom: 16 }}>
-        <Table
-          size="small"
-          tableLayout="fixed"
-          pagination={{ pageSize: 20, hideOnSinglePage: true }}
-          rowKey="二级菜单编码"
-          dataSource={permRows}
-          columns={[
-            { title: '一级菜单', dataIndex: '一级菜单名称', width: 112 },
-            { title: '二级菜单', dataIndex: '二级菜单名称', ellipsis: true },
-            {
-              title: '菜单可见性',
-              dataIndex: '菜单可见性',
-              width: 140,
-              align: 'center',
-              render: (v) => (v === 'VISIBLE' ? '可见' : '不可见'),
-            },
-          ]}
-        />
-      </Card>
+        <Card title="菜单权限（只读）" style={{ marginBottom: 16 }}>
+          <Table
+            size="small"
+            pagination={{ pageSize: 20, hideOnSinglePage: true }}
+            rowKey="二级菜单编码"
+            data={permRows}
+            columns={[
+              { title: '一级菜单', dataIndex: '一级菜单名称', width: 112 },
+              { title: '二级菜单', dataIndex: '二级菜单名称', ellipsis: true },
+              {
+                title: '菜单可见性',
+                dataIndex: '菜单可见性',
+                width: 140,
+                align: 'center',
+                render: (v) => (v === 'VISIBLE' ? '可见' : '不可见'),
+              },
+            ]}
+          />
+        </Card>
 
-      <Card title="系统信息">
-        <ProDescriptions column={2}>
-          <ProDescriptions.Item label="创建人">{role.创建人}</ProDescriptions.Item>
-          <ProDescriptions.Item label="创建时间">{role.创建时间}</ProDescriptions.Item>
-          <ProDescriptions.Item label="最后修改人">{role.最后修改人}</ProDescriptions.Item>
-          <ProDescriptions.Item label="最后修改时间">{role.最后修改时间}</ProDescriptions.Item>
-        </ProDescriptions>
-      </Card>
+        <Card title="系统信息">
+          <Descriptions column={2} data={[
+            { label: '创建人', value: role.创建人 },
+            { label: '创建时间', value: role.创建时间 },
+            { label: '最后修改人', value: role.最后修改人 },
+            { label: '最后修改时间', value: role.最后修改时间 },
+          ]} />
+        </Card>
       </div>
-    </PageContainer>
+    </PageShell>
   )
 }

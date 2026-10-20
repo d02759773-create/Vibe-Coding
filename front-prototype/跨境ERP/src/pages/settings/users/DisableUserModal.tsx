@@ -1,4 +1,4 @@
-import { Form, Input, Modal } from 'antd'
+import { Form, Input, Modal } from '@arco-design/web-react'
 
 type Props = {
   open: boolean
@@ -17,14 +17,15 @@ export function DisableUserModal({ open, onCancel, onConfirm }: Props) {
   return (
     <Modal
       title="停用用户"
-      open={open}
+      visible={open}
       okText="确认停用"
       onCancel={handleClose}
-      destroyOnClose
+      unmountOnExit
       onOk={async () => {
         try {
-          const { reason } = await form.validateFields()
-          onConfirm(String(reason).trim())
+          await form.validate()
+          const reason = String(form.getFieldValue('reason') ?? '').trim()
+          onConfirm(reason)
           form.resetFields()
         } catch {
           /* 字段标红，不关闭弹窗 */
@@ -32,16 +33,34 @@ export function DisableUserModal({ open, onCancel, onConfirm }: Props) {
       }}
     >
       <p>停用后该账号无法登录。</p>
-      <Form form={form} layout="vertical" preserve={false}>
+      <Form form={form} layout="vertical">
         <Form.Item
-          name="reason"
+          field="reason"
           label="停用原因"
           rules={[
-            { required: true, whitespace: true, message: '请填写停用原因（1-200 字）' },
-            { max: 200, message: '请填写停用原因（1-200 字）' },
+            { required: true, message: '请填写停用原因（1-200 字）' },
+            {
+              validator: (value, callback) => {
+                const text = String(value ?? '').trim()
+                if (!text) {
+                  callback('请填写停用原因（1-200 字）')
+                  return
+                }
+                if (text.length > 200) {
+                  callback('请填写停用原因（1-200 字）')
+                  return
+                }
+                callback()
+              },
+            },
           ]}
         >
-          <Input.TextArea rows={3} maxLength={200} showCount placeholder="停用原因（必填，1-200 字）" />
+          <Input.TextArea
+            rows={3}
+            maxLength={200}
+            showWordLimit
+            placeholder="停用原因（必填，1-200 字）"
+          />
         </Form.Item>
       </Form>
     </Modal>

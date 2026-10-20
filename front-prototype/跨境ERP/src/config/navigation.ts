@@ -8,7 +8,7 @@ export type RouteMeta = {
   message?: string
 }
 
-/** 左侧 ProLayout 全量菜单（一级业务域 + 二级页面） */
+/** 左侧全量菜单（一级业务域 + 二级页面） */
 export const navigation: NavItem[] = sidebarNavigation
 
 function collectNavLeaves(items: NavItem[]): RouteMeta[] {

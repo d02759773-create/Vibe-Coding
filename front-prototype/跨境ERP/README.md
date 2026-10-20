@@ -16,9 +16,10 @@ npm run build
 |---|---|
 | `src/config/sidebarMenu.ts` | 左侧全量一级 + 二级菜单（唯一维护入口） |
 | `src/config/navigation.ts` | 路由元数据导出 |
+| `src/config/arcoMenu.ts` | 侧栏 Menu 树与默认展开分组 |
 
-左侧 ProLayout 一次展示全部业务域与子页面，默认展开分组。
+左侧 Arco Layout 一次展示全部业务域与子页面，默认展开分组。
 
 ## 技术栈
 
-React、TypeScript、Vite、Ant Design v5、ProComponents、HashRouter。
+React、TypeScript、Vite、Arco Design、HashRouter。
